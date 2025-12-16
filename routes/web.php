@@ -13,6 +13,39 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// GulmaTrack Pages Routes
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('pages.home');
+})->name('home');
+
+Route::get('/wilayah', function () {
+    return view('pages.wilayah');
+})->name('wilayah');
+
+Route::get('/nanas', function () {
+    return view('pages.nanas');
+})->name('nanas');
+
+Route::get('/pisang', function () {
+    return view('pages.pisang');
+})->name('pisang');
+
+Route::get('/Kategori', function () {
+    return view('pages.Kategori');
+})->name('Kategori');
+
+Route::get('/tenaga-kerja', function () {
+    return view('pages.tenaga-kerja');
+})->name('tenaga-kerja');
+
+Route::get('/statistik', function () {
+    return view('pages.statistik');
+})->name('statistik');
+
+Route::get('/tentang', function () {
+    return view('pages.about');
+})->name('about');
+
+Route::get('/kontak', function () {
+    return view('pages.contact');
+})->name('contact');

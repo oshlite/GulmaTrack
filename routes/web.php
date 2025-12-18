@@ -30,13 +30,6 @@ Route::get('/pisang', function () {
     return view('pages.pisang');
 })->name('pisang');
 
-Route::get('/Kategori', function () {
-    return view('pages.Kategori');
-})->name('Kategori');
-
-Route::get('/tenaga-kerja', function () {
-    return view('pages.tenaga-kerja');
-})->name('tenaga-kerja');
 
 Route::get('/statistik', function () {
     return view('pages.statistik');

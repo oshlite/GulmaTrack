@@ -227,16 +227,14 @@
 <script>
     // Data wilayah dummy
     const wilayahData = [
-        { id: 1, nama: 'Kabupaten Pelalawan', provinsi: 'Riau', komoditas: 'Nanas', luas: 320, produksi: 2800, produktivitas: 8.75 },
-        { id: 2, nama: 'Kabupaten Rokan Hulu', provinsi: 'Riau', komoditas: 'Pisang', luas: 180, produksi: 1440, produktivitas: 8.0 },
-        { id: 3, nama: 'Kabupaten Rokan Hilir', provinsi: 'Riau', komoditas: 'Nanas', luas: 250, produksi: 2125, produktivitas: 8.5 },
-        { id: 4, nama: 'Kabupaten Bengkalis', provinsi: 'Riau', komoditas: 'Keduanya', luas: 420, produksi: 3780, produktivitas: 9.0 },
-        { id: 5, nama: 'Kabupaten Siak', provinsi: 'Riau', komoditas: 'Pisang', luas: 160, produksi: 1280, produktivitas: 8.0 },
-        { id: 6, nama: 'Kabupaten Meranti', provinsi: 'Riau', komoditas: 'Nanas', luas: 280, produksi: 2380, produktivitas: 8.5 },
-        { id: 7, nama: 'Kabupaten Indragiri Hulu', provinsi: 'Riau', komoditas: 'Keduanya', luas: 350, produksi: 3150, produktivitas: 9.0 },
-        { id: 8, nama: 'Kabupaten Indragiri Hilir', provinsi: 'Riau', komoditas: 'Pisang', luas: 190, produksi: 1520, produktivitas: 8.0 },
-        { id: 9, nama: 'Kabupaten Kuantan Singingi', provinsi: 'Riau', komoditas: 'Nanas', luas: 200, produksi: 1700, produktivitas: 8.5 },
-        { id: 10, nama: 'Kota Pekanbaru', provinsi: 'Riau', komoditas: 'Keduanya', luas: 120, produksi: 1080, produktivitas: 9.0 },
+        { id: 1, nama: 'Wilayah 16', komoditas: 'Nanas', luas: 320, produksi: 2800, produktivitas: 8.75 },
+        { id: 2, nama: 'Wilayah 17', komoditas: 'Pisang', luas: 180, produksi: 1440, produktivitas: 8.0 },
+        { id: 3, nama: 'Wilayah 18', komoditas: 'Nanas', luas: 250, produksi: 2125, produktivitas: 8.5 },
+        { id: 4, nama: 'Wilayah 19', komoditas: 'Keduanya', luas: 420, produksi: 3780, produktivitas: 9.0 },
+        { id: 5, nama: 'Wilayah 20', komoditas: 'Pisang', luas: 160, produksi: 1280, produktivitas: 8.0 },
+        { id: 6, nama: 'Wilayah 21', komoditas: 'Nanas', luas: 280, produksi: 2380, produktivitas: 8.5 },
+        { id: 7, nama: 'Wilayah 22', komoditas: 'Keduanya', luas: 350, produksi: 3150, produktivitas: 9.0 },
+        { id: 8, nama: 'Wilayah 23', komoditas: 'Pisang', luas: 190, produksi: 1520, produktivitas: 8.0 },
     ];
 
     function renderWilayah(data) {
@@ -249,7 +247,6 @@
             card.innerHTML = `
                 <div class="wilayah-card-header">
                     <h3>${wilayah.nama}</h3>
-                    <small>${wilayah.provinsi}</small>
                 </div>
                 <div class="wilayah-card-body">
                     <div class="info-row">
@@ -283,7 +280,7 @@
         const komoditas = document.getElementById('filterKomoditas').value;
 
         const filtered = wilayahData.filter(w => {
-            const matchSearch = w.nama.toLowerCase().includes(search) || w.provinsi.toLowerCase().includes(search);
+            const matchSearch = w.nama.toLowerCase().includes(search);
             const matchKomoditas = !komoditas || w.komoditas.toLowerCase().includes(komoditas);
             return matchSearch && matchKomoditas;
         });

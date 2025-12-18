@@ -45,18 +45,6 @@
         </div>
 
         <div class="card">
-            <h3 style="color: var(--title-color); margin-bottom: 15px; font-size: 20px;"><i class="fas fa-chart-line" style="margin-right: 8px;"></i>Kategori perkebunan</h3>
-            <p>Pantau Kategori-Kategori penting yang mempengaruhi performa perkebunan dan produktivitas.</p>
-            <a href="{{ route('Kategori') }}" class="btn" style="margin-top: 15px; display: inline-block;">Lihat Kategori</a>
-        </div>
-
-        <div class="card">
-            <h3 style="color: var(--title-color); margin-bottom: 15px; font-size: 20px;"><i class="fas fa-users" style="margin-right: 8px;"></i>Tenaga Kerja</h3>
-            <p>Kelola dan pantau data tenaga kerja perkebunan, keahlian, dan distribusi di berbagai wilayah.</p>
-            <a href="{{ route('tenaga-kerja') }}" class="btn" style="margin-top: 15px; display: inline-block;">Kelola Tenaga Kerja</a>
-        </div>
-
-        <div class="card">
             <h3 style="color: var(--title-color); margin-bottom: 15px; font-size: 20px;"><i class="fas fa-bars" style="margin-right: 8px;"></i>Statistik</h3>
             <p>Analisis mendalam tentang tren produksi, pertumbuhan, dan perbandingan data antar wilayah.</p>
             <a href="{{ route('statistik') }}" class="btn" style="margin-top: 15px; display: inline-block;">Lihat Statistik</a>

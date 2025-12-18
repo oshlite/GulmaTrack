@@ -334,21 +334,8 @@
                     <a href="{{ route('pisang') }}" class="nav-link {{ request()->routeIs('pisang') ? 'active' : '' }}">Pisang</a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('Kategori') }}" class="nav-link {{ request()->routeIs('Kategori') ? 'active' : '' }}">Kategori</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('tenaga-kerja') }}" class="nav-link {{ request()->routeIs('tenaga-kerja') ? 'active' : '' }}">Tenaga Kerja</a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">Statistik</a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">Tentang</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Kontak</a>
-                </li>
-            </ul>
         </div>
     </nav>
 

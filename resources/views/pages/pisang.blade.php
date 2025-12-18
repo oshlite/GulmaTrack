@@ -184,21 +184,6 @@
             <div class="value" id="totalLuas">1,240</div>
             <div class="subtitle">Hektar</div>
         </div>
-        <div class="summary-box">
-            <h3>📊 Total Produksi</h3>
-            <div class="value" id="totalProduksi">9,920</div>
-            <div class="subtitle">Ton</div>
-        </div>
-        <div class="summary-box">
-            <h3>📈 Rata-rata Produktivitas</h3>
-            <div class="value" id="rataProduktivitas">8.0</div>
-            <div class="subtitle">Ton/Hektar</div>
-        </div>
-        <div class="summary-box">
-            <h3>🌾 Jumlah Petani</h3>
-            <div class="value" id="jumlahPetani">456</div>
-            <div class="subtitle">Orang</div>
-        </div>
     </div>
 
     <!-- Filter & Kontrol -->

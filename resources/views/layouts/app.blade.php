@@ -27,21 +27,31 @@
             --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
 
+        html, body {
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Poppins';
+            font-family: 'Poppins', sans-serif;
             color: var(--text-color);
             background-color: #fff;
             line-height: 1.6;
         }
 
-        /* Navbar Styling */
+        /* Navbar Styling - Modern */
         nav {
-            background: linear-gradient(135deg, var(--dark-color) 0%, #197B40 100%);
+            background: rgba(25, 123, 64, 0.95);
+            backdrop-filter: blur(10px);
             padding: 0;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid var(--secondary-color);
         }
 
         .navbar-container {
@@ -55,9 +65,12 @@
         }
 
         .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--secondary-color);
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--title-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -66,19 +79,21 @@
         }
 
         .logo:hover {
-            color: var(--accent-light);
             transform: scale(1.05);
         }
 
         .logo i {
             font-size: 28px;
-            margin-right: 8px;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--title-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-menu {
             display: flex;
             list-style: none;
-            gap: 5px;
+            gap: 2px;
             flex-wrap: wrap;
         }
 
@@ -89,19 +104,41 @@
         .nav-link {
             color: #ecf0f1;
             text-decoration: none;
-            padding: 12px 18px;
+            padding: 10px 20px;
             display: block;
             transition: all 0.3s ease;
-            border-radius: 4px;
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            position: relative;
         }
 
-        .nav-link:hover,
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-link:hover {
+            color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .nav-link.active {
-            color: var(--accent-color);
-            transform: translateY(-1px);
+            color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .mobile-toggle {
@@ -111,6 +148,16 @@
             color: white;
             font-size: 24px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Body needs padding to account for fixed navbar */
+        body {
+            padding-top: 70px;
         }
 
         /* Main Content */
@@ -118,6 +165,7 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
+            min-height: calc(100vh - 200px);
         }
 
         /* Page Header */
@@ -146,6 +194,7 @@
             padding: 40px 20px;
             margin-top: 60px;
             text-align: center;
+            border-top: 3px solid var(--secondary-color);
         }
 
         .footer-content {
@@ -165,10 +214,11 @@
             color: var(--accent-light);
             text-decoration: none;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .footer-links a:hover {
-            color: var(--accent-color);
+            color: var(--secondary-color);
             text-decoration: underline;
         }
 
@@ -200,28 +250,29 @@
         /* Responsive */
         @media (max-width: 768px) {
             .navbar-container {
-                flex-direction: column;
-                height: auto;
-                padding: 10px 20px;
+                padding: 0 15px;
             }
 
             .logo {
-                margin-bottom: 15px;
+                font-size: 20px;
             }
 
             .mobile-toggle {
                 display: block;
-                position: absolute;
-                top: 15px;
-                right: 20px;
             }
 
             .nav-menu {
                 display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
                 width: 100%;
                 flex-direction: column;
-                gap: 5px;
-                margin-top: 10px;
+                gap: 0;
+                margin-top: 0;
+                background: rgba(25, 123, 64, 0.98);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
 
             .nav-menu.active {
@@ -229,7 +280,20 @@
             }
 
             .nav-link {
-                text-align: center;
+                text-align: left;
+                border-radius: 0;
+                padding: 15px 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+
+            .nav-link.active {
+                background: rgba(214, 223, 32, 0.1);
+                border-left: 4px solid var(--secondary-color);
+                padding-left: 16px;
             }
 
             .page-header h1 {
@@ -238,6 +302,10 @@
 
             .main-container {
                 padding: 20px 15px;
+            }
+
+            body {
+                padding-top: 70px;
             }
         }
 
@@ -265,6 +333,7 @@
 
         .btn:hover {
             background-color: var(--secondary-color);
+            color: var(--text-color);
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
@@ -275,6 +344,7 @@
 
         .btn-secondary:hover {
             background-color: var(--accent-color);
+            color: white;
         }
 
         .card {
@@ -319,23 +389,36 @@
                 <i class="fas fa-leaf"></i>
                 GulmaTrack
             </a>
-            <button class="mobile-toggle" id="mobileToggle">☰</button>
+            <button class="mobile-toggle" id="mobileToggle">
+                <i class="fas fa-bars"></i>
+            </button>
             <ul class="nav-menu" id="navMenu">
                 <li class="nav-item">
-                    <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Beranda</a>
+                    <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                        <i class="fas fa-home"></i> Beranda
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('wilayah') }}" class="nav-link {{ request()->routeIs('wilayah') ? 'active' : '' }}">Wilayah</a>
+                    <a href="{{ route('wilayah') }}" class="nav-link {{ request()->routeIs('wilayah') ? 'active' : '' }}">
+                        <i class="fas fa-map"></i> Wilayah
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('nanas') }}" class="nav-link {{ request()->routeIs('nanas') ? 'active' : '' }}">Nanas</a>
+                    <a href="{{ route('nanas') }}" class="nav-link {{ request()->routeIs('nanas') ? 'active' : '' }}">
+                        <i class="fas fa-apple-alt"></i> Nanas
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('pisang') }}" class="nav-link {{ request()->routeIs('pisang') ? 'active' : '' }}">Pisang</a>
+                    <a href="{{ route('pisang') }}" class="nav-link {{ request()->routeIs('pisang') ? 'active' : '' }}">
+                        <i class="fas fa-leaf"></i> Pisang
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">Statistik</a>
+                    <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar"></i> Statistik
+                    </a>
                 </li>
+            </ul>
         </div>
     </nav>
 

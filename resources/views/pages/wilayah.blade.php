@@ -227,6 +227,20 @@
 
     <!-- Daftar Wilayah -->
     <h2 style="font-size: 24px; margin: 30px 0 20px; color: var(--title-color);">Daftar Wilayah Produksi</h2>
+    
+    <!-- Kontrol Wilayah -->
+    <div class="wilayah-controls">
+        <input type="text" id="searchWilayah" placeholder="Cari wilayah...">
+        <select id="filterKomoditas">
+            <option value="">Semua Kategori</option>
+            <option value="ringan">Ringan</option>
+            <option value="sedang">Sedang</option>
+            <option value="berat">Berat</option>
+            <option value="bersih">Bersih</option>
+        </select>
+        <button onclick="filterWilayah()">Filter</button>
+    </div>
+    
     <div class="wilayah-grid" id="wilayahGrid">
         <!-- Wilayah cards akan dimuat di sini -->
     </div>
@@ -235,14 +249,14 @@
 <script>
     // Data wilayah dummy
     const wilayahData = [
-        { id: 1, nama: 'Wilayah 16', komoditas: 'Nanas', luas: 320, produksi: 2800, produktivitas: 8.75 },
-        { id: 2, nama: 'Wilayah 17', komoditas: 'Nanas', luas: 180, produksi: 1440, produktivitas: 8.0 },
-        { id: 3, nama: 'Wilayah 18', komoditas: 'Nanas', luas: 250, produksi: 2125, produktivitas: 8.5 },
-        { id: 4, nama: 'Wilayah 19', komoditas: 'Nanas', luas: 420, produksi: 3780, produktivitas: 9.0 },
-        { id: 5, nama: 'Wilayah 20', komoditas: 'Nanas', luas: 160, produksi: 1280, produktivitas: 8.0 },
-        { id: 6, nama: 'Wilayah 21', komoditas: 'Nanas', luas: 280, produksi: 2380, produktivitas: 8.5 },
-        { id: 7, nama: 'Wilayah 22', komoditas: 'Nanas', luas: 350, produksi: 3150, produktivitas: 9.0 },
-        { id: 8, nama: 'Wilayah 23', komoditas: 'Nanas', luas: 190, produksi: 1520, produktivitas: 8.0 },
+        { id: 1, nama: 'Wilayah 16', luas: 320, kategori: 'Ringan', statuswilayah: 'Aktif', tenagakerja: 45 },
+        { id: 2, nama: 'Wilayah 17', luas: 180, kategori: 'Berat', statuswilayah: 'Aktif', tenagakerja: 32 },
+        { id: 3, nama: 'Wilayah 18', luas: 250, kategori: 'Sedang', statuswilayah: 'Aktif', tenagakerja: 28 },
+        { id: 4, nama: 'Wilayah 19', luas: 420, kategori: 'Bersih', statuswilayah: 'Aktif', tenagakerja: 50 },
+        { id: 5, nama: 'Wilayah 20', luas: 160, kategori: 'Ringan', statuswilayah: 'Aktif', tenagakerja: 22 },
+        { id: 6, nama: 'Wilayah 21', luas: 280, kategori: 'Berat', statuswilayah: 'Aktif', tenagakerja: 35 },
+        { id: 7, nama: 'Wilayah 22', luas: 350, kategori: 'Sedang', statuswilayah: 'Aktif', tenagakerja: 40 },
+        { id: 8, nama: 'Wilayah 23', luas: 190, kategori: 'Ringan', statuswilayah: 'Aktif', tenagakerja: 25 },
     ];
 
     function renderWilayah(data) {
@@ -258,20 +272,20 @@
                 </div>
                 <div class="wilayah-card-body">
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-tag"></i> Komoditas:</span>
-                        <span class="info-value">${wilayah.komoditas}</span>
-                    </div>
-                    <div class="info-row">
                         <span class="info-label"><i class="fas fa-ruler"></i> Luas Lahan:</span>
                         <span class="info-value">${wilayah.luas} Ha</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-chart-bar"></i> Produksi:</span>
-                        <span class="info-value">${wilayah.produksi} Ton</span>
+                        <span class="info-label"><i class="fas fa-chart-bar"></i> Kategori:</span>
+                        <span class="info-value">${wilayah.kategori}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-chart-line"></i> Produktivitas:</span>
-                        <span class="info-value">${wilayah.produktivitas} T/Ha</span>
+                        <span class="info-label"><i class="fas fa-chart-line"></i> Status Wilayah:</span>
+                        <span class="info-value">${wilayah.statuswilayah}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-chart-line"></i> Total Tenaga Kerja:</span>
+                        <span class="info-value">${wilayah.tenagakerja} Orang</span>
                     </div>
                 </div>
             `;
@@ -285,7 +299,7 @@
 
         const filtered = wilayahData.filter(w => {
             const matchSearch = w.nama.toLowerCase().includes(search);
-            const matchKomoditas = !komoditas || w.komoditas.toLowerCase().includes(komoditas);
+            const matchKomoditas = !komoditas || w.kategori.toLowerCase().includes(komoditas);
             return matchSearch && matchKomoditas;
         });
 

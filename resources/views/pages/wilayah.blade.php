@@ -177,22 +177,14 @@
     </style>
 
     <!-- Statistik -->
-    <div class="stats-row">
-        <div class="stat-box">
-            <div class="stat-label"><i class="fas fa-globe"></i> Total Wilayah</div>
-            <div class="stat-number" id="totalWilayah">32</div>
+    <div class="stats-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <div class="stat-box" style="flex: 1; padding: 10px; border-radius: 8px; background: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="stat-label" style="font-weight: bold;"><i class="fas fa-globe"></i> Total Wilayah</div>
+            <div class="stat-number" id="totalWilayah" style="font-size: 20px; color: #333;">30</div>
         </div>
-        <div class="stat-box" style="background: linear-gradient(135deg, var(--secondary-color), #2980b9);">
-            <div class="stat-label"><i class="fas fa-ruler-combined"></i> Total Luas Area</div>
-            <div class="stat-number">2.450 Ha</div>
-        </div>
-        <div class="stat-box" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-            <div class="stat-label"><i class="fas fa-chart-pie"></i> Produktivitas Rata-rata</div>
-            <div class="stat-number">8.5 T/Ha</div>
-        </div>
-        <div class="stat-box" style="background: linear-gradient(135deg, #f39c12, #d68910);">
-            <div class="stat-label"><i class="fas fa-cubes"></i> Produksi Tahunan</div>
-            <div class="stat-number">20.8 Ton</div>
+        <div class="stat-box" style="flex: 1; padding: 10px; border-radius: 8px; background: linear-gradient(100deg, var(--secondary-color), #2980b9); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="stat-label" style="font-weight: bold;"><i class="fas fa-ruler-combined"></i> Total Luas Area</div>
+            <div class="stat-number" style="font-size: 20px;">2.450 Ha</div>
         </div>
     </div>
 
@@ -228,13 +220,13 @@
     // Data wilayah dummy
     const wilayahData = [
         { id: 1, nama: 'Wilayah 16', komoditas: 'Nanas', luas: 320, produksi: 2800, produktivitas: 8.75 },
-        { id: 2, nama: 'Wilayah 17', komoditas: 'Pisang', luas: 180, produksi: 1440, produktivitas: 8.0 },
+        { id: 2, nama: 'Wilayah 17', komoditas: 'Nanas', luas: 180, produksi: 1440, produktivitas: 8.0 },
         { id: 3, nama: 'Wilayah 18', komoditas: 'Nanas', luas: 250, produksi: 2125, produktivitas: 8.5 },
-        { id: 4, nama: 'Wilayah 19', komoditas: 'Keduanya', luas: 420, produksi: 3780, produktivitas: 9.0 },
-        { id: 5, nama: 'Wilayah 20', komoditas: 'Pisang', luas: 160, produksi: 1280, produktivitas: 8.0 },
+        { id: 4, nama: 'Wilayah 19', komoditas: 'Nanas', luas: 420, produksi: 3780, produktivitas: 9.0 },
+        { id: 5, nama: 'Wilayah 20', komoditas: 'Nanas', luas: 160, produksi: 1280, produktivitas: 8.0 },
         { id: 6, nama: 'Wilayah 21', komoditas: 'Nanas', luas: 280, produksi: 2380, produktivitas: 8.5 },
-        { id: 7, nama: 'Wilayah 22', komoditas: 'Keduanya', luas: 350, produksi: 3150, produktivitas: 9.0 },
-        { id: 8, nama: 'Wilayah 23', komoditas: 'Pisang', luas: 190, produksi: 1520, produktivitas: 8.0 },
+        { id: 7, nama: 'Wilayah 22', komoditas: 'Nanas', luas: 350, produksi: 3150, produktivitas: 9.0 },
+        { id: 8, nama: 'Wilayah 23', komoditas: 'Nanas', luas: 190, produksi: 1520, produktivitas: 8.0 },
     ];
 
     function renderWilayah(data) {

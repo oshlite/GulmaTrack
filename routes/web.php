@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WilayahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +19,7 @@ Route::get('/', function () {
     return view('pages.home');
 })->name('home');
 
-Route::get('/wilayah', function () {
-    return view('pages.wilayah');
-})->name('wilayah');
+Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah');
 
 Route::get('/nanas', function () {
     return view('pages.nanas');

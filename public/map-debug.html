@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Debug Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: 600px; width: 100%; }
+        body { font-family: Arial; margin: 0; padding: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Map Debug Test</h1>
+    
+    <div class="debug">
+        <h2>Test 1: Check API Endpoints</h2>
+        <button onclick="testAPIs()">Test All APIs</button>
+        <div id="apiResults"></div>
+    </div>
+
+    <div class="debug">
+        <h2>Test 2: Check Map Initialization</h2>
+        <div id="map"></div>
+    </div>
+
+    <div class="debug">
+        <h2>Test 3: Load and Display GeoJSON</h2>
+        <select id="wilayahSelect">
+            <option value="">-- Select Wilayah --</option>
+            <option value="16">Wilayah 16</option>
+            <option value="17">Wilayah 17</option>
+            <option value="18">Wilayah 18</option>
+            <option value="19">Wilayah 19</option>
+            <option value="20">Wilayah 20</option>
+            <option value="21">Wilayah 21</option>
+            <option value="22">Wilayah 22</option>
+            <option value="23">Wilayah 23</option>
+        </select>
+        <button onclick="loadGeoJSON()">Load GeoJSON</button>
+        <div id="geoResults"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let geoJsonLayer;
+
+        function testAPIs() {
+            const results = document.getElementById('apiResults');
+            results.innerHTML = '<p>Testing...</p>';
+            
+            Promise.all([
+                fetch('/api/wilayah/data').then(r => ({ url: '/api/wilayah/data', status: r.status, ok: r.ok })),
+                fetch('/api/wilayah/geojson/16').then(r => ({ url: '/api/wilayah/geojson/16', status: r.status, ok: r.ok })),
+            ]).then(responses => {
+                let html = '';
+                responses.forEach(r => {
+                    html += `<p class="${r.ok ? 'success' : 'error'}">${r.url}: ${r.status} ${r.ok ? '✓' : '✗'}</p>`;
+                });
+                results.innerHTML = html;
+            }).catch(e => {
+                results.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+            });
+        }
+
+        function initMap() {
+            map = L.map('map').setView([-4.7, 108.2], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            console.log('Map initialized');
+        }
+
+        function loadGeoJSON() {
+            const wilayah = document.getElementById('wilayahSelect').value;
+            if (!wilayah) {
+                alert('Please select Wilayah');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('geoResults');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            fetch(`/api/wilayah/geojson/${wilayah}`)
+                .then(r => r.json())
+                .then(data => {
+                    console.log('GeoJSON data:', data);
+                    
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+                        return;
+                    }
+
+                    if (!data.features || data.features.length === 0) {
+                        resultsDiv.innerHTML = '<p class="error">No features found</p>';
+                        return;
+                    }
+
+                    // Remove old layer
+                    if (geoJsonLayer) {
+                        map.removeLayer(geoJsonLayer);
+                    }
+
+                    // Add new layer
+                    geoJsonLayer = L.geoJSON(data, {
+                        style: {
+                            color: '#3498db',
+                            weight: 2,
+                            opacity: 0.8,
+                            fillOpacity: 0.7
+                        }
+                    }).addTo(map);
+
+                    // Fit bounds
+                    const bounds = geoJsonLayer.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    }
+
+                    resultsDiv.innerHTML = `
+                        <p class="success">✓ Loaded ${data.features.length} features</p>
+                        <p>CRS: ${data.crs ? JSON.stringify(data.crs) : 'Not specified'}</p>
+                        <p>First feature: ${data.features[0].properties.Lokasi || 'N/A'}</p>
+                    `;
+                })
+                .catch(e => {
+                    resultsDiv.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+                    console.error(e);
+                });
+        }
+
+        window.onload = () => {
+            initMap();
+            testAPIs();
+        };
+    </script>
+</body>
+</html>

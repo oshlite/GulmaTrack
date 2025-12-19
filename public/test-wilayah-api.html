@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wilayah API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Wilayah API</h1>
+        
+        <div>
+            <button onclick="testDataAPI()">Test /api/wilayah/data</button>
+            <button onclick="testGeojsonAPI(16)">Test GeoJSON Wil16</button>
+            <button onclick="testGeojsonAPI(19)">Test GeoJSON Wil19</button>
+            <button onclick="testGeojsonAPI(20)">Test GeoJSON Wil20</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Total Wilayah</div>
+                <div class="stat-value" id="totalWilayah">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Area (Ha)</div>
+                <div class="stat-value" id="totalArea">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Plot</div>
+                <div class="stat-value" id="totalPlot">-</div>
+            </div>
+        </div>
+
+        <div id="status"></div>
+        <pre id="result">Klik tombol di atas untuk test API</pre>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type;
+            statusDiv.innerHTML = message;
+        }
+
+        async function testDataAPI() {
+            showStatus('⏳ Loading data...', 'success');
+            try {
+                const response = await fetch('/api/wilayah/data');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('totalWilayah').textContent = data.total_wilayah || 0;
+                
+                let totalArea = 0;
+                let totalPlot = 0;
+                data.data.forEach(w => {
+                    totalArea += w.total_area;
+                    totalPlot += w.feature_count;
+                });
+                
+                document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+                document.getElementById('totalPlot').textContent = totalPlot;
+                
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                showStatus('✅ API Data berhasil dimuat!', 'success');
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+                document.getElementById('result').textContent = error.stack;
+            }
+        }
+
+        async function testGeojsonAPI(wilayah) {
+            showStatus(`⏳ Loading GeoJSON Wil${wilayah}...`, 'success');
+            try {
+                const response = await fetch(`/api/wilayah/geojson/${wilayah}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                const summary = {
+                    wilayah: wilayah,
+                    type: data.type,
+                    features: data.features ? data.features.length : 0,
+                    firstFeature: data.features ? data.features[0] : null
+                };
+                
+                document.getElementById('result').textContent = JSON.stringify(summary, null, 2);
+                showStatus(`✅ GeoJSON Wil${wilayah} berhasil dimuat! (${summary.features} features)`, 'success');
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+                document.getElementById('result').textContent = error.stack;
+            }
+        }
+
+        // Auto load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            testDataAPI();
+        });
+    </script>
+</body>
+</html>

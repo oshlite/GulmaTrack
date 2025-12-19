@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WilayahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Wilayah GeoJSON endpoints - Public access
+Route::get('/wilayah/geojson/{wilayah_number}', [WilayahController::class, 'getGeojson'])
+    ->name('api.wilayah.geojson')
+    ->withoutMiddleware('api'); // Bypass API middleware if needed
+
+Route::get('/wilayah/data', [WilayahController::class, 'getData'])
+    ->name('api.wilayah.data')
+    ->withoutMiddleware('api'); // Bypass API middleware if needed

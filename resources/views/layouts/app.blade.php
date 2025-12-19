@@ -41,7 +41,7 @@
             width: 100%;
             max-width: 100%;
             overflow-x: hidden;
-            font-family: 'Poppins';
+            font-family: 'Poppins', sans-serif;
             color: var(--text-color);
             background-color: #fff;
             line-height: 1.6;

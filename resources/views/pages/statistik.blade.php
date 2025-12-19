@@ -270,7 +270,6 @@
         <select id="filterKomoditas" style="min-width: 150px;">
             <option value="">Semua Komoditas</option>
             <option value="nanas">Nanas</option>
-            <option value="pisang">Pisang</option>
         </select>
         <button onclick="updateStats()"><i class="fas fa-search"></i> Update Statistik</button>
         <button class="export-btn" onclick="exportStats()"><i class="fas fa-download"></i> Export CSV</button>
@@ -304,98 +303,64 @@
                     <span class="comparison-value"><span class="trend-indicator trend-up">↑ +2.3%</span></span>
                 </div>
             </div>
-
-            <div class="comparison-card">
-                <div class="comparison-title"><i class="fas fa-leaf"></i> Pisang</div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Produksi:</span>
-                    <span class="comparison-value">9,920 Ton</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Luas Lahan:</span>
-                    <span class="comparison-value">1,240 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Produktivitas:</span>
-                    <span class="comparison-value">8.0 T/Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Petani:</span>
-                    <span class="comparison-value">456 Orang</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Perubahan:</span>
-                    <span class="comparison-value"><span class="trend-indicator trend-down">↓ -0.5%</span></span>
-                </div>
-            </div>
-
-            <div class="comparison-card">
-                <div class="comparison-title"><i class="fas fa-chart-line"></i> Total Produksi</div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Produksi:</span>
-                    <span class="comparison-value">30,745 Ton</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Luas Lahan:</span>
-                    <span class="comparison-value">3,690 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Produktivitas:</span>
-                    <span class="comparison-value">8.3 T/Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Petani:</span>
-                    <span class="comparison-value">1,348 Orang</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Perubahan:</span>
-                    <span class="comparison-value"><span class="trend-indicator trend-up">↑ +1.3%</span></span>
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- Ranking Wilayah -->
     <div class="stat-section">
-        <h3><i class="fas fa-trophy"></i> Ranking Wilayah Berdasarkan Produksi</h3>
+        <h3><i class="fas fa-trophy"></i> Ranking Wilayah Berdasarkan Gulma</h3>
         <div class="bar-chart">
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Bengkalis</div>
+                <div class="bar-label">Wilayah 23</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 100%;">3,780 Ton</div>
                 </div>
                 <div class="bar-value">3,780 T</div>
             </div>
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Pelalawan</div>
+                <div class="bar-label">Wilayah 22</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 74%;">2,800 Ton</div>
                 </div>
                 <div class="bar-value">2,800 T</div>
             </div>
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Meranti</div>
+                <div class="bar-label">Wilayah 21</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 63%;">2,380 Ton</div>
                 </div>
                 <div class="bar-value">2,380 T</div>
             </div>
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Rokan Hilir</div>
+                <div class="bar-label">Wilayah 20</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 56%;">2,125 Ton</div>
                 </div>
                 <div class="bar-value">2,125 T</div>
             </div>
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Indragiri Hulu</div>
+                <div class="bar-label">Wilayah 19</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 46%;">1,700 Ton</div>
                 </div>
                 <div class="bar-value">1,700 T</div>
             </div>
             <div class="bar-item">
-                <div class="bar-label">Kabupaten Rokan Hulu</div>
+                <div class="bar-label">Wilayah 18</div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
+                </div>
+                <div class="bar-value">1,440 T</div>
+            </div>
+             <div class="bar-item">
+                <div class="bar-label">Wilayah 17</div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
+                </div>
+                <div class="bar-value">1,440 T</div>
+            </div>
+             <div class="bar-item">
+                <div class="bar-label">Wilayah 16</div>
                 <div class="bar-container">
                     <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
                 </div>

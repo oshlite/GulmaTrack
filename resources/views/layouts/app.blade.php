@@ -409,11 +409,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('pisang') }}" class="nav-link {{ request()->routeIs('pisang') ? 'active' : '' }}">
-                        <i class="fas fa-leaf"></i> Pisang
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">
                         <i class="fas fa-chart-bar"></i> Statistik
                     </a>

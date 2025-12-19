@@ -19,7 +19,7 @@
             --primary-color: #197B40;
             --secondary-color: #D6DF20;
             --accent-color: #FBA919;
-            --accent-light: #25AAE2;
+            --accent-light: #FBA919;
             --dark-color: #197B40;
             --light-color: #f5f5f5;
             --text-color: #333;

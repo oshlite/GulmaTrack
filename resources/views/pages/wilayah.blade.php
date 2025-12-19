@@ -177,16 +177,44 @@
     </style>
 
     <!-- Statistik -->
-    <div class="stats-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-        <div class="stat-box" style="flex: 1; padding: 10px; border-radius: 8px; background: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <div class="stat-label" style="font-weight: bold;"><i class="fas fa-globe"></i> Total Wilayah</div>
-            <div class="stat-number" id="totalWilayah" style="font-size: 20px; color: #333;">30</div>
+    <div class="stats-row" style="display: flex; gap: 50px; margin-bottom: 10px; margin-right: 70px; margin-left: 250px;">
+    <div class="stat-box" style="
+        padding: 10px;
+        border-radius: 8px;
+        background: linear-gradient(100deg, var(--secondary-color), #2980b9);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 500px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;">
+        <div class="stat-label" style="font-weight: bold;">
+            <i class="fas fa-ruler-combined"></i> Total Wilayah
         </div>
-        <div class="stat-box" style="flex: 1; padding: 10px; border-radius: 8px; background: linear-gradient(100deg, var(--secondary-color), #2980b9); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <div class="stat-label" style="font-weight: bold;"><i class="fas fa-ruler-combined"></i> Total Luas Area</div>
-            <div class="stat-number" style="font-size: 20px;">2.450 Ha</div>
-        </div>
+        <div class="stat-number" style="font-size: 30px;">30</div>
     </div>
+
+    <div class="stat-box" style="
+        padding: 10px;
+        border-radius: 8px;
+        background: linear-gradient(100deg, var(--secondary-color), #2980b9);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 500px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;">
+        <div class="stat-label" style="font-weight: bold;">
+            <i class="fas fa-ruler-combined"></i> Total Luas Area
+        </div>
+        <div class="stat-number" style="font-size: 30px;">2.450 Ha</div>
+    </div>
+</div>
+
 
     <!-- Peta Interaktif -->
     <div class="map-container">

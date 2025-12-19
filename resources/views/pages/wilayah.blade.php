@@ -197,18 +197,6 @@
         </div>
     </div>
 
-    <!-- Filter -->
-    <div class="wilayah-controls">
-        <input type="text" id="searchWilayah" placeholder="Cari wilayah..." style="flex: 2;">
-        <select id="filterKomoditas" style="flex: 1;">
-            <option value="">Semua Komoditas</option>
-            <option value="nanas">Nanas</option>
-            <option value="pisang">Pisang</option>
-            <option value="keduanya">Keduanya</option>
-        </select>
-        <button onclick="filterWilayah()"><i class="fas fa-search"></i> Terapkan Filter</button>
-    </div>
-
     <!-- Daftar Wilayah -->
     <h2 style="font-size: 24px; margin: 30px 0 20px; color: var(--title-color);">Daftar Wilayah Produksi</h2>
     <div class="wilayah-grid" id="wilayahGrid">
@@ -257,10 +245,6 @@
                         <span class="info-label"><i class="fas fa-chart-line"></i> Produktivitas:</span>
                         <span class="info-value">${wilayah.produktivitas} T/Ha</span>
                     </div>
-                    <div class="wilayah-actions">
-                        <button onclick="viewDetail(${wilayah.id})"><i class="fas fa-eye"></i> Detail</button>
-                        <button onclick="editWilayah(${wilayah.id})"><i class="fas fa-edit"></i> Edit</button>
-                    </div>
                 </div>
             `;
             grid.appendChild(card);
@@ -278,14 +262,6 @@
         });
 
         renderWilayah(filtered);
-    }
-
-    function viewDetail(id) {
-        alert(`Membuka detail wilayah ${id}`);
-    }
-
-    function editWilayah(id) {
-        alert(`Mengedit wilayah ${id}`);
     }
 
     // Initial render

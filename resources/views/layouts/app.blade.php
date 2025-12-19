@@ -27,17 +27,26 @@
             --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
 
-        html, body {
+        html {
             margin: 0;
             padding: 0;
-            scroll-behavior: smooth;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
         }
 
         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
             font-family: 'Poppins', sans-serif;
             color: var(--text-color);
             background-color: #fff;
             line-height: 1.6;
+            scroll-behavior: smooth;
+            padding-top: 70px;
         }
 
         /* Navbar Styling - Modern */
@@ -52,11 +61,12 @@
             z-index: 1000;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
             border-bottom: 2px solid var(--secondary-color);
+            width: 100%;
         }
 
         .navbar-container {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             padding: 0 20px;
             display: flex;
             justify-content: space-between;
@@ -76,6 +86,7 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .logo:hover {
@@ -94,11 +105,13 @@
             display: flex;
             list-style: none;
             gap: 2px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            margin: 0;
         }
 
         .nav-item {
             position: relative;
+            white-space: nowrap;
         }
 
         .nav-link {
@@ -149,29 +162,26 @@
             font-size: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
+            padding: 5px;
         }
 
         .mobile-toggle:hover {
             color: var(--secondary-color);
         }
 
-        /* Body needs padding to account for fixed navbar */
-        body {
-            padding-top: 70px;
-        }
-
         /* Main Content */
         .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            min-height: calc(100vh - 200px);
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            min-height: auto;
         }
 
         /* Page Header */
         .page-header {
             margin-bottom: 40px;
-            padding-bottom: 30px;
+            padding: 40px 20px 30px;
             border-bottom: 3px solid var(--primary-color);
             animation: slideInDown 0.5s ease;
         }
@@ -195,11 +205,13 @@
             margin-top: 60px;
             text-align: center;
             border-top: 3px solid var(--secondary-color);
+            width: 100%;
         }
 
         .footer-content {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
         .footer-links {
@@ -267,7 +279,7 @@
                 top: 70px;
                 left: 0;
                 right: 0;
-                width: 100%;
+                width: 100vw;
                 flex-direction: column;
                 gap: 0;
                 margin-top: 0;
@@ -300,10 +312,6 @@
                 font-size: 28px;
             }
 
-            .main-container {
-                padding: 20px 15px;
-            }
-
             body {
                 padding-top: 70px;
             }
@@ -311,8 +319,9 @@
 
         /* Utility Classes */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
             padding: 0 20px;
         }
 

@@ -21,6 +21,7 @@ class CoordinateTransformer
 
     /**
      * Convert UTM (32748 - Zone 48S) to WGS84 (LatLng)
+     * Lampung area is in UTM Zone 48S (EPSG:32748)
      * 
      * @param float $easting
      * @param float $northing
@@ -28,19 +29,43 @@ class CoordinateTransformer
      */
     public static function utm32748ToWgs84($easting, $northing)
     {
+        // UTM Zone 48S parameters
+        $k0 = self::SCALE_FACTOR;
+        $a = self::WGS84_A;
+        $e = sqrt(self::WGS84_E2);
+        $e2 = self::WGS84_E2;
+        
+        // Remove false easting and northing
         $x = $easting - self::FALSE_EASTING;
         $y = $northing - self::FALSE_NORTHING;
-
-        $m = $y / self::SCALE_FACTOR;
-        $mu = $m / (self::WGS84_A * (1 - self::WGS84_E2 / 4 - 3 * self::WGS84_E2 * self::WGS84_E2 / 64 - 5 * self::WGS84_E2 * self::WGS84_E2 * self::WGS84_E2 / 256));
         
-        $p1 = $mu + (3 / 2) * 0.00675701 * sin(2 * $mu) - (27 / 32) * 0.00675701 * 0.00675701 * sin(4 * $mu);
+        // Calculate footpoint latitude
+        $M = $y / $k0;
+        $mu = $M / ($a * (1 - $e2/4 - 3*$e2*$e2/64 - 5*$e2*$e2*$e2/256));
         
-        $p_lat = asin(sin($p1) / (1 + 0.00675701 * cos($p1) * cos($p1)));
-        $p_lng = atan(tan($x / (self::WGS84_A * cos($p_lat) * self::SCALE_FACTOR)) / cos($p_lat));
+        $e1 = (1 - sqrt(1-$e2)) / (1 + sqrt(1-$e2));
         
-        $lng = (self::ZONE * 6 - 180) + rad2deg($p_lng);
-        $lat = rad2deg($p_lat);
+        $phi1 = $mu + (3*$e1/2 - 27*$e1*$e1*$e1/32) * sin(2*$mu)
+                    + (21*$e1*$e1/16 - 55*$e1*$e1*$e1*$e1/32) * sin(4*$mu)
+                    + (151*$e1*$e1*$e1/96) * sin(6*$mu)
+                    + (1097*$e1*$e1*$e1*$e1/512) * sin(8*$mu);
+        
+        $C1 = $e2 * pow(cos($phi1), 2);
+        $T1 = pow(tan($phi1), 2);
+        $N1 = $a / sqrt(1 - $e2 * pow(sin($phi1), 2));
+        $R1 = $a * (1 - $e2) / pow(1 - $e2 * pow(sin($phi1), 2), 1.5);
+        $D = $x / ($N1 * $k0);
+        
+        $lat = $phi1 - ($N1 * tan($phi1) / $R1) * 
+               ($D*$D/2 - (5 + 3*$T1 + 10*$C1 - 4*$C1*$C1 - 9*$e2) * $D*$D*$D*$D/24
+               + (61 + 90*$T1 + 298*$C1 + 45*$T1*$T1 - 252*$e2 - 3*$C1*$C1) * pow($D, 6)/720);
+        
+        $lng = ($D - (1 + 2*$T1 + $C1) * $D*$D*$D/6
+               + (5 - 2*$C1 + 28*$T1 - 3*$C1*$C1 + 8*$e2 + 24*$T1*$T1) * pow($D, 5)/120) / cos($phi1);
+        
+        // Convert to degrees and add central meridian
+        $lat = rad2deg($lat);
+        $lng = rad2deg($lng) + (self::ZONE * 6 - 183); // Central meridian for zone 48
 
         return [
             'lat' => $lat,

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Map Debug Test</title>
+    <title>Map Debug Test - Lampung Tengah</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         #map { height: 600px; width: 100%; }
@@ -9,10 +9,17 @@
         .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
         .error { color: red; }
         .success { color: green; }
+        .info { background: #d1ecf1; padding: 10px; border-left: 4px solid #0c5460; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <h1>Map Debug Test</h1>
+    <h1>Map Debug Test - Lampung Tengah 🗺️</h1>
+    
+    <div class="info">
+        <strong>Expected Location:</strong> Lampung Tengah, Indonesia<br>
+        <strong>Coordinates:</strong> Lat: -4.66 to -4.88, Lng: 105.0 to 105.3<br>
+        <strong>CRS Conversion:</strong> UTM Zone 48S (EPSG:32748) → WGS84 (EPSG:4326)
+    </div>
     
     <div class="debug">
         <h2>Test 1: Check API Endpoints</h2>
@@ -66,11 +73,13 @@
         }
 
         function initMap() {
-            map = L.map('map').setView([-4.7, 108.2], 11);
+            // Lampung Tengah coordinates
+            map = L.map('map').setView([-4.85, 105.0], 11);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
             }).addTo(map);
-            console.log('Map initialized');
+            console.log('Map initialized at Lampung Tengah');
         }
 
         function loadGeoJSON() {

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Status Gulma - GulmaTrack</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #197B40, #155A31);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            background: #197B40;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #155A31;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            min-width: 200px;
+        }
+        .map-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 200px;
+        }
+        .legend h4 {
+            margin: 0 0 15px 0;
+            color: #197B40;
+            font-size: 16px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #197B40;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .leaflet-popup-content {
+            margin: 0 !important;
+            font-family: 'Poppins';
+        }
+    </style>
+</head>
+<body>
+
+        <div class="controls">
+            <select id="wilayahSelect">
+                <option value="">-- Pilih Wilayah --</option>
+            </select>
+            <button onclick="loadWilayah()">📍 Tampilkan Wilayah</button>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="legend">
+                <h4>📊 Status Gulma</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3498db;"></div>
+                    <span><strong>Bersih</strong></span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #27ae60;"></div>
+                    <span><strong>Ringan</strong></span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f1c40f;"></div>
+                    <span><strong>Sedang</strong></span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <span><strong>Berat</strong></span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffffff;"></div>
+                    <span><strong>Berat</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let layers = {};
+
+        // Initialize map on page load
+        function initMap() {
+            map = L.map('map').setView([-4.85, 105.0], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            }).addTo(map);
+            
+            console.log('✓ Map initialized');
+        }
+
+        // Get feature style based on gulma status
+        function getFeatureStyle(feature) {
+            const props = feature.properties || {};
+            let color = '#ecf0f1'; // Default: tidak ada data
+            
+            // Check multiple possible status field names
+            const status = (props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+            
+            if (status.includes('bersih')) {
+                color = '#3498db'; // Biru
+            } else if (status.includes('ringan')) {
+                color = '#27ae60'; // Hijau
+            } else if (status.includes('sedang')) {
+                color = '#f1c40f'; // Kuning
+            } else if (status.includes('berat')) {
+                color = '#e74c3c'; // Merah
+            }
+
+            return {
+                color: color,
+                weight: 2,
+                opacity: 0.9,
+                fillColor: color,
+                fillOpacity: 0.6
+            };
+        }
+
+        // Create popup content
+        function createPopup(props) {
+            const statusGulma = props.Kelas_weed || props.gulma_KATEGORI || 'Tidak Ada Data';
+            let statusColor = '#ecf0f1';
+            
+            if (statusGulma.toLowerCase().includes('bersih')) statusColor = '#3498db';
+            else if (statusGulma.toLowerCase().includes('ringan')) statusColor = '#27ae60';
+            else if (statusGulma.toLowerCase().includes('sedang')) statusColor = '#f1c40f';
+            else if (statusGulma.toLowerCase().includes('berat')) statusColor = '#e74c3c';
+
+            let html = '<div style="min-width: 250px; padding: 10px;">';
+            
+            if (props.Lokasi) {
+                html += `<h3 style="margin: 0 0 10px 0; color: #197B40; font-size: 16px;">📍 ${props.Lokasi}</h3>`;
+            }
+            
+            html += `<div style="background: ${statusColor}; color: white; padding: 8px; margin-bottom: 10px; border-radius: 4px; text-align: center; font-weight: bold;">
+                ${statusGulma}
+            </div>`;
+            
+            html += '<table style="width: 100%; font-size: 12px;">';
+            
+            if (props.Wilayah || props.gulma_Wilayah) {
+                html += `<tr><td><strong>Wilayah:</strong></td><td>${props.Wilayah || props.gulma_Wilayah}</td></tr>`;
+            }
+            
+            const bruto = props.Luas_Bruto || props.Bruto;
+            if (bruto) {
+                html += `<tr><td><strong>Luas Bruto:</strong></td><td>${bruto} Ha</td></tr>`;
+            }
+            
+            const netto = props.Luas_Netto || props.Netto || props.gulma_Neto;
+            if (netto) {
+                html += `<tr><td><strong>Luas Netto:</strong></td><td>${netto} Ha</td></tr>`;
+            }
+            
+            if (props.tk_ha || props['gulma_TK/HA']) {
+                html += `<tr><td><strong>TK/Ha:</strong></td><td>${props.tk_ha || props['gulma_TK/HA']}</td></tr>`;
+            }
+            
+            html += '</table></div>';
+            return html;
+        }
+
+        // Load single wilayah
+        function loadWilayah() {
+            const wilayahNum = document.getElementById('wilayahSelect').value;
+            if (!wilayahNum) {
+                alert('Silakan pilih wilayah terlebih dahulu');
+                return;
+            }
+
+            clearMap();
+            console.log(`Loading Wilayah ${wilayahNum}...`);
+
+            fetch(`/api/wilayah/geojson/${wilayahNum}`)
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    
+                    const layer = L.geoJSON(data, {
+                        style: getFeatureStyle,
+                        onEachFeature: (feature, layer) => {
+                            if (feature.properties) {
+                                layer.bindPopup(createPopup(feature.properties));
+                            }
+                        }
+                    }).addTo(map);
+                    
+                    layers[wilayahNum] = layer;
+                    
+                    const bounds = layer.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    }
+                    
+                    console.log(`✓ Loaded ${data.features.length} features for Wilayah ${wilayahNum}`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal memuat data: ' + error.message);
+                });
+        }
+
+        // Load all wilayah
+        function loadAllWilayah() {
+            clearMap();
+            console.log('Loading all wilayah...');
+
+            fetch('/api/wilayah/data')
+                .then(r => r.json())
+                .then(summary => {
+                    const wilayahNumbers = summary.data.map(w => w.wilayah);
+                    const promises = wilayahNumbers.map(num => 
+                        fetch(`/api/wilayah/geojson/${num}`)
+                            .then(r => r.json())
+                            .then(data => ({ wilayah: num, data }))
+                    );
+
+                    return Promise.all(promises);
+                })
+                .then(results => {
+                    const allBounds = [];
+                    let totalFeatures = 0;
+
+                    results.forEach(({ wilayah, data }) => {
+                        if (data.features && data.features.length > 0) {
+                            const layer = L.geoJSON(data, {
+                                style: getFeatureStyle,
+                                onEachFeature: (feature, layer) => {
+                                    if (feature.properties) {
+                                        layer.bindPopup(createPopup(feature.properties));
+                                    }
+                                }
+                            }).addTo(map);
+
+                            layers[wilayah] = layer;
+                            totalFeatures += data.features.length;
+                            
+                            const bounds = layer.getBounds();
+                            if (bounds.isValid()) {
+                                allBounds.push(bounds);
+                            }
+                        }
+                    });
+
+                    if (allBounds.length > 0) {
+                        const combinedBounds = allBounds.reduce((acc, bounds) => {
+                            return acc.extend(bounds);
+                        }, L.latLngBounds(allBounds[0]));
+                        
+                        map.fitBounds(combinedBounds, { padding: [50, 50] });
+                    }
+
+                    console.log(`✓ Loaded ${results.length} wilayah, ${totalFeatures} total features`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal memuat data: ' + error.message);
+                });
+        }
+
+        // Clear map
+        function clearMap() {
+            Object.values(layers).forEach(layer => {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            });
+            layers = {};
+            console.log('✓ Map cleared');
+        }
+
+        // Load statistics and populate dropdown
+        function loadStats() {
+            fetch('/api/wilayah/data')
+                .then(r => r.json())
+                .then(data => {
+                    // Update stats
+                    document.getElementById('totalWilayah').textContent = data.total_wilayah;
+                    
+                    let totalArea = 0;
+                    let totalPlot = 0;
+                    data.data.forEach(w => {
+                        totalArea += w.total_area;
+                        totalPlot += w.feature_count;
+                    });
+                    
+                    document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+                    document.getElementById('totalPlot').textContent = totalPlot;
+
+                    // Populate dropdown
+                    const select = document.getElementById('wilayahSelect');
+                    data.data.forEach(wilayah => {
+                        const option = document.createElement('option');
+                        option.value = wilayah.wilayah;
+                        option.textContent = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
+                        select.appendChild(option);
+                    });
+
+                    console.log('✓ Stats loaded');
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Initializing GulmaTrack Map...');
+            initMap();
+            loadStats();
+            // Auto-load all wilayah on start
+            setTimeout(() => loadAllWilayah(), 500);
+        });
+    </script>
+</body>
+</html>

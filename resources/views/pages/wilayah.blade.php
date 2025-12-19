@@ -311,6 +311,20 @@
 
     <!-- Daftar Wilayah -->
     <h2 style="font-size: 24px; margin: 30px 0 20px; color: var(--title-color);">Daftar Wilayah Produksi</h2>
+    
+    <!-- Kontrol Wilayah -->
+    <div class="wilayah-controls">
+        <input type="text" id="searchWilayah" placeholder="Cari wilayah...">
+        <select id="filterKomoditas">
+            <option value="">Semua Kategori</option>
+            <option value="ringan">Ringan</option>
+            <option value="sedang">Sedang</option>
+            <option value="berat">Berat</option>
+            <option value="bersih">Bersih</option>
+        </select>
+        <button onclick="filterWilayah()">Filter</button>
+    </div>
+    
     <div class="wilayah-grid" id="wilayahGrid">
         <div style="text-align: center; width: 100%; padding: 40px;">
             <div class="loading" style="margin: 0 auto;"></div>
@@ -323,306 +337,19 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    let map;
-    let allLayers = {};
-    let currentWilayah = null;
-    
-    const colorMap = {
-        'Bersih': '#27ae60',
-        'Ringan': '#f39c12',
-        'Sedang': '#e67e22',
-        'Berat': '#e74c3c',
-        'Tidak Ada': '#95a5a6'
-    };
+    // Data wilayah dummy
+    const wilayahData = [
+        { id: 1, nama: 'Wilayah 16', komoditas: 'Nanas', luas: 320, produksi: 2800, produktivitas: 8.75 },
+        { id: 2, nama: 'Wilayah 17', komoditas: 'Nanas', luas: 180, produksi: 1440, produktivitas: 8.0 },
+        { id: 3, nama: 'Wilayah 18', komoditas: 'Nanas', luas: 250, produksi: 2125, produktivitas: 8.5 },
+        { id: 4, nama: 'Wilayah 19', komoditas: 'Nanas', luas: 420, produksi: 3780, produktivitas: 9.0 },
+        { id: 5, nama: 'Wilayah 20', komoditas: 'Nanas', luas: 160, produksi: 1280, produktivitas: 8.0 },
+        { id: 6, nama: 'Wilayah 21', komoditas: 'Nanas', luas: 280, produksi: 2380, produktivitas: 8.5 },
+        { id: 7, nama: 'Wilayah 22', komoditas: 'Nanas', luas: 350, produksi: 3150, produktivitas: 9.0 },
+        { id: 8, nama: 'Wilayah 23', komoditas: 'Nanas', luas: 190, produksi: 1520, produktivitas: 8.0 },
+    ];
 
-    // Utility: Show toast notification
-    function showNotification(message, type = 'info') {
-        const bgColor = {
-            'success': '#27ae60',
-            'error': '#e74c3c',
-            'warning': '#f39c12',
-            'info': '#3498db'
-        }[type] || '#3498db';
-
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${bgColor};
-            color: white;
-            padding: 15px 20px;
-            border-radius: 4px;
-            z-index: 9999;
-            max-width: 400px;
-            font-size: 13px;
-            animation: slideIn 0.3s ease;
-        `;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
-    // Inisialisasi peta
-    function initMap() {
-        console.log('Initializing map...');
-        const mapElement = document.getElementById('map');
-        console.log('Map element:', mapElement);
-        console.log('Map container:', document.getElementById('mapContainer'));
-        
-        if (!mapElement) {
-            console.error('Map element #map not found!');
-            return;
-        }
-        
-        // Default center untuk Sumatera (daerah Lampung/Bengkulu)
-        map = L.map('map').setView([-4.7, 108.2], 11);
-        console.log('Map instance created:', map);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        console.log('Map initialized successfully at center: [-4.7, 108.2]');
-    }
-
-    // Get color based on kelas weed
-    function getColor(kelasWeed) {
-        return colorMap[kelasWeed] || '#3498db';
-    }
-
-    // Style untuk feature
-    function featureStyle(feature) {
-        const props = feature.properties;
-        const kelasWeed = props.Kelas_weed || 'Tidak Ada';
-        
-        return {
-            fillColor: getColor(kelasWeed),
-            weight: 2,
-            opacity: 0.8,
-            color: '#2c3e50',
-            fillOpacity: 0.7
-        };
-    }
-
-    // Buat popup content
-    function popupContent(props) {
-        let html = `
-            <div style="font-size: 12px; width: 280px;">
-                <h4>
-                    <i class="fas fa-map-pin"></i> ${props.Lokasi || 'Unknown'}
-                </h4>
-                
-                <div class="popup-section">
-                    <div><span class="popup-label">Wilayah:</span> <span class="popup-value">${props.Wilayah || '-'}</span></div>
-                    <div><span class="popup-label">Area:</span> <span class="popup-value">${props.Area || '-'}</span></div>
-                    <div><span class="popup-label">Status:</span> <span class="popup-value">${props.Status || '-'}</span></div>
-                </div>
-
-                <div class="popup-section">
-                    <div><span class="popup-label">Luas Bruto:</span> <span class="popup-value">${props.Luas_Bruto || props.Bruto || '-'} Ha</span></div>
-                    <div><span class="popup-label">Luas Netto:</span> <span class="popup-value">${props.Luas_Netto || props.Netto || props.netto || '-'} Ha</span></div>
-                </div>
-        `;
-
-        if (props.Kelas_weed) {
-            html += `
-                <div class="popup-section">
-                    <div><span class="popup-label">Kelas Gulma:</span> <span class="popup-value">${props.Kelas_weed}</span></div>
-                    <div><span class="popup-label">TK/HA:</span> <span class="popup-value">${props['gulma_TK/HA'] || '-'}</span></div>
-                    <div><span class="popup-label">Total TK:</span> <span class="popup-value">${props['gulma_TOTAL TK'] || '-'}</span></div>
-                </div>
-            `;
-        }
-
-        if (props.gulma_Penanggungjawab) {
-            html += `
-                <div class="popup-section">
-                    <div><span class="popup-label">PJ:</span> <span class="popup-value">${props.gulma_Penanggungjawab}</span></div>
-                    <div><span class="popup-label">Aktivitas:</span> <span class="popup-value">${props.gulma_ACTIVITAS || '-'}</span></div>
-                </div>
-            `;
-        }
-
-        html += '</div>';
-        return html;
-    }
-
-    // Tampilkan peta wilayah terpilih
-    function loadWilayahMap() {
-        const wilayah = document.getElementById('wilayahSelect').value;
-        if (!wilayah) {
-            showNotification('Silakan pilih wilayah terlebih dahulu', 'warning');
-            return;
-        }
-
-        // Clear existing layers
-        Object.values(allLayers).forEach(layer => {
-            try {
-                map.removeLayer(layer);
-            } catch (e) {}
-        });
-
-        showNotification('Memuat peta wilayah ' + wilayah + '...', 'info');
-        
-        const url = `/api/wilayah/geojson/${wilayah}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                console.log('GeoJSON loaded for wilayah', wilayah, data);
-                
-                if (!data.features || data.features.length === 0) {
-                    showNotification('Tidak ada data untuk wilayah ini', 'warning');
-                    return;
-                }
-
-                const geoJsonLayer = L.geoJSON(data, {
-                    style: featureStyle,
-                    onEachFeature: (feature, layer) => {
-                        layer.bindPopup(popupContent(feature.properties));
-                    }
-                });
-                
-                geoJsonLayer.addTo(map);
-                map.fitBounds(geoJsonLayer.getBounds(), { padding: [50, 50] });
-                
-                showNotification(`Wilayah ${wilayah} berhasil dimuat (${data.features.length} plot)`, 'success');
-            })
-            .catch(error => {
-                console.error('Error loading wilayah:', error);
-                showNotification('Error memuat peta: ' + error.message, 'error');
-            });
-    }
-
-    // Load semua wilayah
-    function loadAllWilayah() {
-        Object.values(allLayers).forEach(layer => {
-            try {
-                map.removeLayer(layer);
-            } catch (e) {}
-        });
-        allLayers = {};
-
-        showNotification('Memuat semua wilayah...', 'info');
-        console.log('Starting to load all wilayah...');
-
-        const wilayahNumbers = [16, 17, 18, 19, 20, 21, 22, 23];
-        let loadedCount = 0;
-        let totalFeatures = 0;
-
-        wilayahNumbers.forEach(num => {
-            console.log(`Fetching wilayah ${num}...`);
-            fetch(`/api/wilayah/geojson/${num}`)
-                .then(response => {
-                    console.log(`Response for wilayah ${num}:`, response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(`Wilayah ${num} loaded:`, data.features ? data.features.length : 0, 'features');
-                    
-                    if (data.features && data.features.length > 0) {
-                        const geoJsonLayer = L.geoJSON(data, {
-                            style: featureStyle,
-                            onEachFeature: (feature, layer) => {
-                                layer.bindPopup(popupContent(feature.properties));
-                            }
-                        });
-                        
-                        geoJsonLayer.addTo(map);
-                        allLayers[num] = geoJsonLayer;
-                        totalFeatures += data.features.length;
-                    }
-                    
-                    loadedCount++;
-
-                    if (loadedCount === wilayahNumbers.length) {
-                        let bounds = L.latLngBounds();
-                        let validBounds = false;
-                        
-                        Object.values(allLayers).forEach(layer => {
-                            try {
-                                const layerBounds = layer.getBounds();
-                                if (layerBounds && layerBounds.isValid()) {
-                                    bounds.extend(layerBounds);
-                                    validBounds = true;
-                                }
-                            } catch (e) {
-                                console.error('Error getting bounds:', e);
-                            }
-                        });
-                        
-                        if (validBounds) {
-                            console.log('Fitting bounds:', bounds);
-                            map.fitBounds(bounds, { padding: [50, 50] });
-                        } else {
-                            console.warn('No valid bounds found');
-                        }
-                        showNotification(`Semua wilayah berhasil dimuat (${totalFeatures} plot)`, 'success');
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error loading wilayah ${num}:`, error);
-                    loadedCount++;
-                });
-        });
-    }
-
-    // Load data summary
-    function loadWilayahData() {
-        console.log('Loading wilayah data...');
-        fetch('/api/wilayah/data')
-            .then(response => {
-                console.log('Data API response:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Wilayah data loaded:', data);
-                
-                const wilayahData = data.data;
-                document.getElementById('totalWilayah').textContent = wilayahData.length;
-
-                let totalArea = 0;
-                let totalFeatures = 0;
-                
-                wilayahData.forEach(w => {
-                    totalArea += w.total_area;
-                    totalFeatures += w.feature_count;
-                });
-
-                document.getElementById('totalArea').textContent = totalArea.toFixed(0) + ' Ha';
-                document.getElementById('totalPlot').textContent = totalFeatures;
-
-                // Populate select
-                const select = document.getElementById('wilayahSelect');
-                wilayahData.forEach(w => {
-                    const option = document.createElement('option');
-                    option.value = w.wilayah;
-                    option.textContent = `Wilayah ${w.wilayah} (${w.feature_count} plot)`;
-                    select.appendChild(option);
-                });
-
-                renderWilayahCards(wilayahData);
-            })
-            .catch(error => {
-                console.error('Error loading data:', error);
-                showNotification('Error memuat data: ' + error.message, 'error');
-            });
-    }
-
-    // Render kartu wilayah
-    function renderWilayahCards(data) {
+    function renderWilayah(data) {
         const grid = document.getElementById('wilayahGrid');
         grid.innerHTML = '';
 
@@ -642,20 +369,20 @@
                 </div>
                 <div class="wilayah-card-body">
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-layer-group"></i> Plot:</span>
-                        <span class="info-value">${wilayah.feature_count}</span>
+                        <span class="info-label"><i class="fas fa-tag"></i> Komoditas:</span>
+                        <span class="info-value">${wilayah.komoditas}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label"><i class="fas fa-ruler"></i> Total Area:</span>
                         <span class="info-value">${wilayah.total_area} Ha</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-cube"></i> Netto:</span>
-                        <span class="info-value">${wilayah.total_netto_area} Ha</span>
+                        <span class="info-label"><i class="fas fa-chart-bar"></i> Produksi:</span>
+                        <span class="info-value">${wilayah.produksi} Ton</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label"><i class="fas fa-tag"></i> Status:</span>
-                        <span class="info-value">${wilayah.status_types.join(', ')}</span>
+                        <span class="info-label"><i class="fas fa-chart-line"></i> Produktivitas:</span>
+                        <span class="info-value">${wilayah.produktivitas} T/Ha</span>
                     </div>
                 </div>
             `;
@@ -663,48 +390,24 @@
         });
     }
 
-    // Add CSS animations
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(styleElement);
+    function filterWilayah() {
+        const search = document.getElementById('searchWilayah').value.toLowerCase();
+        const komoditas = document.getElementById('filterKomoditas').value;
 
-    // Initialize on page load
-    function initialize() {
-        console.log('Page loaded, initializing...');
-        console.log('Leaflet available?', typeof L !== 'undefined');
-        
-        if (typeof L === 'undefined') {
-            console.error('Leaflet library not loaded!');
-            setTimeout(initialize, 100);
-            return;
-        }
-        
-        initMap();
-        loadWilayahData();
-        loadAllWilayah();
+        const filtered = wilayahData.filter(w => {
+            const matchSearch = w.nama.toLowerCase().includes(search);
+            const matchKomoditas = !komoditas || w.komoditas.toLowerCase().includes(komoditas);
+            return matchSearch && matchKomoditas;
+        });
+
+        renderWilayah(filtered);
     }
-    
-    document.addEventListener('DOMContentLoaded', initialize);
+
+    // Initial render
+    renderWilayah(wilayahData);
+
+    // Real-time search
+    document.getElementById('searchWilayah').addEventListener('keyup', filterWilayah);
+    document.getElementById('filterKomoditas').addEventListener('change', filterWilayah);
 </script>
 @endsection

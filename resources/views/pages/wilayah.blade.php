@@ -363,29 +363,54 @@
                 document.getElementById('mapContainer').scrollIntoView({ behavior: 'smooth' });
             };
 
-            card.innerHTML = `
-                <div class="wilayah-card-header">
-                    <h3>Wilayah ${wilayah.wilayah}</h3>
-                </div>
-                <div class="wilayah-card-body">
-                    <div class="info-row">
-                        <span class="info-label"><i class="fas fa-tag"></i> Komoditas:</span>
-                        <span class="info-value">${wilayah.komoditas || 'Nanas'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label"><i class="fas fa-ruler"></i> Total Area:</span>
-                        <span class="info-value">${wilayah.total_area} Ha</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label"><i class="fas fa-th"></i> Jumlah Plot:</span>
-                        <span class="info-value">${wilayah.feature_count} Plot</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label"><i class="fas fa-chart-area"></i> Area Netto:</span>
-                        <span class="info-value">${wilayah.total_netto_area || '-'} Ha</span>
-                    </div>
-                </div>
-            `;
+           card.innerHTML = `
+    <div class="wilayah-card-header">
+        <h3>Wilayah ${wilayah.wilayah}</h3>
+    </div>
+
+    <div class="wilayah-card-body">
+
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-ruler"></i> Luas Lahan:
+            </span>
+            <span class="info-value">
+                ${wilayah.total_area ?? wilayah.total_netto_area ?? 0} Ha
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-list"></i> Kategori:
+            </span>
+            <span class="info-value">
+                ${wilayah.kategori ?? wilayah.kategori_gulma ?? '-'}
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-check-circle"></i> Status Wilayah:
+            </span>
+            <span class="info-value">
+                ${wilayah.status ?? wilayah.status_wilayah ?? '-'}
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-users"></i> Total Tenaga Kerja:
+            </span>
+            <span class="info-value">
+                ${wilayah.tk ?? wilayah.tenaga_kerja_minggu ?? 0} Orang
+            </span>
+        </div>
+
+    </div>
+`;
+
+
+
             grid.appendChild(card);
         });
     }
@@ -459,7 +484,7 @@
         // Show loading
         console.log(`Loading Wilayah ${wilayahNumber}...`);
 
-        fetch(`/api/wilayah/geojson/${wilayahNumber}`)
+        fetch(`/api/wilayah/${wilayahNumber}/geojson`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -524,7 +549,7 @@
                 
                 // Load each wilayah
                 const promises = wilayahNumbers.map(num => 
-                    fetch(`/api/wilayah/geojson/${num}`)
+                    fetch(`/api/wilayah/${num}/geojson`)
                         .then(r => r.json())
                         .then(data => ({ wilayah: num, data }))
                 );

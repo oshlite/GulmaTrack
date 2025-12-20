@@ -414,11 +414,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('nanas') }}" class="nav-link {{ request()->routeIs('nanas') ? 'active' : '' }}">
-                        <i class="fas fa-apple-alt"></i> Nanas
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">
                         <i class="fas fa-chart-bar"></i> Statistik
                     </a>

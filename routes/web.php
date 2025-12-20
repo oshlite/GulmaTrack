@@ -21,14 +21,6 @@ Route::get('/', function () {
 
 Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah');
 
-Route::get('/nanas', function () {
-    return view('pages.nanas');
-})->name('nanas');
-
-Route::get('/pisang', function () {
-    return view('pages.pisang');
-})->name('pisang');
-
 
 Route::get('/statistik', function () {
     return view('pages.statistik');

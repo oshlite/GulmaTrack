@@ -262,18 +262,28 @@
     <!-- Filter & Kontrol -->
     <div class="stats-controls">
         <select id="filterTahun" style="min-width: 150px;">
-            <option value="2025">Tahun 2025</option>
-            <option value="2024">Tahun 2024</option>
-            <option value="2023">Tahun 2023</option>
-            <option value="2022">Tahun 2022</option>
+            <option value="2025">Minggu Pertama</option>
+            <option value="2024">Minggu Kedua</option>
+            <option value="2023">Minggu Ketiga</option>
+            <option value="2022">Minggu Keempat</option>
         </select>
-        <select id="filterKomoditas" style="min-width: 150px;">
-            <option value="">Semua Komoditas</option>
-            <option value="nanas">Nanas</option>
+         <select id="filterBulan" style="min-width: 150px;">
+            <option value="2025">Januari</option>
+            <option value="2024">Februari</option>
+            <option value="2023">Maret</option>
+            <option value="2022">April</option>
+            <option value="2025">Mei</option>
+            <option value="2024">Juni</option>
+            <option value="2023">Juli</option>
+            <option value="2022">Agustus</option>
+            <option value="2025">September</option>
+            <option value="2024">Oktober</option>
+            <option value="2023">November</option>
+            <option value="2022">Desember</option>
+
         </select>
+
         <button onclick="updateStats()"><i class="fas fa-search"></i> Update Statistik</button>
-        <button class="export-btn" onclick="exportStats()"><i class="fas fa-download"></i> Export CSV</button>
-        <button class="export-btn" onclick="printStats()"><i class="fas fa-print"></i> Cetak</button>
     </div>
 
     <!-- Perbandingan Produksi -->
@@ -283,19 +293,19 @@
             <div class="comparison-card">
                 <div class="comparison-title"><i class="fas fa-apple-alt"></i> Nanas</div>
                 <div class="comparison-stat">
-                    <span class="comparison-label">Produksi:</span>
-                    <span class="comparison-value">20,825 Ton</span>
+                    <span class="comparison-label">Luas Perkebunan:</span>
+                    <span class="comparison-value">20,825 Ha</span>
                 </div>
                 <div class="comparison-stat">
-                    <span class="comparison-label">Luas Lahan:</span>
+                    <span class="comparison-label">Total Neto:</span>
                     <span class="comparison-value">2,450 Ha</span>
                 </div>
                 <div class="comparison-stat">
-                    <span class="comparison-label">Produktivitas:</span>
+                    <span class="comparison-label">Total Gulma:</span>
                     <span class="comparison-value">8.5 T/Ha</span>
                 </div>
                 <div class="comparison-stat">
-                    <span class="comparison-label">Petani:</span>
+                    <span class="comparison-label">Tenaga Kerja:</span>
                     <span class="comparison-value">892 Orang</span>
                 </div>
                 <div class="comparison-stat">
@@ -402,13 +412,15 @@
         <table class="stat-table">
             <thead>
                 <tr>
+                     <th>No.</th>
                     <th>Wilayah</th>
-                    <th>Produksi (Ton)</th>
-                    <th>Luas Lahan (Ha)</th>
-                    <th>Produktivitas (T/Ha)</th>
-                    <th>Jumlah Petani</th>
-                    <th>Pertumbuhan</th>
-                    <th>Ranking</th>
+                    <th>Luas Wilayah (Ha)</th>
+                    <th>Total Neto</th>
+                    <th>Total Gulma (T/Ha)</th>
+                    <th>Rata Rata Umur Tanaman</th>
+                    <th>Total Tenaga Kerja</th>
+                    <th>Tahun</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="detailStatsTable">
@@ -459,49 +471,65 @@
 
 <script>
     const wilayahStatsData = [
-        { wilayah: 'Kabupaten Bengkalis', produksi: 3780, luas: 420, produktivitas: 9.0, petani: 160, pertumbuhan: '+2.5%', ranking: 1 },
-        { wilayah: 'Kabupaten Pelalawan', produksi: 2800, luas: 320, produktivitas: 8.75, petani: 125, pertumbuhan: '+1.8%', ranking: 2 },
-        { wilayah: 'Kabupaten Meranti', produksi: 2380, luas: 280, produktivitas: 8.5, petani: 102, pertumbuhan: '+0.5%', ranking: 3 },
-        { wilayah: 'Kabupaten Rokan Hilir', produksi: 2125, luas: 250, produktivitas: 8.5, petani: 95, pertumbuhan: '+1.2%', ranking: 4 },
-        { wilayah: 'Kabupaten Indragiri Hulu', produksi: 1700, luas: 200, produktivitas: 8.5, petani: 78, pertumbuhan: '-0.8%', ranking: 5 },
-        { wilayah: 'Kabupaten Rokan Hulu', produksi: 1440, luas: 180, produktivitas: 8.0, petani: 65, pertumbuhan: '+2.1%', ranking: 6 },
+        { id: 1, wilayah: 'Wilayah 16', luas: 320, neto: 2800, gulma: 8.75, umur: '3.5 tahun', tenagaKerja: 125, tahun: 2025 },
+        { id: 2, wilayah: 'Wilayah 17', luas: 250, neto: 2125, gulma: 8.5, umur: '3.2 tahun', tenagaKerja: 95, tahun: 2025 },
+        { id: 3, wilayah: 'Wilayah 18', luas: 220, neto: 1980, gulma: 9.0, umur: '4.1 tahun', tenagaKerja: 88, tahun: 2025 },
+        { id: 4, wilayah: 'Wilayah 19', luas: 280, neto: 2380, gulma: 8.5, umur: '3.8 tahun', tenagaKerja: 102, tahun: 2025 },
+        { id: 5, wilayah: 'Wilayah 20', luas: 200, neto: 1700, gulma: 8.5, umur: '3.0 tahun', tenagaKerja: 78, tahun: 2025 },
+        { id: 6, wilayah: 'Wilayah 21', luas: 180, neto: 1530, gulma: 8.5, umur: '2.8 tahun', tenagaKerja: 68, tahun: 2025 },
+        { id: 7, wilayah: 'Wilayah 22', luas: 200, neto: 1700, gulma: 8.5, umur: '3.3 tahun', tenagaKerja: 78, tahun: 2025 },
+        { id: 8, wilayah: 'Wilayah 23', luas: 190, neto: 1615, gulma: 8.5, umur: '3.1 tahun', tenagaKerja: 72, tahun: 2025 },
     ];
 
     function renderDetailStats() {
         const tbody = document.getElementById('detailStatsTable');
         tbody.innerHTML = '';
 
-        wilayahStatsData.forEach(item => {
+        wilayahStatsData.forEach((item, index) => {
             const row = tbody.insertRow();
-            const pertumbuhanClass = item.pertumbuhan.includes('+') ? 'trend-up' : 'trend-down';
             row.innerHTML = `
+                <td><strong>${index + 1}</strong></td>
                 <td><strong>${item.wilayah}</strong></td>
-                <td class="stat-value">${item.produksi.toLocaleString('id-ID')}</td>
-                <td class="stat-value">${item.luas}</td>
-                <td class="stat-value">${item.produktivitas}</td>
-                <td>${item.petani}</td>
-                <td><span class="trend-indicator ${pertumbuhanClass}">${item.pertumbuhan}</span></td>
-                <td><strong>#${item.ranking}</strong></td>
+                <td class="stat-value">${item.luas.toLocaleString('id-ID')} Ha</td>
+                <td class="stat-value">${item.neto.toLocaleString('id-ID')} Ha</td>
+                <td class="stat-value">${item.gulma} T/Ha</td>
+                <td>${item.umur}</td>
+                <td>${item.tenagaKerja} Orang</td>
+                <td><strong>${item.tahun}</strong></td>
+                <td>
+                    <button class="export-btn" onclick="viewDetail(${item.id})">
+                        <i class="fas fa-eye"></i> Detail
+                    </button>
+                </td>
             `;
         });
     }
 
-    function updateStats() {
-        const tahun = document.getElementById('filterTahun').value;
-        const komoditas = document.getElementById('filterKomoditas').value;
-        alert(`Update statistik untuk tahun ${tahun}, komoditas: ${komoditas || 'Semua'}`);
-        renderDetailStats();
+    function viewDetail(id) {
+        const item = wilayahStatsData.find(w => w.id === id);
+        alert(`Detail ${item.wilayah}:\n\nLuas: ${item.luas} Ha\nTotal Neto: ${item.neto} Ha\nGulma: ${item.gulma} T/Ha\nUmur Tanaman: ${item.umur}\nTenaga Kerja: ${item.tenagaKerja} Orang`);
     }
 
-    function exportStats() {
-        alert('Mengexport data statistik sebagai CSV...');
+    function updateStats() {
+        const tahun = document.getElementById('filterTahun').value;
+        const bulan = document.getElementById('filterBulan').value;
+        alert(`Update statistik untuk filter yang dipilih`);
+        renderDetailStats();
     }
 
     function printStats() {
         window.print();
     }
 
-    // Initial render
-    renderDetailStats();
+    // Initial render ketika halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        renderDetailStats();
+    });
+
+    // Atau langsung render jika DOM sudah siap
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderDetailStats);
+    } else {
+        renderDetailStats();
+    }
 </script>
-@endsection

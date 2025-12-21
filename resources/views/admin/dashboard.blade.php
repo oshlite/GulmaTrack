@@ -1,4 +1,4 @@
-@extends('layouts.app')
+<!-- @extends('layouts.admin') -->
 
 @section('title', 'Dashboard Admin')
 
@@ -336,9 +336,9 @@
 
 <!-- Navbar Admin -->
 <nav class="admin-navbar">
-    <a href="{{ route('home') }}" class="navbar-brand">
+    <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
         <i class="fas fa-leaf"></i>
-        GulmaTrack
+        GulmaTrack 
     </a>
     <div class="navbar-right">
         <div class="user-info">

@@ -639,48 +639,6 @@
 
 <!-- Scroll Content -->
 <div class="scroll-content">
-    <!-- Statistics Section -->
-    <section class="stats-section">
-        <h2 class="section-title">Statistik Cepat</h2>
-        <p class="section-subtitle">Ringkasan data penyebaran gulma terkini</p>
-        <div class="stats-grid">
-            <div class="stat-card bersih">
-                <div class="stat-icon bersih">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-label">Luas Wilayah Terpantau</div>
-                <div class="stat-value">5</div>
-                <div class="stat-description">Wilayah aktif</div>
-            </div>
-            
-            <div class="stat-card ringan">
-                <div class="stat-icon ringan">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <div class="stat-label">Total Catatan Gulma</div>
-                <div class="stat-value">540</div>
-                <div class="stat-description">+12 data minggu ini</div>
-            </div>
-            
-            <div class="stat-card sedang">
-                <div class="stat-icon sedang">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="stat-label">Pengguna Terdaftar</div>
-                <div class="stat-value">Rumpun Teki</div>
-                <div class="stat-description">Jenis gulma teratas</div>
-            </div>
-            
-            <div class="stat-card berat">
-                <div class="stat-icon berat">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="stat-label">Area Penyebaran Tinggi</div>
-                <div class="stat-value">156</div>
-                <div class="stat-description">Patch pengguna aktif</div>
-            </div>
-        </div>
-    </section>
 
     <!-- Features Section -->
     <section class="features-section">
@@ -692,39 +650,39 @@
                     <i class="fas fa-map"></i>
                 </div>
                 <h3 class="feature-title">Peta Interaktif</h3>
-                <p class="feature-description">Visualisasi real-time lokasi dan tingkat penyebaran gulma dengan zoom dan filter kategori untuk analisis mendalam.</p>
+                <p class="feature-description">Visualisasi geografis lengkap dengan detail wilayah produksi yang mudah dijelajahi</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <h3 class="feature-title">Analisis Statistik</h3>
-                <p class="feature-description">Grafik dan tabel lengkap untuk memahami tren penyebaran gulma dari waktu ke waktu di setiap lokasi.</p>
+                <h3 class="feature-title">Dashboard Analitik</h3>
+                <p class="feature-description">Analisis mendalam dengan statistik dan tren produksi yang update real-time</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-leaf"></i>
                 </div>
-                <h3 class="feature-title">Fokus Tanaman</h3>
-                <p class="feature-description">Analisis khusus untuk pertanian nanas dan pisang dengan hasil panen kepada gulma.</p>
+                <h3 class="feature-title">Responsif & Mobile</h3>
+                <p class="feature-description">Akses dari perangkat apapun dengan pengalaman pengguna yang sempurna</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-filter"></i>
                 </div>
-                <h3 class="feature-title">Filter Kategori</h3>
-                <p class="feature-description">Filter penyebaran gulma, tingkat kepedulian, dan wilayah untuk analisis spesifik.</p>
+                <h3 class="feature-title">Keamanan Data</h3>
+                <p class="feature-description">Sistem keamanan berlapis untuk melindungi data perkebunan yang sensitif</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
                     <i class="fas fa-download"></i>
                 </div>
-                <h3 class="feature-title">Export Data</h3>
-                <p class="feature-description">Unduh data statistik dalam format CSV atau PDF untuk dokumentasi dan laporan.</p>
+                <h3 class="feature-title">Sinkronisasi Data</h3>
+                <p class="feature-description">Sinkronisasi otomatis dengan berbagai sumber data perkebunan terpercaya</p>
             </div>
         </div>
     </section>

@@ -31,9 +31,7 @@ Route::get('/tentang', function () {
     return view('pages.about');
 })->name('about');
 
-Route::get('/kontak', function () {
-    return view('pages.contact');
-})->name('contact');
+
 
 // ==================== AUTHENTICATION ROUTES ====================
 // Login page bisa diakses oleh guest dan user yang sudah login (untuk re-login)

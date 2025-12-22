@@ -213,6 +213,7 @@
             max-width: 100%;
             margin: 0 auto;
             padding: 0 20px;
+            text-align: center;
         }
 
         .footer-links {
@@ -233,6 +234,39 @@
         .footer-links a:hover {
             color: var(--secondary-color);
             text-decoration: underline;
+        }
+
+        .footer-contact {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .social-icon {
+            color: var(--accent-light);
+            font-size: 20px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-icon:hover {
+            color: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
         /* Animations */
@@ -432,9 +466,24 @@
         <div class="footer-content">
             <div class="footer-links">
                 <a href="{{ route('about') }}">Tentang Kami</a>
-                <a href="{{ route('contact') }}">Hubungi Kami</a>
                 <a href="{{ route('statistik') }}">Statistik</a>
                 <a href="{{ route('wilayah') }}">Peta Wilayah</a>
+            </div>
+            <div class="footer-contact">
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>info@gulmatrack.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>(+62) 123 456 7890</span>
+                </div>
+                <div class="social-links">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                </div>
             </div>
             <p>&copy; 2025 GulmaTrack. Semua hak dilindungi.</p>
         </div>

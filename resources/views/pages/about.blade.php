@@ -280,27 +280,31 @@
             color: var(--dark-color);
             font-size: 13px;
         }
-    </style>
 
-    <!-- Visi dan Misi -->
-    <div class="vision-mission">
-        <div class="vm-card">
-            <h3><i class="fas fa-bullseye"></i> Visi</h3>
-            <p>
-                Menjadi platform informasi geografis perkebunan yang terdepan dan terpercaya dalam mendukung 
-                peningkatan produktivitas dan efisiensi sektor hortikultura di Indonesia melalui teknologi 
-                dan inovasi data-driven.
-            </p>
-        </div>
-        <div class="vm-card">
-            <h3><i class="fas fa-briefcase"></i> Misi</h3>
-            <p>
-                Menyediakan sistem informasi yang komprehensif, interaktif, dan mudah digunakan untuk membantu 
-                petani, stakeholder, dan pemerintah dalam pengambilan keputusan yang tepat berbasis data geografis 
-                dan analisis statistik real-time.
-            </p>
-        </div>
-    </div>
+        .office-hours {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .office-hours h4 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .office-hours-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .office-hours-item:last-child {
+            margin-bottom: 0;
+        }
+    </style>
 
     <!-- Tentang Platform -->
     <div class="about-section">
@@ -343,11 +347,6 @@
                 <p>Sistem keamanan berlapis untuk melindungi data perkebunan yang sensitif</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                <h4>Performa Optimal</h4>
-                <p>Loading cepat dan responsif dengan optimasi database terbaik</p>
-            </div>
-            <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-sync"></i></div>
                 <h4>Sinkronisasi Data</h4>
                 <p>Sinkronisasi otomatis dengan berbagai sumber data perkebunan terpercaya</p>
@@ -387,41 +386,7 @@
         </div>
     </div>
 
-    <!-- Timeline -->
-    <div class="about-section">
-        <h2><i class="fas fa-history"></i> Sejarah Pengembangan</h2>
-        <div class="timeline">
-            <div class="timeline-item" style="position: relative;">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-year">2023 - Q1</div>
-                    <div class="timeline-desc">Konsep awal dan riset pasar tentang kebutuhan GIS perkebunan</div>
-                </div>
-            </div>
-            <div class="timeline-item" style="position: relative;">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-year">2023 - Q3</div>
-                    <div class="timeline-desc">Pengembangan prototype dan testing dengan stakeholder</div>
-                </div>
-            </div>
-            <div class="timeline-item" style="position: relative;">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-year">2024 - Q2</div>
-                    <div class="timeline-desc">Peluncuran versi beta dengan integrasi data awal</div>
-                </div>
-            </div>
-            <div class="timeline-item" style="position: relative;">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-year">2025 - Sekarang</div>
-                    <div class="timeline-desc">Versi production dan continuous improvement dengan user feedback</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Tim -->
     <div class="about-section">
         <h2><i class="fas fa-users"></i> Tim Pengembang</h2>
@@ -429,7 +394,7 @@
             <div class="team-member">
                 <div class="team-avatar"><i class="fas fa-user-tie"></i></div>
                 <div class="team-info">
-                    <div class="team-name">Budi Hartono</div>
+                    <div class="team-name">Alfi Rahma Amalia</div>
                     <div class="team-position">Project Lead & Backend Developer</div>
                     <div class="team-desc">Berpengalaman 8 tahun di pengembangan sistem informasi perkebunan</div>
                 </div>
@@ -437,7 +402,7 @@
             <div class="team-member">
                 <div class="team-avatar"><i class="fas fa-user-secret"></i></div>
                 <div class="team-info">
-                    <div class="team-name">Siti Nurhaliza</div>
+                    <div class="team-name">Oryza Surya Hapsari</div>
                     <div class="team-position">Frontend Developer & UX Designer</div>
                     <div class="team-desc">Spesialis dalam UI/UX dengan fokus pada user experience terbaik</div>
                 </div>
@@ -445,34 +410,30 @@
             <div class="team-member">
                 <div class="team-avatar"><i class="fas fa-flask"></i></div>
                 <div class="team-info">
-                    <div class="team-name">Dr. Ahmad Wijaya</div>
+                    <div class="team-name">Carissa Oktavia Sanjaya</div>
                     <div class="team-position">GIS & Data Specialist</div>
                     <div class="team-desc">Ahli dalam sistem informasi geografis dan analisis data perkebunan</div>
-                </div>
-            </div>
-            <div class="team-member">
-                <div class="team-avatar"><i class="fas fa-leaf"></i></div>
-                <div class="team-info">
-                    <div class="team-name">Rina Kusuma</div>
-                    <div class="team-position">Agricultural Consultant</div>
-                    <div class="team-desc">Konsultan perkebunan dengan pengalaman langsung di lapangan</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dukungan -->
-    <div class="about-section" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
-        <h2 style="color: white; border-bottom-color: rgba(255,255,255,0.3);"><i class="fas fa-handshake"></i> Dukungan & Kolaborasi</h2>
-        <p style="color: rgba(255,255,255,0.9);">
-            GulmaTrack didukung oleh berbagai instansi pemerintah, universitas terkemuka, dan asosiasi petani 
-            yang berkomitmen untuk meningkatkan sektor perkebunan Indonesia. Kami terbuka untuk kolaborasi dan 
-            partnership dengan pihak-pihak yang memiliki visi yang sama.
-        </p>
-        <p style="color: rgba(255,255,255,0.9);">
-            Jika Anda tertarik untuk berkolaborasi atau memiliki pertanyaan lebih lanjut, silakan 
-            <a href="{{ route('contact') }}" style="color: white; text-decoration: underline; font-weight: 600;">hubungi kami</a>.
-        </p>
+    <!-- Office Hours -->
+    <div class="office-hours">
+        <h4><i class="fas fa-clock"></i> Jam Kantor</h4>
+        <div class="office-hours-item">
+            <span>Senin - Jumat</span>
+            <span>08:00 - 17:00</span>
+        </div>
+        <div class="office-hours-item">
+            <span>Sabtu</span>
+            <span>09:00 - 13:00</span>
+        </div>
+        <div class="office-hours-item">
+            <span>Minggu & Hari Libur</span>
+            <span>Tutup</span>
+        </div>
     </div>
+
 </div>
 @endsection

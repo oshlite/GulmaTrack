@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GulmaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +45,25 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post')->mid
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ==================== ADMIN ROUTES ====================
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::post('/upload-csv', [AdminController::class, 'uploadCsv'])->name('upload-csv');
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Admin Dashboard
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
+
+    // CSV Upload
+    Route::post('/admin/upload-csv', [AdminController::class, 'uploadCsv'])
+        ->name('admin.upload-csv');
+
+    // API Endpoints
+    Route::prefix('admin/api')->group(function () {
+        Route::get('/geojson/{wilayah}', [GulmaController::class, 'getGeoJSONWithData'])
+            ->name('admin.get-geojson')
+            ->where('wilayah', '[0-9]+');
+        
+        Route::get('/data-gulma', [GulmaController::class, 'getDataGulma'])
+            ->name('admin.get-data-gulma');
+        
+        Route::get('/statistics', [GulmaController::class, 'getStatistics'])
+            ->name('admin.get-statistics');
+    });
 });

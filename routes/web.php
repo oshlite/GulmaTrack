@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+<<<<<<< HEAD
 use App\Http\Controllers\GulmaController;
+=======
+use App\Http\Controllers\ExcelDataController;
+>>>>>>> 1f3aa11c10721f77520264d768a6aec8b564e0d7
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +37,10 @@ Route::get('/tentang', function () {
 })->name('about');
 
 
+
+// ==================== DATA ENDPOINTS ====================
+// Excel data endpoint for popups
+Route::get('/data/excel', [ExcelDataController::class, 'getExcelData'])->name('data.excel');
 
 // ==================== AUTHENTICATION ROUTES ====================
 // Login page bisa diakses oleh guest dan user yang sudah login (untuk re-login)

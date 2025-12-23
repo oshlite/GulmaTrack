@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\ExcelDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,3 +28,8 @@ Route::get('/wilayah/geojson/{wilayah_number}', [WilayahController::class, 'getG
 Route::get('/wilayah/data', [WilayahController::class, 'getData'])
     ->name('api.wilayah.data')
     ->withoutMiddleware('api'); // Bypass API middleware if needed
+
+// Excel data endpoint
+Route::get('/excel-data', [ExcelDataController::class, 'getExcelData'])
+    ->name('api.excel.data')
+    ->withoutMiddleware('api');

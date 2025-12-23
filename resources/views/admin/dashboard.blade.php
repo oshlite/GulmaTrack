@@ -586,10 +586,6 @@
                     <li>Mengelola informasi wilayah dan tanaman</li>
                 </ul>
                 <p style="margin-top: 15px; font-size: 13px; color: #999;">
-                    <strong>Format CSV:</strong><br>
-                    wilayah,id_feature,status_gulma,persentase,tanggal<br>
-                    16,1,Bersih,0,2024-01-15<br>
-                    16,2,Ringan,25,2024-01-15
                 </p>
             </div>
         </div>

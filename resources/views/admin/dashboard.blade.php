@@ -542,12 +542,13 @@
             <form id="uploadForm" enctype="multipart/form-data">
                 @csrf
 
-                <div class="upload-area" onclick="document.getElementById('csvFile').click()">
+                <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">
                         <i class="fas fa-file-csv"></i>
                     </div>
                     <div class="upload-text">Klik atau drag file CSV di sini</div>
                     <div class="upload-hint">Format: CSV | Ukuran maksimal: 10MB</div>
+                    <div id="fileName" class="file-name" style="display: none; margin-top: 10px; color: #197B40; font-weight: bold;"></div>
                     <input 
                         type="file" 
                         id="csvFile" 
@@ -587,9 +588,7 @@
                 </ul>
                 <p style="margin-top: 15px; font-size: 13px; color: #999;">
                     <strong>Format CSV:</strong><br>
-                    wilayah,id_feature,status_gulma,persentase,tanggal<br>
-                    16,1,Bersih,0,2024-01-15<br>
-                    16,2,Ringan,25,2024-01-15
+                    PG,FM,Wilayah,SEKSI,Neto,Hasil,Umur Tanaman,Penanggungjawab,Kode Aktf,ACTIVITAS,KATEGORI,TK/HA,TOTAL TK
                 </p>
             </div>
         </div>
@@ -760,24 +759,12 @@
             .catch(err => console.error('Error loading GeoJSON:', err));
     }
 
-    // Wilayah selector change
-    document.getElementById('wilayahSelect').addEventListener('change', function() {
-        loadWilayah(this.value);
-    });
-
     // Form upload
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const wilayah = document.getElementById('wilayahSelect').value;
         const file = document.getElementById('csvFile').files[0];
         const messageDiv = document.getElementById('uploadMessage');
-
-        if (!wilayah) {
-            messageDiv.innerHTML = 'Pilih wilayah terlebih dahulu';
-            messageDiv.className = 'message show error';
-            return;
-        }
 
         if (!file) {
             messageDiv.innerHTML = 'Pilih file CSV terlebih dahulu';
@@ -787,7 +774,6 @@
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('wilayah_id', wilayah);
         formData.append('_token', document.querySelector('[name="_token"]').value);
 
         document.getElementById('uploadBtn').disabled = true;
@@ -805,7 +791,7 @@
                 messageDiv.innerHTML = `✓ ${data.message}`;
                 messageDiv.className = 'message show success';
                 document.getElementById('csvFile').value = '';
-                loadWilayah(wilayah);
+                document.getElementById('fileName').style.display = 'none';
                 
                 // Reload setelah 2 detik
                 setTimeout(() => {
@@ -825,9 +811,11 @@
     });
 
     // Drag and drop
-    const uploadArea = document.querySelector('.upload-area');
+    const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('csvFile');
+    const fileNameDisplay = document.getElementById('fileName');
 
+    // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
         uploadArea.addEventListener(evt, e => {
             e.preventDefault();
@@ -835,13 +823,15 @@
         });
     });
 
+    // Highlight upload area when dragging over
     ['dragenter', 'dragover'].forEach(evt => {
         uploadArea.addEventListener(evt, () => {
             uploadArea.style.borderColor = '#197B40';
-            uploadArea.style.background = '#f0f0f0';
+            uploadArea.style.background = '#f0f8f0';
         });
     });
 
+    // Remove highlight when dragging away or dropping
     ['dragleave', 'drop'].forEach(evt => {
         uploadArea.addEventListener(evt, () => {
             uploadArea.style.borderColor = '#D6DF20';
@@ -849,8 +839,36 @@
         });
     });
 
+    // Handle dropped files
     uploadArea.addEventListener('drop', (e) => {
-        fileInput.files = e.dataTransfer.files;
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            // Transfer files to input element using DataTransfer
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(files[0]);
+            fileInput.files = dataTransfer.files;
+            
+            // Display file name
+            fileNameDisplay.textContent = '📄 ' + files[0].name;
+            fileNameDisplay.style.display = 'block';
+        }
+    });
+
+    // Handle file selection via click
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            fileNameDisplay.textContent = '📄 ' + e.target.files[0].name;
+            fileNameDisplay.style.display = 'block';
+        } else {
+            fileNameDisplay.style.display = 'none';
+        }
+    });
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
     });
 
     // Initialize

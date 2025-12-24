@@ -14,7 +14,20 @@ class DataGulma extends Model
         'status_gulma',
         'persentase',
         'tanggal',
-        'import_log_id'
+        'import_log_id',
+        // Kolom CSV baru
+        'pg',
+        'fm',
+        'seksi',
+        'neto',
+        'hasil',
+        'umur_tanaman',
+        'penanggungjawab',
+        'kode_aktf',
+        'activitas',
+        'kategori',
+        'tk_ha',
+        'total_tk'
     ];
 
     public function importLog()

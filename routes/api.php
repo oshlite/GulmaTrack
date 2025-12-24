@@ -33,3 +33,8 @@ Route::get('/wilayah/data', [WilayahController::class, 'getData'])
 Route::get('/excel-data', [ExcelDataController::class, 'getExcelData'])
     ->name('api.excel.data')
     ->withoutMiddleware('api');
+
+// Get kategori color mapping
+Route::get('/kategori-colors', [\App\Http\Controllers\AdminController::class, 'getKategoriColors'])
+    ->name('api.kategori.colors')
+    ->withoutMiddleware('api');

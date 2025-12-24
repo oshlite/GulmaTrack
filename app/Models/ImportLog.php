@@ -12,6 +12,8 @@ class ImportLog extends Model
     protected $fillable = [
         'nama_file',
         'wilayah_id',
+        'bulan',
+        'minggu',
         'jumlah_records',
         'jumlah_berhasil',
         'jumlah_gagal',

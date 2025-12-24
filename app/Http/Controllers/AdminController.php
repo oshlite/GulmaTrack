@@ -25,11 +25,7 @@ class AdminController extends Controller
         $totalDataGulma = DataGulma::count();
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
-<<<<<<< HEAD
-        $importTerbaru = ImportLog::latest('created_at')->limit(10)->get();
-=======
         $importTerbaru = ImportLog::latest('created_at')->limit(5)->get();
->>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -47,11 +43,19 @@ class AdminController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:csv,txt|max:10240',
+            'bulan' => 'required|integer|min:1|max:12',
+            'minggu' => 'required|integer|min:1|max:4',
         ], [
             'file.required' => 'File harus dipilih',
             'file.file' => 'File tidak valid',
             'file.mimes' => 'File harus berformat CSV atau TXT',
             'file.max' => 'Ukuran file maksimal 10MB',
+            'bulan.required' => 'Bulan harus dipilih',
+            'bulan.min' => 'Bulan harus antara 1-12',
+            'bulan.max' => 'Bulan harus antara 1-12',
+            'minggu.required' => 'Minggu harus dipilih',
+            'minggu.min' => 'Minggu harus antara 1-4',
+            'minggu.max' => 'Minggu harus antara 1-4',
         ]);
 
         try {
@@ -64,45 +68,43 @@ class AdminController extends Controller
             $headers = array_map('strtolower', $headers);
             $headers = array_map('trim', $headers);
 
-            // Check if wilayah column exists
-            $wilayahIndex = array_search('wilayah', $headers);
-            if ($wilayahIndex === false) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kolom "wilayah" tidak ditemukan di CSV'
-                ], 400);
-            }
-
-            // Get wilayah dari baris pertama
-            $wilayahId = null;
-            if (!empty($csv[0][$wilayahIndex])) {
-                $wilayahId = (int) trim($csv[0][$wilayahIndex]);
-            }
-
-            if (!$wilayahId || $wilayahId < 16 || $wilayahId > 23) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Wilayah tidak valid. Harus antara 16-23'
-                ], 400);
-            }
-
-<<<<<<< HEAD
-=======
-            $required = ['id_feature', 'status_gulma', 'persentase', 'tanggal'];
+            // Check required columns: PG, FM, Wilayah, SEKSI, dll
+            $required = ['pg', 'fm', 'wilayah', 'seksi'];
             $missing = array_diff($required, $headers);
 
             if (!empty($missing)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom CSV tidak lengkap: ' . implode(', ', $missing)
+                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: PG, FM, Wilayah, SEKSI, Neto, Hasil, Umur Tanaman, Penanggungjawab, Kode Aktf, ACTIVITAS, KATEGORI, TK/HA, TOTAL TK'
                 ], 400);
             }
 
->>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
-            // Create import log
+            // Collect all unique wilayah from CSV
+            $wilayahIndex = array_search('wilayah', $headers);
+            $allWilayah = [];
+            foreach ($csv as $row) {
+                if (!empty($row[$wilayahIndex])) {
+                    $wil = (int) trim($row[$wilayahIndex]);
+                    if ($wil >= 16 && $wil <= 23) {
+                        $allWilayah[$wil] = true;
+                    }
+                }
+            }
+
+            if (empty($allWilayah)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada wilayah valid (16-23) dalam CSV'
+                ], 400);
+            }
+
+            // Create import log with all wilayah (comma separated)
+            $wilayahList = implode(',', array_keys($allWilayah));
             $importLog = ImportLog::create([
                 'nama_file' => $file->getClientOriginalName(),
-                'wilayah_id' => $wilayahId,
+                'wilayah_id' => $wilayahList,
+                'bulan' => $request->bulan,
+                'minggu' => $request->minggu,
                 'jumlah_records' => 0,
                 'jumlah_berhasil' => 0,
                 'jumlah_gagal' => 0,
@@ -122,59 +124,52 @@ class AdminController extends Controller
                     $data = array_combine($headers, $row);
                     $data = array_map('trim', $data);
 
-                    // Validation
-                    if (empty($data['id_feature'])) {
-                        throw new \Exception('ID Feature kosong');
+                    // Validation basic
+                    if (empty($data['seksi'])) {
+                        throw new \Exception('SEKSI kosong');
                     }
 
-<<<<<<< HEAD
-                    if (empty($data['kategori'])) {
-                        throw new \Exception('KATEGORI kosong');
+                    // Get wilayah from current row
+                    $rowWilayahId = !empty($data['wilayah']) ? (int) $data['wilayah'] : null;
+                    
+                    if (!$rowWilayahId || $rowWilayahId < 16 || $rowWilayahId > 23) {
+                        throw new \Exception('Wilayah tidak valid: ' . ($data['wilayah'] ?? 'kosong'));
                     }
 
-                    // Validate wilayah
-                    if ($currentWilayah < 16 || $currentWilayah > 23) {
-                        throw new \Exception('Wilayah tidak valid: ' . $currentWilayah);
-                    }
-
-                    // Use SEKSI as id_feature
+                    // id_feature langsung dari SEKSI (ini harus match dengan property di GeoJSON)
                     $idFeature = $data['seksi'];
 
-                    // Determine status_gulma based on KATEGORI
-                    $kategori = strtolower(trim($data['kategori']));
-                    $statusGulma = 'Bersih'; // default
-                    $persentase = 0; // default
-
-                    if (strpos($kategori, 'berat') !== false) {
-                        $statusGulma = 'Berat';
-                        $persentase = 75;
-                    } elseif (strpos($kategori, 'sedang') !== false) {
-                        $statusGulma = 'Sedang';
-                        $persentase = 50;
-                    } elseif (strpos($kategori, 'ringan') !== false) {
-                        $statusGulma = 'Ringan';
-                        $persentase = 25;
-=======
-                    if (!in_array($data['status_gulma'], ['Bersih', 'Ringan', 'Sedang', 'Berat'])) {
-                        throw new \Exception('Status gulma tidak valid: ' . $data['status_gulma']);
->>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
-                    }
-
-                    $persentase = (int) $data['persentase'];
-                    if ($persentase < 0 || $persentase > 100) {
-                        throw new \Exception('Persentase harus antara 0-100');
-                    }
+                    // Parse numeric values dengan handling empty/null
+                    $parseFloat = function($val) {
+                        if (empty($val) || !is_numeric($val)) return null;
+                        return (float) $val;
+                    };
+                    
+                    $parseInt = function($val) {
+                        if (empty($val) || !is_numeric($val)) return null;
+                        return (int) $val;
+                    };
 
                     // Save to database
                     DataGulma::updateOrCreate(
                         [
-                            'wilayah_id' => $wilayahId,
-                            'id_feature' => $data['id_feature'],
+                            'wilayah_id' => $rowWilayahId,
+                            'id_feature' => $idFeature,
                         ],
                         [
-                            'status_gulma' => $data['status_gulma'],
-                            'persentase' => $persentase,
-                            'tanggal' => $data['tanggal'],
+                            'pg' => $data['pg'] ?? null,
+                            'fm' => $data['fm'] ?? null,
+                            'seksi' => $data['seksi'] ?? null,
+                            'neto' => $parseFloat($data['neto'] ?? null),
+                            'hasil' => $parseFloat($data['hasil'] ?? null),
+                            'umur_tanaman' => $parseInt($data['umur tanaman'] ?? null),
+                            'penanggungjawab' => $data['penanggungjawab'] ?? null,
+                            'kode_aktf' => $data['kode aktf'] ?? null,
+                            'activitas' => $data['activitas'] ?? null,
+                            'kategori' => $data['kategori'] ?? null,
+                            'tk_ha' => $parseFloat($data['tk/ha'] ?? null),
+                            'total_tk' => $parseInt($data['total tk'] ?? null),
+                            'tanggal' => now()->toDateString(),
                             'import_log_id' => $importLog->id
                         ]
                     );
@@ -182,13 +177,7 @@ class AdminController extends Controller
                     $berhasil++;
                 } catch (\Exception $e) {
                     $gagal++;
-                    $rowNum = $index + 2;
-                    $errorMsg = "Baris {$rowNum}: {$e->getMessage()}";
-                    $errors[] = $errorMsg;
-                    \Log::error("CSV Import Error - " . $errorMsg, [
-                        'row_data' => $row,
-                        'wilayah' => $wilayahId
-                    ]);
+                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
                 }
             }
 
@@ -199,30 +188,18 @@ class AdminController extends Controller
                 'jumlah_gagal' => $gagal,
                 'status' => $gagal === 0 ? 'success' : 'failed',
                 'error_log' => !empty($errors) ? json_encode($errors) : null
-<<<<<<< HEAD
             ]);
 
-            $message = "File CSV berhasil diproses! Berhasil: $berhasil, Gagal: $gagal";
-            
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'wilayah_id' => $wilayahId,
-                'berhasil' => $berhasil,
-                'gagal' => $gagal,
-                'reload' => true
-=======
->>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
-            ]);
-
-            $message = "File CSV berhasil diproses! Berhasil: $berhasil, Gagal: $gagal";
+            $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
+            $message = "File CSV berhasil diproses! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
             
             // Return JSON untuk AJAX
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
                     'message' => $message,
-                    'wilayah_id' => $wilayahId,
+                    'wilayah_id' => $wilayahList,
+                    'wilayah_count' => count($allWilayah),
                     'berhasil' => $berhasil,
                     'gagal' => $gagal
                 ]);
@@ -243,6 +220,126 @@ class AdminController extends Controller
 
             return redirect()->route('admin.dashboard')
                 ->with('error', $message);
+        }
+    }
+
+    /**
+     * Get kategori color mapping dari data yang ada di database
+     */
+    public function getKategoriColors()
+    {
+        try {
+            // Get unique kategori dari database
+            $kategoris = DataGulma::whereNotNull('kategori')
+                ->distinct()
+                ->pluck('kategori')
+                ->filter()
+                ->values();
+
+            // Generate warna untuk setiap kategori
+            $colorMap = [];
+            $colors = [
+                '#22c55e', // green-500 - Bersih
+                '#84cc16', // lime-500
+                '#eab308', // yellow-500 - Ringan  
+                '#f97316', // orange-500 - Sedang
+                '#ef4444', // red-500 - Berat
+                '#dc2626', // red-600
+                '#991b1b', // red-800
+                '#6b7280', // gray-500
+            ];
+
+            foreach ($kategoris as $index => $kategori) {
+                $colorIndex = $index % count($colors);
+                $colorMap[$kategori] = $colors[$colorIndex];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $colorMap
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Publish map data to public view
+     */
+    public function publishMap(Request $request)
+    {
+        try {
+            // Create new publication record
+            $publication = \App\Models\MapPublication::create([
+                'status' => 'published',
+                'published_at' => now(),
+                'published_by' => auth()->id(),
+                'notes' => $request->notes ?? 'Publikasi peta dengan data terbaru'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Peta berhasil dipublikasikan! Data sekarang dapat dilihat oleh publik.',
+                'published_at' => $publication->published_at->format('d M Y H:i')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get publication status
+     */
+    public function getPublicationStatus()
+    {
+        try {
+            $latest = \App\Models\MapPublication::getLatestPublished();
+            
+            return response()->json([
+                'success' => true,
+                'is_published' => $latest !== null,
+                'published_at' => $latest ? $latest->published_at->format('d M Y H:i') : null,
+                'published_by' => $latest && $latest->publisher ? $latest->publisher->name : null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get dashboard statistics
+     */
+    public function getStatistics()
+    {
+        try {
+            $totalDataGulma = DataGulma::count();
+            $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
+            $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
+            $uploadTerbaru = ImportLog::count();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'totalDataGulma' => $totalDataGulma,
+                    'wilayahAktif' => $wilayahAktif,
+                    'totalTanaman' => $totalTanaman,
+                    'uploadTerbaru' => $uploadTerbaru
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

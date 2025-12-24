@@ -61,6 +61,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/upload-csv', [AdminController::class, 'uploadCsv'])
         ->name('admin.upload-csv');
 
+    // Publish Map
+    Route::post('/admin/publish-map', [AdminController::class, 'publishMap'])
+        ->name('admin.publish-map');
+    
+    Route::get('/admin/publication-status', [AdminController::class, 'getPublicationStatus'])
+        ->name('admin.publication-status');
+    
+    Route::get('/admin/statistics', [AdminController::class, 'getStatistics'])
+        ->name('admin.statistics');
+
     // API Endpoints
     Route::prefix('admin/api')->group(function () {
         Route::get('/geojson/{wilayah}', [GulmaController::class, 'getGeoJSONWithData'])

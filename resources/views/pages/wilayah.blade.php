@@ -501,6 +501,11 @@
             })
             .then(data => {
                 if (data.error) {
+                    // Check if error is about unpublished data
+                    if (data.error.includes('belum dipublikasikan')) {
+                        alert('⚠️ Peta belum tersedia.\n\nData peta belum dipublikasikan oleh administrator. Silakan hubungi admin untuk memperbarui peta.');
+                        return;
+                    }
                     throw new Error(data.error);
                 }
 

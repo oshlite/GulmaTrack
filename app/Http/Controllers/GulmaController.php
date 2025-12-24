@@ -19,8 +19,8 @@ class GulmaController extends Controller
             ], 400);
         }
 
-        // Load GeoJSON file
-        $geoJsonPath = storage_path("../data/Wil{$wilayahId}.geojson");
+        // Load GeoJSON file dari datafix
+        $geoJsonPath = storage_path("../datafix/Wil{$wilayahId}.geojson");
         
         if (!file_exists($geoJsonPath)) {
             return response()->json([
@@ -39,17 +39,39 @@ class GulmaController extends Controller
 
             // Merge data dengan features
             foreach ($geoData['features'] as &$feature) {
-                $featureId = $feature['properties']['id'] ?? null;
+                // Try multiple field names for feature ID
+                $featureId = $feature['properties']['id'] ?? 
+                            $feature['properties']['SEKSI'] ?? 
+                            $feature['properties']['Seksi'] ?? 
+                            $feature['properties']['Lokasi'] ?? null;
                 
                 if ($featureId && isset($dataGulma[$featureId])) {
                     $data = $dataGulma[$featureId];
-                    $feature['properties']['status_gulma'] = $data->status_gulma;
-                    $feature['properties']['persentase'] = $data->persentase;
+                    
+                    // Inject semua data CSV ke properties
+                    $feature['properties']['id_feature'] = $data->id_feature;
+                    $feature['properties']['pg'] = $data->pg;
+                    $feature['properties']['fm'] = $data->fm;
+                    $feature['properties']['seksi'] = $data->seksi;
+                    $feature['properties']['neto'] = $data->neto;
+                    $feature['properties']['hasil'] = $data->hasil;
+                    $feature['properties']['umur_tanaman'] = $data->umur_tanaman;
+                    $feature['properties']['penanggungjawab'] = $data->penanggungjawab;
+                    $feature['properties']['kode_aktf'] = $data->kode_aktf;
+                    $feature['properties']['activitas'] = $data->activitas;
+                    $feature['properties']['kategori'] = $data->kategori;
+                    $feature['properties']['tk_ha'] = $data->tk_ha;
+                    $feature['properties']['total_tk'] = $data->total_tk;
                     $feature['properties']['tanggal'] = $data->tanggal;
+                    
+                    // Keep old data jika ada
+                    if ($data->status_gulma) {
+                        $feature['properties']['status_gulma'] = $data->status_gulma;
+                        $feature['properties']['persentase'] = $data->persentase;
+                    }
+                    
                     $feature['properties']['has_data'] = true;
                 } else {
-                    $feature['properties']['status_gulma'] = 'Bersih';
-                    $feature['properties']['persentase'] = 0;
                     $feature['properties']['has_data'] = false;
                 }
             }

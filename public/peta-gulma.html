@@ -192,23 +192,23 @@
             <div class="legend">
                 <h4><i class="fas fa-info-circle"></i> Status Gulma</h4>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #3498db;"></div>
+                    <div class="legend-color" style="background: #22c55e;"></div>
                     <span><strong>Bersih</strong></span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #27ae60;"></div>
+                    <div class="legend-color" style="background: #eab308;"></div>
                     <span><strong>Ringan</strong></span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #f1c40f;"></div>
+                    <div class="legend-color" style="background: #f97316;"></div>
                     <span><strong>Sedang</strong></span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <div class="legend-color" style="background: #ef4444;"></div>
                     <span><strong>Berat</strong></span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color" style="background: #ffffff;"></div>
+                    <div class="legend-color" style="background: #9ca3af;"></div>
                     <span><strong>Tidak ada Data</strong></span>
                 </div>
             </div>
@@ -232,27 +232,27 @@
             console.log('✓ Map initialized');
         }
 
-        // Get feature style based on gulma status
+        // Color mapping untuk kategori (akan di-load dari API)
+        let kategoriColors = {
+            'Bersih': '#22c55e',
+            'Ringan': '#eab308',
+            'Sedang': '#f97316',
+            'Berat': '#ef4444'
+        };
+
+        // Get feature style based on kategori dari CSV
         function getFeatureStyle(feature) {
             const props = feature.properties || {};
-            let color = '#ecf0f1'; // Default: tidak ada data
-            let borderColor = '#cccccc'; // Border color untuk default (abu-abu)
+            let color = '#9ca3af'; // Default: tidak ada data (gray-400)
+            let borderColor = '#6b7280'; // Border gray-500
             
-            // Check multiple possible status field names
-            const status = (props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+            // Ambil kategori dari properties (dari CSV)
+            const kategori = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '';
             
-            if (status.includes('bersih')) {
-                color = '#3498db'; // Biru
-                borderColor = '#3498db';
-            } else if (status.includes('ringan')) {
-                color = '#27ae60'; // Hijau
-                borderColor = '#27ae60';
-            } else if (status.includes('sedang')) {
-                color = '#f1c40f'; // Kuning
-                borderColor = '#f1c40f';
-            } else if (status.includes('berat')) {
-                color = '#e74c3c'; // Merah
-                borderColor = '#e74c3c';
+            // Cari warna dari mapping
+            if (kategori && kategoriColors[kategori]) {
+                color = kategoriColors[kategori];
+                borderColor = kategoriColors[kategori];
             }
 
             return {
@@ -266,22 +266,13 @@
 
         // Create popup content
         function createPopup(props) {
-            const statusGulma = props.Kelas_weed || props.gulma_KATEGORI || 'Tidak Ada Data';
-            let statusColor = '#ecf0f1';
-            let textColor = '#333333'; // Default text color untuk background abu-abu
+            const kategori = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || 'Tidak Ada Data';
+            let statusColor = kategoriColors[kategori] || '#9ca3af';
+            let textColor = 'white';
             
-            if (statusGulma.toLowerCase().includes('bersih')) {
-                statusColor = '#3498db';
-                textColor = 'white';
-            } else if (statusGulma.toLowerCase().includes('ringan')) {
-                statusColor = '#27ae60';
-                textColor = 'white';
-            } else if (statusGulma.toLowerCase().includes('sedang')) {
-                statusColor = '#f1c40f';
-                textColor = '#333333';
-            } else if (statusGulma.toLowerCase().includes('berat')) {
-                statusColor = '#e74c3c';
-                textColor = 'white';
+            // Kuning perlu text hitam untuk keterbacaan
+            if (kategori === 'Sedang') {
+                textColor = '#1f2937';
             }
 
             let html = '<div style="min-width: 300px; padding: 0;">';
@@ -294,12 +285,19 @@
             // Content wrapper
             html += '<div style="padding: 10px;">';
             
-            if (props.Lokasi) {
-                html += `<h3 style="margin: 0 0 10px 0; color: #197B40; font-size: 16px;">📍 ${props.Lokasi}</h3>`;
+            // Tampilkan info seksi/lokasi
+            const lokasi = props.seksi || props.Lokasi || props.id_feature;
+            if (lokasi) {
+                html += `<h3 style="margin: 0 0 10px 0; color: #197B40; font-size: 16px;">📍 Seksi ${lokasi}</h3>`;
+            }
+            
+            // Tampilkan info PG dan FM
+            if (props.pg) {
+                html += `<div style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">PG: ${props.pg} | FM: ${props.fm || '-'}</div>`;
             }
             
             html += `<div style="background: ${statusColor}; color: ${textColor}; padding: 8px; margin-bottom: 15px; border-radius: 4px; text-align: center; font-weight: bold;">
-                ${statusGulma}
+                ${kategori}
             </div>`;
             
             html += '<table style="width: 100%; font-size: 13px; margin-bottom: 10px;">';
@@ -313,18 +311,37 @@
                 html += `<tr><td style="padding: 5px 0;"><strong>Luas Bruto:</strong></td><td style="padding: 5px 0; text-align: right;">${bruto} Ha</td></tr>`;
             }
             
-            const netto = props.Luas_Netto || props.Netto || props.gulma_Neto;
-            if (netto) {
-                html += `<tr><td style="padding: 5px 0;"><strong>Luas Netto:</strong></td><td style="padding: 5px 0; text-align: right;">${netto} Ha</td></tr>`;
+            // Data dari CSV
+            if (props.neto) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Neto:</strong></td><td style="padding: 5px 0; text-align: right;">${props.neto} Ha</td></tr>`;
             }
             
-            const totalTk = props['gulma_TOTAL TK'] || props.tk_total;
-            if (totalTk) {
-                html += `<tr><td style="padding: 5px 0;"><strong>Total TK:</strong></td><td style="padding: 5px 0; text-align: right;">${totalTk} TK</td></tr>`;
+            if (props.hasil) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Hasil:</strong></td><td style="padding: 5px 0; text-align: right;">${props.hasil}</td></tr>`;
             }
             
-            if (props.tk_ha || props['gulma_TK/HA']) {
-                html += `<tr><td style="padding: 5px 0;"><strong>TK/Ha:</strong></td><td style="padding: 5px 0; text-align: right;">${props.tk_ha || props['gulma_TK/HA']}</td></tr>`;
+            if (props.umur_tanaman) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Umur Tanaman:</strong></td><td style="padding: 5px 0; text-align: right;">${props.umur_tanaman} bulan</td></tr>`;
+            }
+            
+            if (props.penanggungjawab) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Penanggung Jawab:</strong></td><td style="padding: 5px 0; text-align: right;">${props.penanggungjawab}</td></tr>`;
+            }
+            
+            if (props.activitas) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Aktivitas:</strong></td><td style="padding: 5px 0; text-align: right;">${props.activitas}</td></tr>`;
+            }
+            
+            if (props.total_tk) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Total TK:</strong></td><td style="padding: 5px 0; text-align: right;">${props.total_tk} TK</td></tr>`;
+            }
+            
+            if (props.tk_ha) {
+                html += `<tr><td style="padding: 5px 0;"><strong>TK/Ha:</strong></td><td style="padding: 5px 0; text-align: right;">${props.tk_ha}</td></tr>`;
+            }
+            
+            if (props.tanggal) {
+                html += `<tr><td style="padding: 5px 0;"><strong>Tanggal:</strong></td><td style="padding: 5px 0; text-align: right;">${props.tanggal}</td></tr>`;
             }
             
             html += '</table>';
@@ -478,9 +495,25 @@
                 });
         }
 
+        // Load kategori colors from API
+        function loadKategoriColors() {
+            fetch('/api/kategori-colors')
+                .then(r => r.json())
+                .then(response => {
+                    if (response.success && response.data) {
+                        kategoriColors = response.data;
+                        console.log('✓ Kategori colors loaded:', kategoriColors);
+                    }
+                })
+                .catch(error => {
+                    console.warn('Failed to load kategori colors, using defaults:', error);
+                });
+        }
+
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             console.log('Initializing GulmaTrack Map...');
+            loadKategoriColors();
             initMap();
             loadStats();
             // Auto-load all wilayah on start

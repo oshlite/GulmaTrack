@@ -507,7 +507,7 @@
                 <i class="fas fa-database"></i>
             </div>
             <div class="stat-label">Total Data Gulma</div>
-            <div class="stat-value">{{ $totalDataGulma ?? 0 }}</div>
+            <div class="stat-value" id="statTotalData">{{ $totalDataGulma ?? 0 }}</div>
         </div>
 
         <div class="stat-card" style="border-left-color: #27AE60;">
@@ -515,7 +515,7 @@
                 <i class="fas fa-map-marker-alt"></i>
             </div>
             <div class="stat-label">Wilayah Aktif</div>
-            <div class="stat-value">{{ $wilayahAktif ?? 0 }}</div>
+            <div class="stat-value" id="statWilayahAktif">{{ $wilayahAktif ?? 0 }}</div>
         </div>
 
         <div class="stat-card" style="border-left-color: var(--accent-color);">
@@ -523,7 +523,7 @@
                 <i class="fas fa-th"></i>
             </div>
             <div class="stat-label">Total Features</div>
-            <div class="stat-value">{{ $totalTanaman ?? 0 }}</div>
+            <div class="stat-value" id="statTotalTanaman">{{ $totalTanaman ?? 0 }}</div>
         </div>
 
         <div class="stat-card" style="border-left-color: var(--secondary-color);">
@@ -531,7 +531,7 @@
                 <i class="fas fa-file-upload"></i>
             </div>
             <div class="stat-label">Upload Terbaru</div>
-            <div class="stat-value">{{ $importTerbaru->count() ?? 0 }}</div>
+            <div class="stat-value" id="statUploadTerbaru">{{ $importTerbaru->count() ?? 0 }}</div>
         </div>
     </div>
 
@@ -544,7 +544,43 @@
             <form id="uploadForm" enctype="multipart/form-data">
                 @csrf
 
-                <div class="upload-area" onclick="document.getElementById('csvFile').click()">
+                <!-- Periode Selection -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="bulan" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-calendar"></i> Pilih Bulan:
+                    </label>
+                    <select id="bulan" name="bulan" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background-color: white;">
+                        <option value="">-- Pilih Bulan --</option>
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="minggu" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-calendar-week"></i> Pilih Minggu:
+                    </label>
+                    <select id="minggu" name="minggu" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background-color: white;">
+                        <option value="">-- Pilih Minggu --</option>
+                        <option value="1">Minggu 1</option>
+                        <option value="2">Minggu 2</option>
+                        <option value="3">Minggu 3</option>
+                        <option value="4">Minggu 4</option>
+                    </select>
+                </div>
+
+                <!-- File Upload Area -->
+                <div class="upload-area" id="uploadArea" onclick="checkPeriodeBeforeUpload()">
                     <div class="upload-icon">
                         <i class="fas fa-file-csv"></i>
                     </div>
@@ -556,10 +592,20 @@
                         name="file" 
                         class="upload-input" 
                         accept=".csv"
+                        style="display: none;"
                     >
                 </div>
 
-                <button type="submit" class="upload-btn" id="uploadBtn">
+                <!-- File Upload Status -->
+                <div id="fileStatus" style="display: none; margin-top: 15px; padding: 12px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+                    <i class="fas fa-check-circle" style="color: #4caf50;"></i>
+                    <span id="fileName" style="font-weight: 600; color: #2e7d32;"></span>
+                    <button type="button" onclick="removeFile()" style="float: right; background: none; border: none; color: #d32f2f; cursor: pointer; font-size: 14px;">
+                        <i class="fas fa-times"></i> Hapus
+                    </button>
+                </div><br>
+
+                <button type="submit" class="upload-btn" id="uploadBtn" disabled style="opacity: 0.5; cursor: not-allowed;">
                     <i class="fas fa-upload"></i> Upload File
                 </button>
 
@@ -588,6 +634,8 @@
                     <li>Mengelola informasi wilayah dan tanaman</li>
                 </ul>
                 <p style="margin-top: 15px; font-size: 13px; color: #999;">
+                    <strong>Format CSV yang valid:</strong><br>
+                    PG, FM, Wilayah, SEKSI, Neto, Hasil, Umur Tanaman, Penanggungjawab, Kode Aktf, ACTIVITAS, KATEGORI, TK/HA, TOTAL TK
                 </p>
             </div>
         </div>
@@ -595,7 +643,19 @@
 
     <!-- Map Card -->
     <div class="card full-width">
-        <h2><i class="fas fa-map"></i> Peta Wilayah - Status Gulma</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin: 0;"><i class="fas fa-map"></i> Peta Wilayah - Status Gulma</h2>
+            
+            <!-- Publish Map Button -->
+            <div>
+                <button type="button" id="publishMapBtn" onclick="publishMapToPublic()" style="background: linear-gradient(135deg, #197B40 0%, #27ae60 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                    <i class="fas fa-globe"></i>
+                    <span>Perbarui Peta Publik</span>
+                </button>
+                <div id="publishStatus" style="margin-top: 8px; font-size: 12px; color: #666; text-align: right;"></div>
+            </div>
+        </div>
+        
         <div id="map" class="map-container"></div>
         
         <div class="map-legend">
@@ -633,6 +693,7 @@
                         <tr>
                             <th>Nama File</th>
                             <th>Wilayah</th>
+                            <th>Periode</th>
                             <th>Total Records</th>
                             <th>Berhasil</th>
                             <th>Gagal</th>
@@ -644,7 +705,34 @@
                         @foreach ($importTerbaru as $log)
                             <tr>
                                 <td>{{ $log->nama_file }}</td>
-                                <td>{{ $log->wilayah_id }}</td>
+                                <td>
+                                    @php
+                                        $wilayahIds = explode(',', $log->wilayah_id);
+                                        $wilayahCount = count($wilayahIds);
+                                    @endphp
+                                    
+                                    @if ($wilayahCount > 1)
+                                        <span style="display: inline-block; padding: 4px 8px; background: #f3e5f5; border-radius: 4px; font-size: 12px; font-weight: 600; color: #7b1fa2;">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                            {{ $wilayahCount }} Wilayah ({{ $log->wilayah_id }})
+                                        </span>
+                                    @else
+                                        <span style="display: inline-block; padding: 4px 8px; background: #e8f5e9; border-radius: 4px; font-size: 12px; font-weight: 600; color: #2e7d32;">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            Wilayah {{ $log->wilayah_id }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($log->bulan && $log->minggu)
+                                        <span style="display: inline-block; padding: 4px 8px; background: #e3f2fd; border-radius: 4px; font-size: 12px; font-weight: 600; color: #1976d2;">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ DateTime::createFromFormat('!m', $log->bulan)->format('M') }} - Minggu {{ $log->minggu }}
+                                        </span>
+                                    @else
+                                        <span style="color: #999;">-</span>
+                                    @endif
+                                </td>
                                 <td>{{ $log->jumlah_records }}</td>
                                 <td>{{ $log->jumlah_berhasil }}</td>
                                 <td>{{ $log->jumlah_gagal }}</td>
@@ -685,6 +773,19 @@
         'Berat': '#e74c3c'
     };
 
+    // Warna berdasarkan kategori dari CSV
+    function getColorByKategori(kategori) {
+        if (!kategori) return '#ffffff'; // Putih - Tidak ada data
+        
+        const kat = kategori.toLowerCase().trim();
+        if (kat === 'bersih') return '#3498db'; // Biru
+        if (kat === 'ringan') return '#27ae60'; // Hijau
+        if (kat === 'sedang') return '#f1c40f'; // Kuning
+        if (kat === 'berat') return '#e74c3c'; // Merah
+        
+        return '#ffffff'; // Putih - Tidak dikenali
+    }
+
     let map;
     let geoJsonLayers = {};
 
@@ -706,13 +807,18 @@
 
     // Load all wilayah with data from database
     function loadAllWilayah() {
-        console.log('Loading all wilayah with data...');
+        console.log('=== Loading all wilayah with data ===');
 
         // Get all wilayah that have data
         fetch('/api/wilayah/data')
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response from /api/wilayah/data:', response.status);
+                return response.json();
+            })
             .then(summary => {
+                console.log('Summary data:', summary);
                 const wilayahNumbers = summary.data.map(w => w.wilayah);
+                console.log('Wilayah numbers to load:', wilayahNumbers);
                 
                 if (wilayahNumbers.length === 0) {
                     console.log('No wilayah data found');
@@ -722,8 +828,14 @@
                 // Load each wilayah
                 const promises = wilayahNumbers.map(num => 
                     fetch(`/api/wilayah/geojson/${num}`)
-                        .then(r => r.json())
-                        .then(data => ({ wilayah: num, data }))
+                        .then(r => {
+                            console.log(`Loaded wilayah ${num}, status: ${r.status}`);
+                            return r.json();
+                        })
+                        .then(data => {
+                            console.log(`Wilayah ${num} has ${data.features ? data.features.length : 0} features`);
+                            return { wilayah: num, data };
+                        })
                         .catch(err => {
                             console.error(`Error loading wilayah ${num}:`, err);
                             return null;
@@ -733,20 +845,28 @@
                 return Promise.all(promises);
             })
             .then(results => {
-                if (!results) return;
+                if (!results) {
+                    console.log('No results to process');
+                    return;
+                }
                 
+                console.log(`Processing ${results.length} wilayah results...`);
                 const allBounds = [];
+                let featuresAdded = 0;
 
                 results.forEach(result => {
                     if (!result || !result.data || !result.data.features || result.data.features.length === 0) {
+                        console.log('Skipping empty result');
                         return;
                     }
 
                     const { wilayah, data } = result;
+                    console.log(`Adding wilayah ${wilayah} to map with ${data.features.length} features`);
 
                     const layer = L.geoJSON(data, {
                         style: function(feature) {
-                            return getFeatureStyle(feature);
+                            const style = getFeatureStyle(feature);
+                            return style;
                         },
                         onEachFeature: function(feature, layer) {
                             if (feature.properties) {
@@ -766,6 +886,7 @@
                     }).addTo(map);
 
                     geoJsonLayers[wilayah] = layer;
+                    featuresAdded += data.features.length;
                     
                     const bounds = layer.getBounds();
                     if (bounds.isValid()) {
@@ -780,33 +901,35 @@
                         combinedBounds.extend(bounds);
                     });
                     map.fitBounds(combinedBounds, { padding: [50, 50] });
+                    console.log(`✓ Map bounds adjusted to show all wilayah`);
                 }
 
-                console.log(`Loaded ${Object.keys(geoJsonLayers).length} wilayah`);
+                console.log(`✓ SUCCESS: Loaded ${Object.keys(geoJsonLayers).length} wilayah with ${featuresAdded} total features`);
             })
             .catch(error => {
-                console.error('Error loading wilayah:', error);
+                console.error('ERROR loading wilayah:', error);
             });
     }
 
-    // Get feature style based on status_gulma from database
+    // Get feature style based on data from CSV
     function getFeatureStyle(feature) {
         const props = feature.properties || {};
         let fillColor = '#ffffff'; // default putih untuk tidak ada data
         let borderColor = '#cccccc';
         
-        // Get status from database (injected by API)
-        const status = props.status_gulma || '';
-        
-        // Debug log
-        if (status) {
-            console.log('Feature with status:', {
-                lokasi: props.Lokasi || props.id_feature || props.SEKSI,
-                status: status,
-                color: statusColors[status]
-            });
-            fillColor = statusColors[status] || fillColor;
-            borderColor = statusColors[status] || borderColor;
+        // Prioritas: kategori > status_gulma > activitas
+        if (props.kategori) {
+            fillColor = getColorByKategori(props.kategori);
+            borderColor = fillColor;
+            console.log(`Feature ${props.seksi || props.id_feature} - Kategori: ${props.kategori} - Color: ${fillColor}`);
+        } else if (props.status_gulma) {
+            fillColor = statusColors[props.status_gulma] || fillColor;
+            borderColor = fillColor;
+        } else if (props.activitas) {
+            const act = props.activitas.toLowerCase();
+            if (act.includes('pemupukan')) fillColor = '#27ae60';
+            else if (act.includes('penyemprotan')) fillColor = '#f1c40f';
+            else if (act.includes('pembersihan')) fillColor = '#3498db';
         }
 
         return {
@@ -823,33 +946,76 @@
         let html = '<div style="padding: 10px; font-family: Arial; font-size: 13px;">';
         
         // Feature ID / Lokasi / Seksi
-        const locationId = props.id_feature || props.Lokasi || props.SEKSI || props.Seksi || props.id;
+        const locationId = props.seksi || props.id_feature || props.Lokasi || props.SEKSI || props.Seksi || props.id;
         if (locationId) {
             html += `<h4 style="margin: 0 0 10px 0; color: #197B40; font-size: 14px;">`;
             html += `<i class="fas fa-map-marker-alt"></i> ${locationId}`;
             html += `</h4>`;
         }
 
-        // Status Gulma
+        // PG dan FM
+        if (props.pg) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">PG:</span> ${props.pg}</div>`;
+        }
+        if (props.fm) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">FM:</span> ${props.fm}</div>`;
+        }
+
+        // Aktivitas dan Kategori
+        if (props.activitas) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Aktivitas:</span> ${props.activitas}</div>`;
+        }
+        if (props.kategori) {
+            const color = getColorByKategori(props.kategori);
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Kategori:</span> <span style="color: ${color}; font-weight: 700;">${props.kategori}</span></div>`;
+        }
+
+        // Neto dan Hasil
+        if (props.neto) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Neto:</span> ${props.neto}</div>`;
+        }
+        if (props.hasil) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Hasil:</span> ${props.hasil}</div>`;
+        }
+
+        // Umur Tanaman
+        if (props.umur_tanaman) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Umur Tanaman:</span> ${props.umur_tanaman} hari</div>`;
+        }
+
+        // Penanggungjawab
+        if (props.penanggungjawab) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Penanggungjawab:</span> ${props.penanggungjawab}</div>`;
+        }
+
+        // TK/HA dan Total TK
+        if (props.tk_ha) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">TK/HA:</span> ${props.tk_ha}</div>`;
+        }
+        if (props.total_tk) {
+            html += `<div style="margin-bottom: 5px;"><span style="font-weight: 600;">Total TK:</span> ${props.total_tk}</div>`;
+        }
+
+        // Tanggal
+        if (props.tanggal) {
+            html += `<div style="margin-bottom: 5px;">`;
+            html += `<span style="font-weight: 600;">Tanggal:</span> ${props.tanggal}`;
+            html += `</div>`;
+        }
+
+        // Status Gulma (old data)
         if (props.status_gulma) {
             const statusColor = statusColors[props.status_gulma] || '#95a5a6';
-            html += `<div style="margin-bottom: 8px;">`;
+            html += `<div style="margin-bottom: 5px;">`;
             html += `<span style="font-weight: 600;">Status:</span> `;
             html += `<span style="color: ${statusColor}; font-weight: 700;">${props.status_gulma}</span>`;
             html += `</div>`;
         }
 
-        // Persentase
+        // Persentase (old data)
         if (props.persentase !== undefined) {
-            html += `<div style="margin-bottom: 8px;">`;
+            html += `<div style="margin-bottom: 5px;">`;
             html += `<span style="font-weight: 600;">Persentase:</span> ${props.persentase}%`;
-            html += `</div>`;
-        }
-
-        // Tanggal
-        if (props.tanggal) {
-            html += `<div style="margin-bottom: 8px;">`;
-            html += `<span style="font-weight: 600;">Tanggal:</span> ${props.tanggal}`;
             html += `</div>`;
         }
 
@@ -864,34 +1030,31 @@
         return html;
     }
 
-    // Wilayah selector change
-    document.getElementById('wilayahSelect').addEventListener('change', function() {
-        loadWilayah(this.value);
-    });
-
     // Form upload
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const wilayah = document.getElementById('wilayahSelect').value;
+        const bulan = document.getElementById('bulan').value;
+        const minggu = document.getElementById('minggu').value;
         const file = document.getElementById('csvFile').files[0];
         const messageDiv = document.getElementById('uploadMessage');
 
-        if (!wilayah) {
-            messageDiv.innerHTML = 'Pilih wilayah terlebih dahulu';
+        if (!bulan || !minggu) {
+            messageDiv.innerHTML = '✗ Pilih bulan dan minggu terlebih dahulu';
             messageDiv.className = 'message show error';
             return;
         }
 
         if (!file) {
-            messageDiv.innerHTML = 'Pilih file CSV terlebih dahulu';
+            messageDiv.innerHTML = '✗ Pilih file CSV terlebih dahulu';
             messageDiv.className = 'message show error';
             return;
         }
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('wilayah_id', wilayah);
+        formData.append('bulan', bulan);
+        formData.append('minggu', minggu);
         formData.append('_token', document.querySelector('[name="_token"]').value);
 
         document.getElementById('uploadBtn').disabled = true;
@@ -901,18 +1064,34 @@
         try {
             const res = await fetch('{{ route("admin.upload-csv") }}', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
             });
 
             if (res.ok) {
                 const data = await res.json();
-                messageDiv.innerHTML = `✓ ${data.message}`;
+                const fileName = file.name;
+                messageDiv.innerHTML = `✓ ${data.message}<br><small style="font-size: 12px; opacity: 0.9;">File: ${fileName}</small>`;
                 messageDiv.className = 'message show success';
+                
+                console.log('Upload berhasil, mulai reload peta...');
+                
+                // Clear form
                 document.getElementById('csvFile').value = '';
-                loadWilayah(wilayah);
+                document.getElementById('fileStatus').style.display = 'none';
+                document.getElementById('uploadBtn').disabled = true;
+                document.getElementById('uploadBtn').style.opacity = '0.5';
+                document.getElementById('uploadBtn').style.cursor = 'not-allowed';
+                
+                // Update statistics
+                console.log('Update statistics...');
+                updateStatistics();
                 
                 // Reload map with new data
-                if (data.wilayah_id && map) {
+                if (map) {
+                    console.log('Clear existing layers...');
                     // Clear existing layers
                     Object.keys(geoJsonLayers).forEach(key => {
                         if (geoJsonLayers[key]) {
@@ -921,16 +1100,16 @@
                     });
                     geoJsonLayers = {};
                     
-                    // Reload all wilayah
+                    // Reload all wilayah with new data immediately
+                    console.log('Reload all wilayah...');
                     setTimeout(() => {
                         loadAllWilayah();
                     }, 500);
+                } else {
+                    console.error('Map tidak ditemukan!');
                 }
                 
-                // Reload page after 3 seconds to update statistics and history
-                setTimeout(() => {
-                    location.reload();
-                }, 3000);
+                // Message tetap tampil (tidak dihilangkan)
             } else {
                 const errorData = await res.json();
                 messageDiv.innerHTML = `✗ ${errorData.message || 'Terjadi kesalahan'}`;
@@ -941,8 +1120,49 @@
             messageDiv.className = 'message show error';
         } finally {
             document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').style.opacity = '1';
+            document.getElementById('uploadBtn').style.cursor = 'pointer';
         }
     });
+
+    // Check periode before upload
+    function checkPeriodeBeforeUpload() {
+        const bulan = document.getElementById('bulan').value;
+        const minggu = document.getElementById('minggu').value;
+        const messageDiv = document.getElementById('uploadMessage');
+        
+        if (!bulan || !minggu) {
+            messageDiv.innerHTML = '✗ Pilih bulan dan minggu terlebih dahulu';
+            messageDiv.className = 'message show error';
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 3000);
+            return;
+        }
+        
+        document.getElementById('csvFile').click();
+    }
+
+    // File selection handler
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileStatus').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').style.opacity = '1';
+            document.getElementById('uploadBtn').style.cursor = 'pointer';
+        }
+    });
+
+    // Remove file function
+    function removeFile() {
+        document.getElementById('csvFile').value = '';
+        document.getElementById('fileStatus').style.display = 'none';
+        document.getElementById('uploadBtn').disabled = true;
+        document.getElementById('uploadBtn').style.opacity = '0.5';
+        document.getElementById('uploadBtn').style.cursor = 'not-allowed';
+    }
 
     // Drag and drop
     const uploadArea = document.querySelector('.upload-area');
@@ -970,11 +1190,116 @@
     });
 
     uploadArea.addEventListener('drop', (e) => {
+        const bulan = document.getElementById('bulan').value;
+        const minggu = document.getElementById('minggu').value;
+        
+        if (!bulan || !minggu) {
+            const messageDiv = document.getElementById('uploadMessage');
+            messageDiv.innerHTML = '✗ Pilih bulan dan minggu terlebih dahulu';
+            messageDiv.className = 'message show error';
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 3000);
+            return;
+        }
+        
         fileInput.files = e.dataTransfer.files;
+        if (fileInput.files[0]) {
+            document.getElementById('fileName').textContent = fileInput.files[0].name;
+            document.getElementById('fileStatus').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').style.opacity = '1';
+            document.getElementById('uploadBtn').style.cursor = 'pointer';
+        }
     });
 
     // Initialize
     initMap();
+    loadPublicationStatus();
+
+    // Update statistics
+    async function updateStatistics() {
+        try {
+            const res = await fetch('{{ route("admin.statistics") }}');
+            const result = await res.json();
+            
+            if (result.success) {
+                const stats = result.data;
+                document.getElementById('statTotalData').textContent = stats.totalDataGulma;
+                document.getElementById('statWilayahAktif').textContent = stats.wilayahAktif;
+                document.getElementById('statTotalTanaman').textContent = stats.totalTanaman;
+                document.getElementById('statUploadTerbaru').textContent = stats.uploadTerbaru;
+            }
+        } catch (error) {
+            console.error('Error updating statistics:', error);
+        }
+    }
+
+    // Load publication status
+    async function loadPublicationStatus() {
+        try {
+            const res = await fetch('{{ route("admin.publication-status") }}');
+            const data = await res.json();
+            
+            if (data.success && data.is_published) {
+                document.getElementById('publishStatus').innerHTML = 
+                    `<i class="fas fa-check-circle" style="color: #27ae60;"></i> Terakhir dipublikasi: ${data.published_at}`;
+            } else {
+                document.getElementById('publishStatus').innerHTML = 
+                    `<i class="fas fa-exclamation-circle" style="color: #f39c12;"></i> Belum dipublikasi`;
+            }
+        } catch (error) {
+            console.error('Error loading publication status:', error);
+        }
+    }
+
+    // Publish map to public
+    async function publishMapToPublic() {
+        const btn = document.getElementById('publishMapBtn');
+        const originalHtml = btn.innerHTML;
+        
+        if (!confirm('Apakah Anda yakin ingin memperbarui peta publik dengan data terbaru?')) {
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+        try {
+            const res = await fetch('{{ route("admin.publish-map") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
+                }
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // Show success message
+                const statusDiv = document.getElementById('publishStatus');
+                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${data.message}`;
+                statusDiv.style.color = '#27ae60';
+                
+                // Update button
+                btn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dipublikasi!';
+                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.style.background = 'linear-gradient(135deg, #197B40 0%, #27ae60 100%)';
+                    loadPublicationStatus();
+                }, 3000);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('Terjadi kesalahan: ' + error.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
 </script>
 
 @endsection

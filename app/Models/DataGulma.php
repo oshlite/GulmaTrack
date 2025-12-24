@@ -13,7 +13,8 @@ class DataGulma extends Model
         'id_feature',
         'status_gulma',
         'persentase',
-        'tanggal'
+        'tanggal',
+        'import_log_id'
     ];
 
     public function importLog()

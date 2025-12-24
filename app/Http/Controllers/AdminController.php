@@ -25,7 +25,11 @@ class AdminController extends Controller
         $totalDataGulma = DataGulma::count();
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
+<<<<<<< HEAD
         $importTerbaru = ImportLog::latest('created_at')->limit(10)->get();
+=======
+        $importTerbaru = ImportLog::latest('created_at')->limit(5)->get();
+>>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -41,41 +45,22 @@ class AdminController extends Controller
      */
     public function uploadCsv(Request $request)
     {
-        try {
-            $request->validate([
-                'file' => 'required|file|mimes:csv,txt|max:10240',
-            ], [
-                'file.required' => 'File harus dipilih',
-                'file.file' => 'File tidak valid',
-                'file.mimes' => 'File harus berformat CSV atau TXT',
-                'file.max' => 'Ukuran file maksimal 10MB',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:10240',
+        ], [
+            'file.required' => 'File harus dipilih',
+            'file.file' => 'File tidak valid',
+            'file.mimes' => 'File harus berformat CSV atau TXT',
+            'file.max' => 'Ukuran file maksimal 10MB',
+        ]);
 
         try {
             $file = $request->file('file');
             $path = $file->getRealPath();
-            
-            // Read CSV with UTF-8 encoding
-            $content = file_get_contents($path);
-            $content = mb_convert_encoding($content, 'UTF-8', 'auto');
-            $lines = explode("\n", $content);
-            $csv = array_map('str_getcsv', $lines);
-            
-            // Remove empty lines
-            $csv = array_filter($csv, function($row) {
-                return !empty(array_filter($row));
-            });
-            $csv = array_values($csv); // Re-index
+            $csv = array_map('str_getcsv', file($path));
             
             // Validate headers
             $headers = array_shift($csv);
-            $originalHeaders = $headers; // Keep original case
             $headers = array_map('strtolower', $headers);
             $headers = array_map('trim', $headers);
 
@@ -84,28 +69,11 @@ class AdminController extends Controller
             if ($wilayahIndex === false) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom "Wilayah" tidak ditemukan di CSV'
+                    'message' => 'Kolom "wilayah" tidak ditemukan di CSV'
                 ], 400);
             }
 
-            // Required columns for new format (minimal yang diperlukan)
-            $requiredColumns = ['wilayah', 'seksi', 'kategori'];
-            $missing = [];
-            
-            foreach ($requiredColumns as $col) {
-                if (!in_array($col, $headers)) {
-                    $missing[] = $col;
-                }
-            }
-
-            if (!empty($missing)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Kolom CSV tidak lengkap: ' . implode(', ', $missing) . '. Kolom yang ditemukan: ' . implode(', ', $headers)
-                ], 400);
-            }
-
-            // Get wilayah dari baris pertama untuk validasi
+            // Get wilayah dari baris pertama
             $wilayahId = null;
             if (!empty($csv[0][$wilayahIndex])) {
                 $wilayahId = (int) trim($csv[0][$wilayahIndex]);
@@ -118,6 +86,19 @@ class AdminController extends Controller
                 ], 400);
             }
 
+<<<<<<< HEAD
+=======
+            $required = ['id_feature', 'status_gulma', 'persentase', 'tanggal'];
+            $missing = array_diff($required, $headers);
+
+            if (!empty($missing)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kolom CSV tidak lengkap: ' . implode(', ', $missing)
+                ], 400);
+            }
+
+>>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
             // Create import log
             $importLog = ImportLog::create([
                 'nama_file' => $file->getClientOriginalName(),
@@ -141,14 +122,12 @@ class AdminController extends Controller
                     $data = array_combine($headers, $row);
                     $data = array_map('trim', $data);
 
-                    // Get wilayah from row
-                    $currentWilayah = (int) $data['wilayah'];
-                    
                     // Validation
-                    if (empty($data['seksi'])) {
-                        throw new \Exception('SEKSI kosong');
+                    if (empty($data['id_feature'])) {
+                        throw new \Exception('ID Feature kosong');
                     }
 
+<<<<<<< HEAD
                     if (empty($data['kategori'])) {
                         throw new \Exception('KATEGORI kosong');
                     }
@@ -175,21 +154,28 @@ class AdminController extends Controller
                     } elseif (strpos($kategori, 'ringan') !== false) {
                         $statusGulma = 'Ringan';
                         $persentase = 25;
+=======
+                    if (!in_array($data['status_gulma'], ['Bersih', 'Ringan', 'Sedang', 'Berat'])) {
+                        throw new \Exception('Status gulma tidak valid: ' . $data['status_gulma']);
+>>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
                     }
 
-                    // Use current date if tanggal not provided
-                    $tanggal = date('Y-m-d');
+                    $persentase = (int) $data['persentase'];
+                    if ($persentase < 0 || $persentase > 100) {
+                        throw new \Exception('Persentase harus antara 0-100');
+                    }
 
                     // Save to database
                     DataGulma::updateOrCreate(
                         [
-                            'wilayah_id' => $currentWilayah,
-                            'id_feature' => $idFeature,
+                            'wilayah_id' => $wilayahId,
+                            'id_feature' => $data['id_feature'],
                         ],
                         [
-                            'status_gulma' => $statusGulma,
+                            'status_gulma' => $data['status_gulma'],
                             'persentase' => $persentase,
-                            'tanggal' => $tanggal
+                            'tanggal' => $data['tanggal'],
+                            'import_log_id' => $importLog->id
                         ]
                     );
 
@@ -213,6 +199,7 @@ class AdminController extends Controller
                 'jumlah_gagal' => $gagal,
                 'status' => $gagal === 0 ? 'success' : 'failed',
                 'error_log' => !empty($errors) ? json_encode($errors) : null
+<<<<<<< HEAD
             ]);
 
             $message = "File CSV berhasil diproses! Berhasil: $berhasil, Gagal: $gagal";
@@ -224,13 +211,38 @@ class AdminController extends Controller
                 'berhasil' => $berhasil,
                 'gagal' => $gagal,
                 'reload' => true
+=======
+>>>>>>> 6de610479774ae269e5883125a3ae667a77ccf27
             ]);
 
+            $message = "File CSV berhasil diproses! Berhasil: $berhasil, Gagal: $gagal";
+            
+            // Return JSON untuk AJAX
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'wilayah_id' => $wilayahId,
+                    'berhasil' => $berhasil,
+                    'gagal' => $gagal
+                ]);
+            }
+
+            return redirect()->route('admin.dashboard')
+                ->with('success', $message);
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
+            $message = 'Error: ' . $e->getMessage();
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 400);
+            }
+
+            return redirect()->route('admin.dashboard')
+                ->with('error', $message);
         }
     }
 }

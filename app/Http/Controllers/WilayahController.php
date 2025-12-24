@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Utils\CoordinateTransformer;
+use App\Models\DataGulma;
 
 class WilayahController extends Controller
 {
     /**
      * Get GeoJSON data for specific wilayah with coordinate conversion
+     * and merge with status_gulma data from database
      */
     public function getGeojson($wilayah_number): JsonResponse
     {
@@ -26,6 +28,44 @@ class WilayahController extends Controller
             
             // Convert dari UTM Zone 48S ke WGS84
             $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
+
+            // Get status_gulma data from database for this wilayah
+            $gulmaData = DataGulma::where('wilayah_id', $wilayah_number)->get();
+            
+            // Create a lookup map by id_feature (SEKSI)
+            $gulmaMap = [];
+            foreach ($gulmaData as $data) {
+                $gulmaMap[$data->id_feature] = [
+                    'status_gulma' => $data->status_gulma,
+                    'persentase' => $data->persentase,
+                    'tanggal' => $data->tanggal
+                ];
+            }
+
+            // Merge data into GeoJSON features
+            if (isset($geojson['features'])) {
+                foreach ($geojson['features'] as &$feature) {
+                    if (isset($feature['properties'])) {
+                        // Try to get id_feature from various property names
+                        // For Wil16-23, the property is 'Lokasi'
+                        $idFeature = $feature['properties']['Lokasi'] 
+                                  ?? $feature['properties']['SEKSI'] 
+                                  ?? $feature['properties']['Seksi'] 
+                                  ?? $feature['properties']['seksi']
+                                  ?? $feature['properties']['id_feature']
+                                  ?? null;
+
+                        // If we found a matching id_feature in database, merge the data
+                        if ($idFeature && isset($gulmaMap[$idFeature])) {
+                            $feature['properties']['status_gulma'] = $gulmaMap[$idFeature]['status_gulma'];
+                            $feature['properties']['persentase'] = $gulmaMap[$idFeature]['persentase'];
+                            $feature['properties']['tanggal'] = $gulmaMap[$idFeature]['tanggal'];
+                            $feature['properties']['id_feature'] = $idFeature; // Add for consistency
+                        }
+                    }
+                }
+                unset($feature); // Break reference
+            }
 
             return response()->json($geojson);
         } catch (\Exception $e) {

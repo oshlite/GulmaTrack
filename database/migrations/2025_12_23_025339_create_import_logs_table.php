@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('import_logs', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_file');
+            $table->string('wilayah_id');
+            $table->integer('jumlah_records')->default(0);
+            $table->integer('jumlah_berhasil')->default(0);
+            $table->integer('jumlah_gagal')->default(0);
+            $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
+            $table->text('error_log')->nullable();
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

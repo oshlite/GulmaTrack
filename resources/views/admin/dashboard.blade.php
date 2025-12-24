@@ -26,7 +26,7 @@
         box-shadow: var(--shadow-lg);
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 1000;
         width: 100%;
     }
 
@@ -358,6 +358,8 @@
         border-radius: 8px;
         margin-top: 15px;
         background: #f0f0f0;
+        position: relative;
+        z-index: 1;
     }
 
     .map-legend {
@@ -601,23 +603,27 @@
         
         <div class="map-legend">
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #0066cc;"></div>
+                <div class="legend-color" style="background-color: #3498db;"></div>
                 <span>Bersih</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #00cc00;"></div>
+                <div class="legend-color" style="background-color: #27ae60;"></div>
                 <span>Ringan</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #ffcc00;"></div>
+                <div class="legend-color" style="background-color: #f1c40f;"></div>
                 <span>Sedang</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #ff0000;"></div>
+                <div class="legend-color" style="background-color: #e74c3c;"></div>
                 <span>Berat</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffffff; border: 1px solid #ddd;"></div>
+                <span>Tidak ada Data</span>
+            </div>
         </div>
-    </div>
+    </div><br><br>
 
     <!-- Recent Uploads -->
     <div class="card full-width">
@@ -676,14 +682,14 @@
 
 <script>
     const statusColors = {
-        'Bersih': '#0066cc',
-        'Ringan': '#00cc00',
-        'Sedang': '#ffcc00',
-        'Berat': '#ff0000'
+        'Bersih': '#3498db',
+        'Ringan': '#27ae60',
+        'Sedang': '#f1c40f',
+        'Berat': '#e74c3c'
     };
 
     let map;
-    let currentLayer;
+    let geoJsonLayers = {};
 
     // Initialize map
     function initMap() {
@@ -696,67 +702,169 @@
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
+        
+        // Load all wilayah after map is initialized
+        loadAllWilayah();
     }
 
-    // Load GeoJSON dengan data
-    function loadWilayah(wilayahId) {
-        if (!wilayahId) {
-            if (currentLayer) {
-                map.removeLayer(currentLayer);
-            }
-            return;
-        }
+    // Load all wilayah with data from database
+    function loadAllWilayah() {
+        console.log('Loading all wilayah with data...');
 
-        fetch(`/storage/data/Wil${wilayahId}.geojson`)
-            .then(res => res.json())
-            .then(geoData => {
-                if (currentLayer) {
-                    map.removeLayer(currentLayer);
+        // Get all wilayah that have data
+        fetch('/api/wilayah/data')
+            .then(response => response.json())
+            .then(summary => {
+                const wilayahNumbers = summary.data.map(w => w.wilayah);
+                
+                if (wilayahNumbers.length === 0) {
+                    console.log('No wilayah data found');
+                    return;
                 }
 
-                // Merge dengan data dari database
-                fetch(`/admin/api/geojson/${wilayahId}`)
-                    .then(res => res.json())
-                    .then(dataWithGulma => {
-                        currentLayer = L.geoJSON(dataWithGulma, {
-                            style: (feature) => {
-                                const status = feature.properties.status_gulma || 'Bersih';
-                                return {
-                                    fillColor: statusColors[status],
-                                    weight: 2,
-                                    opacity: 1,
-                                    color: '#333',
-                                    fillOpacity: 0.7
-                                };
-                            },
-                            onEachFeature: (feature, layer) => {
-                                const props = feature.properties;
-                                let popup = `<div style="font-family: Arial; font-size: 12px;">
-                                    <strong>${props.name || props.id}</strong><br/>
-                                    Status: <strong>${props.status_gulma}</strong><br/>
-                                    Persentase: ${props.persentase}%<br/>
-                                    Tanggal: ${props.tanggal || '-'}
-                                </div>`;
-                                layer.bindPopup(popup);
-                                layer.on('mouseover', () => layer.setStyle({ opacity: 1, weight: 3 }));
-                                layer.on('mouseout', () => layer.setStyle({ opacity: 1, weight: 2 }));
-                            }
-                        }).addTo(map);
-                    })
-                    .catch(err => {
-                        // Jika API gagal, gunakan GeoJSON default
-                        currentLayer = L.geoJSON(geoData, {
-                            style: {
-                                fillColor: '#0066cc',
-                                weight: 2,
-                                opacity: 1,
-                                color: '#333',
-                                fillOpacity: 0.7
-                            }
-                        }).addTo(map);
-                    });
+                // Load each wilayah
+                const promises = wilayahNumbers.map(num => 
+                    fetch(`/api/wilayah/geojson/${num}`)
+                        .then(r => r.json())
+                        .then(data => ({ wilayah: num, data }))
+                        .catch(err => {
+                            console.error(`Error loading wilayah ${num}:`, err);
+                            return null;
+                        })
+                );
+
+                return Promise.all(promises);
             })
-            .catch(err => console.error('Error loading GeoJSON:', err));
+            .then(results => {
+                if (!results) return;
+                
+                const allBounds = [];
+
+                results.forEach(result => {
+                    if (!result || !result.data || !result.data.features || result.data.features.length === 0) {
+                        return;
+                    }
+
+                    const { wilayah, data } = result;
+
+                    const layer = L.geoJSON(data, {
+                        style: function(feature) {
+                            return getFeatureStyle(feature);
+                        },
+                        onEachFeature: function(feature, layer) {
+                            if (feature.properties) {
+                                layer.bindPopup(createPopupContent(feature.properties), {
+                                    maxWidth: 300
+                                });
+                                
+                                layer.on('mouseover', function() {
+                                    this.setStyle({ weight: 3, opacity: 1 });
+                                });
+                                
+                                layer.on('mouseout', function() {
+                                    this.setStyle({ weight: 2, opacity: 0.9 });
+                                });
+                            }
+                        }
+                    }).addTo(map);
+
+                    geoJsonLayers[wilayah] = layer;
+                    
+                    const bounds = layer.getBounds();
+                    if (bounds.isValid()) {
+                        allBounds.push(bounds);
+                    }
+                });
+
+                // Fit map to show all wilayah
+                if (allBounds.length > 0) {
+                    const combinedBounds = allBounds[0];
+                    allBounds.forEach(bounds => {
+                        combinedBounds.extend(bounds);
+                    });
+                    map.fitBounds(combinedBounds, { padding: [50, 50] });
+                }
+
+                console.log(`Loaded ${Object.keys(geoJsonLayers).length} wilayah`);
+            })
+            .catch(error => {
+                console.error('Error loading wilayah:', error);
+            });
+    }
+
+    // Get feature style based on status_gulma from database
+    function getFeatureStyle(feature) {
+        const props = feature.properties || {};
+        let fillColor = '#ffffff'; // default putih untuk tidak ada data
+        let borderColor = '#cccccc';
+        
+        // Get status from database (injected by API)
+        const status = props.status_gulma || '';
+        
+        // Debug log
+        if (status) {
+            console.log('Feature with status:', {
+                lokasi: props.Lokasi || props.id_feature || props.SEKSI,
+                status: status,
+                color: statusColors[status]
+            });
+            fillColor = statusColors[status] || fillColor;
+            borderColor = statusColors[status] || borderColor;
+        }
+
+        return {
+            color: borderColor,
+            weight: 2,
+            opacity: 0.9,
+            fillColor: fillColor,
+            fillOpacity: 0.6
+        };
+    }
+
+    // Create popup content
+    function createPopupContent(props) {
+        let html = '<div style="padding: 10px; font-family: Arial; font-size: 13px;">';
+        
+        // Feature ID / Lokasi / Seksi
+        const locationId = props.id_feature || props.Lokasi || props.SEKSI || props.Seksi || props.id;
+        if (locationId) {
+            html += `<h4 style="margin: 0 0 10px 0; color: #197B40; font-size: 14px;">`;
+            html += `<i class="fas fa-map-marker-alt"></i> ${locationId}`;
+            html += `</h4>`;
+        }
+
+        // Status Gulma
+        if (props.status_gulma) {
+            const statusColor = statusColors[props.status_gulma] || '#95a5a6';
+            html += `<div style="margin-bottom: 8px;">`;
+            html += `<span style="font-weight: 600;">Status:</span> `;
+            html += `<span style="color: ${statusColor}; font-weight: 700;">${props.status_gulma}</span>`;
+            html += `</div>`;
+        }
+
+        // Persentase
+        if (props.persentase !== undefined) {
+            html += `<div style="margin-bottom: 8px;">`;
+            html += `<span style="font-weight: 600;">Persentase:</span> ${props.persentase}%`;
+            html += `</div>`;
+        }
+
+        // Tanggal
+        if (props.tanggal) {
+            html += `<div style="margin-bottom: 8px;">`;
+            html += `<span style="font-weight: 600;">Tanggal:</span> ${props.tanggal}`;
+            html += `</div>`;
+        }
+
+        // Wilayah
+        if (props.wilayah || props.Wilayah) {
+            html += `<div style="color: #7f8c8d; font-size: 12px; margin-top: 8px;">`;
+            html += `<i class="fas fa-location-arrow"></i> Wilayah ${props.wilayah || props.Wilayah}`;
+            html += `</div>`;
+        }
+
+        html += '</div>';
+        return html;
     }
 
     // Form upload
@@ -793,10 +901,26 @@
                 document.getElementById('csvFile').value = '';
                 document.getElementById('fileName').style.display = 'none';
                 
-                // Reload setelah 2 detik
+                // Reload map with new data
+                if (data.wilayah_id && map) {
+                    // Clear existing layers
+                    Object.keys(geoJsonLayers).forEach(key => {
+                        if (geoJsonLayers[key]) {
+                            map.removeLayer(geoJsonLayers[key]);
+                        }
+                    });
+                    geoJsonLayers = {};
+                    
+                    // Reload all wilayah
+                    setTimeout(() => {
+                        loadAllWilayah();
+                    }, 500);
+                }
+                
+                // Reload page after 3 seconds to update statistics and history
                 setTimeout(() => {
                     location.reload();
-                }, 2000);
+                }, 3000);
             } else {
                 const errorData = await res.json();
                 messageDiv.innerHTML = `✗ ${errorData.message || 'Terjadi kesalahan'}`;

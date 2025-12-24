@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataGulma;
+use App\Models\ImportLog;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -24,7 +25,7 @@ class AdminController extends Controller
         $totalDataGulma = DataGulma::count();
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
-        $importTerbaru = collect([]); // Empty collection
+        $importTerbaru = ImportLog::latest('created_at')->limit(10)->get();
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -117,6 +118,17 @@ class AdminController extends Controller
                 ], 400);
             }
 
+            // Create import log
+            $importLog = ImportLog::create([
+                'nama_file' => $file->getClientOriginalName(),
+                'wilayah_id' => $wilayahId,
+                'jumlah_records' => 0,
+                'jumlah_berhasil' => 0,
+                'jumlah_gagal' => 0,
+                'status' => 'pending',
+                'user_id' => auth()->id()
+            ]);
+
             $berhasil = 0;
             $gagal = 0;
             $errors = [];
@@ -135,6 +147,15 @@ class AdminController extends Controller
                     // Validation
                     if (empty($data['seksi'])) {
                         throw new \Exception('SEKSI kosong');
+                    }
+
+                    if (empty($data['kategori'])) {
+                        throw new \Exception('KATEGORI kosong');
+                    }
+
+                    // Validate wilayah
+                    if ($currentWilayah < 16 || $currentWilayah > 23) {
+                        throw new \Exception('Wilayah tidak valid: ' . $currentWilayah);
                     }
 
                     // Use SEKSI as id_feature
@@ -175,9 +196,24 @@ class AdminController extends Controller
                     $berhasil++;
                 } catch (\Exception $e) {
                     $gagal++;
-                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                    $rowNum = $index + 2;
+                    $errorMsg = "Baris {$rowNum}: {$e->getMessage()}";
+                    $errors[] = $errorMsg;
+                    \Log::error("CSV Import Error - " . $errorMsg, [
+                        'row_data' => $row,
+                        'wilayah' => $wilayahId
+                    ]);
                 }
             }
+
+            // Update import log
+            $importLog->update([
+                'jumlah_records' => $berhasil + $gagal,
+                'jumlah_berhasil' => $berhasil,
+                'jumlah_gagal' => $gagal,
+                'status' => $gagal === 0 ? 'success' : 'failed',
+                'error_log' => !empty($errors) ? json_encode($errors) : null
+            ]);
 
             $message = "File CSV berhasil diproses! Berhasil: $berhasil, Gagal: $gagal";
             
@@ -186,7 +222,8 @@ class AdminController extends Controller
                 'message' => $message,
                 'wilayah_id' => $wilayahId,
                 'berhasil' => $berhasil,
-                'gagal' => $gagal
+                'gagal' => $gagal,
+                'reload' => true
             ]);
 
         } catch (\Exception $e) {

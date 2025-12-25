@@ -3,6 +3,7 @@
 @section('title', 'Statistik')
 
 @section('content')
+
 <div class="page-header">
     <h1><i class="fas fa-chart-bar"></i> Statistik perkebunan</h1>
     <p>Analisis mendalam tentang tren produksi dan perbandingan data antar wilayah</p>
@@ -291,7 +292,7 @@
         <h3><i class="fas fa-chart-bar"></i> Perbandingan Produksi Komoditas</h3>
         <div class="comparison-grid">
             <div class="comparison-card">
-                <div class="comparison-title"><i class="fas fa-apple-alt"></i> Nanas</div>
+                <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
                 <div class="comparison-stat">
                     <span class="comparison-label">Luas Perkebunan:</span>
                     <span class="comparison-value">20,825 Ha</span>

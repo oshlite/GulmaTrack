@@ -6,7 +6,7 @@
 
 <style>
     :root {
-        --primary-color: #197B40;
+        --primary-color: #128241;
         --secondary-color: #D6DF20;
         --accent-color: #FBA919;
         --light-bg: #f8f9fa;
@@ -17,7 +17,7 @@
     }
 
     .admin-navbar {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0D5C2E 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #128241 100%);
         padding: 0 20px;
         display: flex;
         justify-content: space-between;
@@ -203,7 +203,7 @@
     .wilayah-selector select:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(25, 123, 64, 0.1);
+        box-shadow: 0 0 0 3px rgba(18, 130, 65, 0.1);
     }
 
     .upload-area {
@@ -257,7 +257,7 @@
     }
 
     .upload-btn:hover:not(:disabled) {
-        background: #0D5C2E;
+        background: #128241;
         transform: translateY(-2px);
     }
 
@@ -307,8 +307,8 @@
     }
 
     .status-success {
-        background: rgba(39, 174, 96, 0.2);
-        color: #27AE60;
+        background: rgba(18, 130, 65, 0.2);
+        color: #128241;
     }
 
     .status-pending {
@@ -342,8 +342,8 @@
 
     .alert-success {
         background: #e8f5e9;
-        color: #2e7d32;
-        border-left-color: #2e7d32;
+        color: #128241;
+        border-left-color: #128241;
     }
 
     .alert-error {
@@ -414,8 +414,8 @@
 
     .message.success {
         background: #e8f5e9;
-        color: #2e7d32;
-        border-left: 4px solid #2e7d32;
+        color: #128241;
+        border-left: 4px solid #128241;
     }
 
     .message.error {
@@ -462,7 +462,7 @@
 <!-- Navbar Admin -->
 <nav class="admin-navbar">
     <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
-        <i class="fas fa-leaf"></i>
+        <i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> 
         GulmaTrack 
     </a>
     <div class="navbar-right">
@@ -510,8 +510,8 @@
             <div class="stat-value" id="statTotalData">{{ $totalDataGulma ?? 0 }}</div>
         </div>
 
-        <div class="stat-card" style="border-left-color: #27AE60;">
-            <div class="stat-icon" style="color: #27AE60;">
+        <div class="stat-card" style="border-left-color: #128241;">
+            <div class="stat-icon" style="color: #128241;">
                 <i class="fas fa-map-marker-alt"></i>
             </div>
             <div class="stat-label">Wilayah Aktif</div>
@@ -545,6 +545,20 @@
                 @csrf
 
                 <!-- Periode Selection -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="tahun" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-calendar-alt"></i> Pilih Tahun:
+                    </label>
+                    <select id="tahun" name="tahun" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background-color: white;">
+                        <option value="">-- Pilih Tahun --</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label for="bulan" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
                         <i class="fas fa-calendar"></i> Pilih Bulan:
@@ -597,9 +611,9 @@
                 </div>
 
                 <!-- File Upload Status -->
-                <div id="fileStatus" style="display: none; margin-top: 15px; padding: 12px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
-                    <i class="fas fa-check-circle" style="color: #4caf50;"></i>
-                    <span id="fileName" style="font-weight: 600; color: #2e7d32;"></span>
+                <div id="fileStatus" style="display: none; margin-top: 15px; padding: 12px; background: #e8f5e9; border-left: 4px solid #128241; border-radius: 4px;">
+                    <i class="fas fa-check-circle" style="color: #128241;"></i>
+                    <span id="fileName" style="font-weight: 600; color: #128241;"></span>
                     <button type="button" onclick="removeFile()" style="float: right; background: none; border: none; color: #d32f2f; cursor: pointer; font-size: 14px;">
                         <i class="fas fa-times"></i> Hapus
                     </button>
@@ -648,7 +662,7 @@
             
             <!-- Publish Map Button -->
             <div>
-                <button type="button" id="publishMapBtn" onclick="publishMapToPublic()" style="background: linear-gradient(135deg, #197B40 0%, #27ae60 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                <button type="button" id="publishMapBtn" onclick="publishMapToPublic()" style="background: linear-gradient(135deg, #128241 0%, #128241 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
                     <i class="fas fa-globe"></i>
                     <span>Perbarui Peta Publik</span>
                 </button>
@@ -664,7 +678,7 @@
                 <span>Bersih</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #27ae60;"></div>
+                <div class="legend-color" style="background-color: #128241;"></div>
                 <span>Ringan</span>
             </div>
             <div class="legend-item">
@@ -717,7 +731,7 @@
                                             {{ $wilayahCount }} Wilayah ({{ $log->wilayah_id }})
                                         </span>
                                     @else
-                                        <span style="display: inline-block; padding: 4px 8px; background: #e8f5e9; border-radius: 4px; font-size: 12px; font-weight: 600; color: #2e7d32;">
+                                        <span style="display: inline-block; padding: 4px 8px; background: #e8f5e9; border-radius: 4px; font-size: 12px; font-weight: 600; color: #128241;">
                                             <i class="fas fa-map-marker-alt"></i>
                                             Wilayah {{ $log->wilayah_id }}
                                         </span>
@@ -768,7 +782,7 @@
 <script>
     const statusColors = {
         'Bersih': '#3498db',
-        'Ringan': '#27ae60',
+        'Ringan': '#128241',
         'Sedang': '#f1c40f',
         'Berat': '#e74c3c'
     };
@@ -779,7 +793,7 @@
         
         const kat = kategori.toLowerCase().trim();
         if (kat === 'bersih') return '#3498db'; // Biru
-        if (kat === 'ringan') return '#27ae60'; // Hijau
+        if (kat === 'ringan') return '#128241'; // Hijau
         if (kat === 'sedang') return '#f1c40f'; // Kuning
         if (kat === 'berat') return '#e74c3c'; // Merah
         
@@ -927,7 +941,7 @@
             borderColor = fillColor;
         } else if (props.activitas) {
             const act = props.activitas.toLowerCase();
-            if (act.includes('pemupukan')) fillColor = '#27ae60';
+            if (act.includes('pemupukan')) fillColor = '#128241';
             else if (act.includes('penyemprotan')) fillColor = '#f1c40f';
             else if (act.includes('pembersihan')) fillColor = '#3498db';
         }
@@ -943,12 +957,12 @@
 
     // Create popup content
     function createPopupContent(props) {
-        let html = '<div style="padding: 10px; font-family: Arial; font-size: 13px;">';
+        let html = '<div style="padding: 10px; font-family: \'Poppins\'; font-size: 13px;">';
         
         // Feature ID / Lokasi / Seksi
         const locationId = props.seksi || props.id_feature || props.Lokasi || props.SEKSI || props.Seksi || props.id;
         if (locationId) {
-            html += `<h4 style="margin: 0 0 10px 0; color: #197B40; font-size: 14px;">`;
+            html += `<h4 style="margin: 0 0 10px 0; color: #128241; font-size: 14px;">`;
             html += `<i class="fas fa-map-marker-alt"></i> ${locationId}`;
             html += `</h4>`;
         }
@@ -1039,8 +1053,12 @@
         const file = document.getElementById('csvFile').files[0];
         const messageDiv = document.getElementById('uploadMessage');
 
-        if (!bulan || !minggu) {
-            messageDiv.innerHTML = '✗ Pilih bulan dan minggu terlebih dahulu';
+        const tahun = document.getElementById('tahun').value;
+        const bulan = document.getElementById('bulan').value;
+        const minggu = document.getElementById('minggu').value;
+
+        if (!tahun || !bulan || !minggu) {
+            messageDiv.innerHTML = '✗ Pilih tahun, bulan, dan minggu terlebih dahulu';
             messageDiv.className = 'message show error';
             return;
         }
@@ -1053,6 +1071,7 @@
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('tahun', tahun);
         formData.append('bulan', bulan);
         formData.append('minggu', minggu);
         formData.append('_token', document.querySelector('[name="_token"]').value);
@@ -1127,12 +1146,13 @@
 
     // Check periode before upload
     function checkPeriodeBeforeUpload() {
+        const tahun = document.getElementById('tahun').value;
         const bulan = document.getElementById('bulan').value;
         const minggu = document.getElementById('minggu').value;
         const messageDiv = document.getElementById('uploadMessage');
         
-        if (!bulan || !minggu) {
-            messageDiv.innerHTML = '✗ Pilih bulan dan minggu terlebih dahulu';
+        if (!tahun || !bulan || !minggu) {
+            messageDiv.innerHTML = '✗ Pilih tahun, bulan, dan minggu terlebih dahulu';
             messageDiv.className = 'message show error';
             setTimeout(() => {
                 messageDiv.className = 'message';
@@ -1177,7 +1197,7 @@
 
     ['dragenter', 'dragover'].forEach(evt => {
         uploadArea.addEventListener(evt, () => {
-            uploadArea.style.borderColor = '#197B40';
+            uploadArea.style.borderColor = '#128241';
             uploadArea.style.background = '#f0f0f0';
         });
     });
@@ -1243,7 +1263,7 @@
             
             if (data.success && data.is_published) {
                 document.getElementById('publishStatus').innerHTML = 
-                    `<i class="fas fa-check-circle" style="color: #27ae60;"></i> Terakhir dipublikasi: ${data.published_at}`;
+                    `<i class="fas fa-check-circle" style="color: #128241;"></i> Terakhir dipublikasi: ${data.published_at}`;
             } else {
                 document.getElementById('publishStatus').innerHTML = 
                     `<i class="fas fa-exclamation-circle" style="color: #f39c12;"></i> Belum dipublikasi`;
@@ -1279,16 +1299,16 @@
             if (data.success) {
                 // Show success message
                 const statusDiv = document.getElementById('publishStatus');
-                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${data.message}`;
-                statusDiv.style.color = '#27ae60';
+                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ${data.message}`;
+                statusDiv.style.color = '#128241';
                 
                 // Update button
                 btn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dipublikasi!';
-                btn.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+                btn.style.background = 'linear-gradient(135deg, #128241 0%, #2ecc71 100%)';
                 
                 setTimeout(() => {
                     btn.innerHTML = originalHtml;
-                    btn.style.background = 'linear-gradient(135deg, #197B40 0%, #27ae60 100%)';
+                    btn.style.background = 'linear-gradient(135deg, #128241 0%, #128241 100%)';
                     loadPublicationStatus();
                 }, 3000);
             } else {

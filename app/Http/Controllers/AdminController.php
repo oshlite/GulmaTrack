@@ -103,6 +103,7 @@ class AdminController extends Controller
             $importLog = ImportLog::create([
                 'nama_file' => $file->getClientOriginalName(),
                 'wilayah_id' => $wilayahList,
+                'tahun' => $request->tahun ?? now()->year,
                 'bulan' => $request->bulan,
                 'minggu' => $request->minggu,
                 'jumlah_records' => 0,

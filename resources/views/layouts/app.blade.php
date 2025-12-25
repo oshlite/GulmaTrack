@@ -4,23 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') | GulmaTrack</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Poppins'
         }
 
         :root {
             --title-color: #A6CE39;
-            --primary-color: #197B40;
+            --primary-color: #128241;
             --secondary-color: #D6DF20;
             --accent-color: #FBA919;
             --accent-light: #FBA919;
-            --dark-color: #197B40;
+            --dark-color: #128241;
             --light-color: #f5f5f5;
             --text-color: #333;
             --border-color: #e0e0e0;
@@ -52,8 +58,8 @@
 
         /* Navbar Styling - Modern */
         nav {
-            background: rgba(25, 123, 64, 0.95);
-            backdrop-filter: blur(10px);
+            background: #128241;
+            backdrop-filter: blur(100px);
             padding: 0;
             position: fixed;
             top: 0;
@@ -76,12 +82,10 @@
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 25px;
+            font-family: 'Poppins';
             font-weight: 800;
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--title-color) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #FBA919;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -100,6 +104,17 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: 60px;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-img {
+            transform: rotate(1deg) scale(1);
         }
 
         .nav-menu {
@@ -146,13 +161,11 @@
         }
 
         .nav-link:hover {
-            color: var(--secondary-color);
-            background: rgba(255, 255, 255, 0.05);
+            color: var(--light-color);
         }
 
         .nav-link.active {
             color: var(--secondary-color);
-            background: rgba(255, 255, 255, 0.08);
         }
 
         .mobile-toggle {
@@ -199,13 +212,27 @@
         }
 
         /* Footer */
+        .footer-wave {
+            width: 100%;
+            height: auto;
+            position: relative;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        .footer-wave img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
         footer {
             background-color: var(--dark-color);
             color: #ecf0f1;
-            padding: 40px 20px;
-            margin-top: 60px;
+            padding: 0px 20px;
+            margin-top: 0;
             text-align: center;
-            border-top: 3px solid var(--secondary-color);
+            border-top: 0;
             width: 100%;
         }
 
@@ -318,7 +345,7 @@
                 flex-direction: column;
                 gap: 0;
                 margin-top: 0;
-                background: rgba(25, 123, 64, 0.98);
+                background: #128241;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
 
@@ -426,68 +453,14 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="navbar-container">
-            <a href="{{ route('home') }}" class="logo">
-                <i class="fas fa-leaf"></i>
-                GulmaTrack
-            </a>
-            <button class="mobile-toggle" id="mobileToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <ul class="nav-menu" id="navMenu">
-                <li class="nav-item">
-                    <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                        <i class="fas fa-home"></i> Beranda
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('wilayah') }}" class="nav-link {{ request()->routeIs('wilayah') ? 'active' : '' }}">
-                        <i class="fas fa-map"></i> Wilayah
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('statistik') }}" class="nav-link {{ request()->routeIs('statistik') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i> Statistik
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    @include('partials.navbar')
 
     <!-- Main Content -->
     <div class="main-container fade-in">
         @yield('content')
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="{{ route('about') }}">Tentang Kami</a>
-                <a href="{{ route('statistik') }}">Statistik</a>
-                <a href="{{ route('wilayah') }}">Peta Wilayah</a>
-            </div>
-            <div class="footer-contact">
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <span>info@gulmatrack.com</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone"></i>
-                    <span>(+62) 123 456 7890</span>
-                </div>
-                <div class="social-links">
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-            <p>&copy; 2025 GulmaTrack. Semua hak dilindungi.</p>
-        </div>
-    </footer>
+    @include('partials.footer')
 
     <script>
         // Mobile Menu Toggle

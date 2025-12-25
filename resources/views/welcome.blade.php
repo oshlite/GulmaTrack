@@ -4,35 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GulmaTrack - Sistem Manajemen Hasil Pertanian</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <style>
+        * {
+            font-family: 'Poppins'
+        }
+    </style>
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body>
-    <!-- ===== HEADER ===== -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="/" class="logo">🌾 GulmaTrack</a>
-                <ul class="nav-menu">
-                    <li><a href="#tentang">Tentang</a></li>
-                    <li><a href="#fitur">Fitur</a></li>
-                    <li><a href="#cerita">Cerita</a></li>
-                    <li><a href="#kontak">Kontak</a></li>
-                </ul>
-                <div class="nav-auth">
-                    @auth
-                        <a href="{{ url('/home') }}" class="btn btn-secondary">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-secondary">Masuk</a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn btn-primary">Daftar</a>
-                        @endif
-                    @endauth
-                </div>
-            </nav>
-        </div>
-    </header>
+    @include('partials.navbar')
 
     <!-- ===== HERO SECTION ===== -->
     <section class="hero">
@@ -203,64 +189,14 @@
     </section>
 
     <!-- ===== CTA SECTION ===== -->
-    <section class="section" style="background: linear-gradient(135deg, #2D5016 0%, #4CAF50 100%); color: white; text-align: center;">
+    <section class="section" style="background: linear-gradient(135deg, #128241 0%, #128241 100%); color: white; text-align: center;">
         <div class="container">
             <h2 style="color: white;">Siap untuk Mengubah Bisnis Pertanian Anda?</h2>
             <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin-bottom: 2rem;">Bergabunglah dengan ribuan pengguna GulmaTrack dan rasakan perbedaannya.</p>
-            <a href="{{ route('register') }}" class="btn btn-primary" style="background-color: white; color: #2D5016;">Mulai Gratis Hari Ini</a>
+            <a href="{{ route('register') }}" class="btn btn-primary" style="background-color: white; color: #128241;">Mulai Gratis Hari Ini</a>
         </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>GulmaTrack</h4>
-                    <p>Platform manajemen pertanian terintegrasi untuk membangun ekosistem pertanian yang berkelanjutan dan menguntungkan.</p>
-                    <div class="social-links">
-                        <a href="#" title="Facebook">f</a>
-                        <a href="#" title="Twitter">𝕏</a>
-                        <a href="#" title="Instagram">📷</a>
-                        <a href="#" title="LinkedIn">in</a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Produk</h4>
-                    <ul>
-                        <li><a href="#fitur">Fitur-Fitur</a></li>
-                        <li><a href="#harga">Harga</a></li>
-                        <li><a href="#demo">Demo Gratis</a></li>
-                        <li><a href="#api">API Documentation</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Perusahaan</h4>
-                    <ul>
-                        <li><a href="#tentang">Tentang Kami</a></li>
-                        <li><a href="#blog">Blog</a></li>
-                        <li><a href="#karir">Karir</a></li>
-                        <li><a href="#kontak">Hubungi Kami</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Dukungan</h4>
-                    <ul>
-                        <li><a href="#help">Pusat Bantuan</a></li>
-                        <li><a href="#faq">FAQ</a></li>
-                        <li><a href="#privacy">Kebijakan Privasi</a></li>
-                        <li><a href="#terms">Syarat & Ketentuan</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2025 GulmaTrack. Semua hak dilindungi. Dibangun dengan ❤️ untuk kemajuan pertanian Indonesia.</p>
-            </div>
-        </div>
-    </footer>
+    @include('partials.footer')
 </body>
 </html>

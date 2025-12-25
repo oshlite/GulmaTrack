@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - GulmaTrack</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Poppins'
         }
 
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Poppins'
         }
 
         .login-wrapper {
@@ -21,7 +26,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #197B40 0%, #0D5C2E 100%);
+            background: linear-gradient(135deg, #128241 0%, #128241 100%);
             position: relative;
             overflow: hidden;
         }
@@ -89,7 +94,7 @@
 
         /* Header Section */
         .login-header {
-            background: linear-gradient(135deg, #197B40 0%, #0D5C2E 100%);
+            background: linear-gradient(135deg, #128241 0%, #128241 100%);
             color: white;
             padding: 50px 30px;
             text-align: center;
@@ -107,29 +112,31 @@
         }
 
         .logo-circle {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 70px;
             margin: 0 auto 20px;
-            background: rgba(214, 223, 32, 0.15);
+            background: rgba(255, 255, 255, 1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             animation: pulse 2s ease-in-out infinite;
+            padding: 15px;
         }
 
         @keyframes pulse {
             0%, 100% {
-                box-shadow: 0 0 0 0 rgba(214, 223, 32, 0.3);
+                box-shadow: 0 0 0 0 rgba(18, 130, 65, 0.3);
             }
             50% {
-                box-shadow: 0 0 0 10px rgba(214, 223, 32, 0);
+                box-shadow: 0 0 0 10px rgba(18, 130, 65, 0);
             }
         }
 
         .logo-icon {
-            font-size: 48px;
-            color: #D6DF20;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .login-header h1 {
@@ -187,8 +194,8 @@
 
         .alert-success {
             background: #e8f5e9;
-            color: #2e7d32;
-            border-left-color: #2e7d32;
+            color: #128241;
+            border-left-color: #128241;
         }
 
         /* Form Group */
@@ -199,7 +206,7 @@
         .form-group label {
             display: block;
             margin-bottom: 10px;
-            color: #197B40;
+            color: #128241;
             font-weight: 600;
             font-size: 14px;
             letter-spacing: 0.3px;
@@ -210,7 +217,7 @@
             padding: 14px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins';
             font-size: 14px;
             transition: all 0.3s ease;
             background: #fafafa;
@@ -223,9 +230,9 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #197B40;
+            border-color: #128241;
             background: white;
-            box-shadow: 0 0 0 4px rgba(25, 123, 64, 0.1);
+            box-shadow: 0 0 0 4px rgba(18, 130, 65, 0.1);
             transform: translateY(-2px);
         }
 
@@ -249,7 +256,7 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
-            accent-color: #197B40;
+            accent-color: #128241;
             border-radius: 4px;
         }
 
@@ -262,7 +269,7 @@
         }
 
         .forgot-link {
-            color: #197B40;
+            color: #128241;
             text-decoration: none;
             font-weight: 600;
             font-size: 13px;
@@ -277,12 +284,13 @@
         .btn-login {
             width: 100%;
             padding: 14px 20px;
-            background: linear-gradient(135deg, #197B40 0%, #0D5C2E 100%);
+            background: linear-gradient(135deg, #128241 0%, #128241 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 15px;
             font-weight: 700;
+            font-family: 'Poppins';
             cursor: pointer;
             transition: all 0.3s ease;
             letter-spacing: 0.5px;
@@ -305,7 +313,7 @@
 
         .btn-login:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(25, 123, 64, 0.3);
+            box-shadow: 0 12px 30px rgba(18, 130, 65, 0.3);
         }
 
         .btn-login:hover::before {
@@ -332,8 +340,8 @@
         }
 
         .info-box {
-            background: linear-gradient(135deg, rgba(25, 123, 64, 0.08) 0%, rgba(214, 223, 32, 0.08) 100%);
-            border: 2px solid rgba(25, 123, 64, 0.15);
+            background: linear-gradient(135deg, rgba(18, 130, 65, 0.08) 0%, rgba(214, 223, 32, 0.08) 100%);
+            border: 2px solid rgba(18, 130, 65, 0.15);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
@@ -341,12 +349,12 @@
         }
 
         .info-box:hover {
-            border-color: rgba(25, 123, 64, 0.3);
-            background: linear-gradient(135deg, rgba(25, 123, 64, 0.12) 0%, rgba(214, 223, 32, 0.12) 100%);
+            border-color: rgba(18, 130, 65, 0.3);
+            background: linear-gradient(135deg, rgba(18, 130, 65, 0.12) 0%, rgba(214, 223, 32, 0.12) 100%);
         }
 
         .info-box-title {
-            color: #197B40;
+            color: #128241;
             font-weight: 700;
             font-size: 14px;
             margin-bottom: 12px;
@@ -366,7 +374,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
-            border-bottom: 1px solid rgba(25, 123, 64, 0.1);
+            border-bottom: 1px solid rgba(18, 130, 65, 0.1);
         }
 
         .info-row:last-child {
@@ -379,10 +387,10 @@
         }
 
         .info-value {
-            color: #197B40;
+            color: #128241;
             font-weight: 700;
-            font-family: 'Monaco', 'Courier', monospace;
-            background: rgba(25, 123, 64, 0.05);
+            font-family: 'Poppins';
+            background: rgba(18, 130, 65, 0.05);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
@@ -410,7 +418,7 @@
         }
 
         .login-link {
-            color: #197B40;
+            color: #128241;
             text-decoration: none;
             font-weight: 600;
             font-size: 13px;
@@ -476,7 +484,7 @@
                 <!-- Header -->
                 <div class="login-header">
                     <div class="logo-circle">
-                        <i class="fas fa-leaf logo-icon"></i>
+                        <img src="{{ asset('image/logo3.png') }}" alt="GulmaTrack Logo" class="logo-icon">
                     </div>
                     <h1>GulmaTrack Admin</h1>
                     <p>Sistem Visualisasi Penyebaran Gulma</p>
@@ -555,7 +563,7 @@
                         <!-- Login Button -->
                         <button type="submit" class="btn-login">
                             <span>
-                                <i class="fas fa-sign-in-alt"></i> MASUK KE DASHBOARD
+                                <i class="fas fa-sign-in-alt"></i> Masuk ke Dashboard
                             </span>
                         </button>
                     </form>

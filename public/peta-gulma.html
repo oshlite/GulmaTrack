@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         :root {
-            --primary-color: #197B40;
+            --primary-color: #128241;
             --secondary-color: #155A31;
             --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -22,7 +22,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins';
             background: var(--bg-light);
         }
         .header {
@@ -161,7 +161,7 @@
         }
         .leaflet-popup-content {
             margin: 0 !important;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins';
         }
         .leaflet-popup-content h3 {
             color: var(--primary-color);
@@ -184,7 +184,7 @@
                 <option value="">-- Pilih Wilayah --</option>
             </select>
             <button onclick="loadWilayah()"><i class="fas fa-search"></i> Tampilkan Peta</button>
-            <button onclick="loadAllWilayah()" style="background-color: #27ae60;"><i class="fas fa-globe"></i> Semua Wilayah</button>
+            <button onclick="loadAllWilayah()" style="background-color: #128241;"><i class="fas fa-globe"></i> Semua Wilayah</button>
         </div>
 
         <div class="map-container">
@@ -288,7 +288,7 @@
             // Tampilkan info seksi/lokasi
             const lokasi = props.seksi || props.Lokasi || props.id_feature;
             if (lokasi) {
-                html += `<h3 style="margin: 0 0 10px 0; color: #197B40; font-size: 16px;">📍 Seksi ${lokasi}</h3>`;
+                html += `<h3 style="margin: 0 0 10px 0; color: #128241; font-size: 16px;">📍 Seksi ${lokasi}</h3>`;
             }
             
             // Tampilkan info PG dan FM

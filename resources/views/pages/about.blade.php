@@ -326,12 +326,12 @@
     <div class="about-section">
         <h2><i class="fas fa-star"></i> Fitur Unggulan</h2>
         <div class="features-grid">
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/wilayah'">
                 <div class="feature-icon"><i class="fas fa-map"></i></div>
                 <h4>Peta Interaktif</h4>
                 <p>Visualisasi geografis lengkap dengan detail wilayah produksi yang mudah dijelajahi</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/statistik'">
                 <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
                 <h4>Dashboard Analitik</h4>
                 <p>Analisis mendalam dengan statistik dan tren produksi yang update real-time</p>
@@ -346,7 +346,7 @@
                 <h4>Keamanan Data</h4>
                 <p>Sistem keamanan berlapis untuk melindungi data perkebunan yang sensitif</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/login'">
                 <div class="feature-icon"><i class="fas fa-sync"></i></div>
                 <h4>Sinkronisasi Data</h4>
                 <p>Sinkronisasi otomatis dengan berbagai sumber data perkebunan terpercaya</p>

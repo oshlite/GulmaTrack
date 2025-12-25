@@ -56,7 +56,7 @@
     .btn-hero {
         display: inline-block;
         padding: 16px 40px;
-        border-radius: 8px;
+        border-radius: 30px;
         text-decoration: none;
         font-weight: 700;
         font-size: 18px;
@@ -73,7 +73,7 @@
     .btn-hero.primary:hover {
         background-color: #D6DF20;
         color: #333;
-        transform: translateY(-3px);
+        transform: translateY(-5px);
         box-shadow: 0 8px 30px rgba(166, 206, 57, 0.5);
     }
 
@@ -86,9 +86,23 @@
     .btn-hero.secondary:hover {
         background-color: white;
         color: var(--primary-color);
-        transform: translateY(-3px);
+        transform: translateY(-5px);
         box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
     }
+
+    .btn-hero.third {
+        background-color: white;
+        color: var(--primary-color);
+        transform: translateY(-5px);
+    }
+
+    .btn-hero.third:hover {
+        background-color: white;
+        color: var(--secondary-color);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+    }
+
 
     @keyframes fadeInUp {
         from {
@@ -133,7 +147,7 @@
     .stat-card {
         background: white;
         padding: 30px;
-        border-radius: 12px;
+        border-radius: 30px;
         text-align: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
@@ -146,8 +160,8 @@
     }
 
     .stat-card.bersih {
-        border-left-color: #27AE60;
-        background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(39, 174, 96, 0.02));
+        border-left-color: #128241;
+        background: linear-gradient(135deg, rgba(18, 130, 65, 0.05), rgba(18, 130, 65, 0.02));
     }
 
     .stat-card.ringan {
@@ -171,7 +185,7 @@
     }
 
     .stat-icon.bersih {
-        color: #27AE60;
+        color: #128241;
     }
 
     .stat-icon.ringan {
@@ -212,14 +226,14 @@
 
     .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 25px;
     }
 
     .feature-card {
         background: white;
         padding: 30px;
-        border-radius: 12px;
+        border-radius: 30px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         text-align: center;
@@ -237,13 +251,13 @@
         width: 70px;
         height: 70px;
         line-height: 70px;
-        border-radius: 12px;
+        border-radius: 30px;
         transition: all 0.3s ease;
     }
 
     .feature-card:nth-child(1) .feature-icon {
-        background-color: rgba(39, 174, 96, 0.1);
-        color: #27AE60;
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #DC3545;
     }
 
     .feature-card:nth-child(2) .feature-icon {
@@ -262,13 +276,8 @@
     }
 
     .feature-card:nth-child(5) .feature-icon {
-        background-color: rgba(41, 128, 185, 0.1);
-        color: #2980B9;
-    }
-
-    .feature-card:nth-child(6) .feature-icon {
-        background-color: rgba(230, 126, 34, 0.1);
-        color: #E67E22;
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10B981;
     }
 
     .feature-card:hover .feature-icon {
@@ -290,9 +299,9 @@
 
     /* CTA Section */
     .cta-section {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0D5C2E 100%);
+        background: #128241;
         padding: 60px 40px;
-        border-radius: 12px;
+        border-radius: 30px;
         text-align: center;
         color: white;
         margin-bottom: 70px;
@@ -307,7 +316,6 @@
     .cta-section p {
         font-size: 18px;
         margin-bottom: 30px;
-        opacity: 0.95;
     }
 
     .cta-buttons {
@@ -348,7 +356,7 @@
     }
 
     .stat-icon.bersih {
-        color: #27AE60;
+        color: #128241;
     }
 
     .stat-icon.ringan {
@@ -391,18 +399,23 @@
     }
 
     .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 30px;
+        justify-content: center;
+        align-items: stretch;
     }
 
     .feature-card {
         background: white;
         padding: 40px;
-        border-radius: 12px;
+        border-radius: 30px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         text-align: center;
+        width: calc(33.333% - 20px);
+        min-width: 280px;
+        flex: 0 1 auto;
     }
 
     .feature-card:hover {
@@ -417,13 +430,13 @@
         width: 80px;
         height: 80px;
         line-height: 80px;
-        border-radius: 12px;
+        border-radius: 30px;
         transition: all 0.3s ease;
     }
 
     .feature-card:nth-child(1) .feature-icon {
-        background-color: rgba(39, 174, 96, 0.1);
-        color: #27AE60;
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #ff5162ff;
     }
 
     .feature-card:nth-child(2) .feature-icon {
@@ -442,8 +455,8 @@
     }
 
     .feature-card:nth-child(5) .feature-icon {
-        background-color: rgba(41, 128, 185, 0.1);
-        color: #2980B9;
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10B981;
     }
 
     .feature-card:hover .feature-icon {
@@ -465,7 +478,7 @@
 
     /* CTA Section */
     .cta-section {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #0D5C2E 100%);
+        background: #128241;
         padding: 80px 40px;
         text-align: center;
         color: white;
@@ -515,6 +528,11 @@
         .features-section,
         .cta-section {
             padding: 60px 20px;
+        }
+
+        .feature-card {
+            width: calc(50% - 15px);
+            min-width: 250px;
         }
     }
 
@@ -567,11 +585,12 @@
         }
 
         .features-grid {
-            grid-template-columns: 1fr;
             gap: 20px;
         }
 
         .feature-card {
+            width: 100%;
+            min-width: auto;
             padding: 30px 20px;
         }
 
@@ -625,12 +644,12 @@
 <section class="hero-section">
     <div class="hero-content">
         <h1>Sistem Visualisasi Penyebaran Gulma</h1>
-        <p>Monitoring dan analisis penyebaran gulma pada pertanian nanas dan pisang dengan teknologi data interaktif</p>
+        <p>Monitoring dan analisis penyebaran gulma pada pertanian nanas dengan teknologi data interaktif</p>
         <div class="hero-buttons">
-            <a href="{{ route('wilayah') }}" class="btn-hero primary">
+            <a href="{{ route('wilayah') }}" class="btn-hero third">
                 <i class="fas fa-map-marker-alt"></i> Lihat Peta
             </a>
-            <a href="{{ route('statistik') }}" class="btn-hero secondary">
+            <a href="{{ route('statistik') }}" class="btn-hero third">
                 <i class="fas fa-chart-bar"></i> Lihat Statistik
             </a>
         </div>
@@ -645,7 +664,7 @@
         <h2 class="section-title">Fitur Unggulan</h2>
         <p class="section-subtitle">Solusi lengkap untuk monitoring dan analisis penyebaran gulma</p>
         <div class="features-grid">
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/wilayah'">
                 <div class="feature-icon">
                     <i class="fas fa-map"></i>
                 </div>
@@ -653,7 +672,7 @@
                 <p class="feature-description">Visualisasi geografis lengkap dengan detail wilayah produksi yang mudah dijelajahi</p>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/statistik'">
                 <div class="feature-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
@@ -663,7 +682,7 @@
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fas fa-leaf"></i>
+                    <i class="fas fa-mobile-alt"></i>
                 </div>
                 <h3 class="feature-title">Responsif & Mobile</h3>
                 <p class="feature-description">Akses dari perangkat apapun dengan pengalaman pengguna yang sempurna</p>
@@ -671,15 +690,15 @@
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fas fa-filter"></i>
+                    <i class="fas fa-lock"></i>
                 </div>
                 <h3 class="feature-title">Keamanan Data</h3>
                 <p class="feature-description">Sistem keamanan berlapis untuk melindungi data perkebunan yang sensitif</p>
             </div>
 
-            <div class="feature-card">
+            <div class="feature-card" onclick="window.location.href='/login'">
                 <div class="feature-icon">
-                    <i class="fas fa-download"></i>
+                    <i class="fas fa-sync"></i>
                 </div>
                 <h3 class="feature-title">Sinkronisasi Data</h3>
                 <p class="feature-description">Sinkronisasi otomatis dengan berbagai sumber data perkebunan terpercaya</p>
@@ -692,11 +711,11 @@
         <h2>Mulai Monitoring Gulma Sekarang</h2>
         <p>Dapatkan insight lengkap tentang penyebaran gulma di area pertanian Anda</p>
         <div class="cta-buttons">
-            <a href="{{ route('wilayah') }}" class="btn-hero primary">
+            <a href="{{ route('wilayah') }}" class="btn-hero secondary">
                 <i class="fas fa-map-location-dot"></i> Jelajahi Wilayah
             </a>
             <a href="{{ route('statistik') }}" class="btn-hero secondary">
-                <i class="fas fa-envelope"></i> Lihat Statistik Lengkap
+                <i class="fa-solid fa-chart-area"></i> Lihat Statistik Lengkap
             </a>
         </div>
     </section>

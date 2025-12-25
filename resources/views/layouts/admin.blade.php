@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') | GulmaTrack Admin</title>
+    <title>@yield('title') | GulmaTrack</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Poppins'
         }
 
         :root {
-            --primary-color: #197B40;
+            --primary-color: #128241;
             --secondary-color: #D6DF20;
             --accent-color: #FBA919;
             --light-bg: #f8f9fa;
@@ -33,7 +39,7 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins';
             background-color: var(--light-bg);
             color: var(--text-color);
             line-height: 1.6;

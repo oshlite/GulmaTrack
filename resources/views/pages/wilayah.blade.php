@@ -6,12 +6,15 @@
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<!-- Poppins Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <div class="page-header">
     <h1><i class="fas fa-map-marked-alt"></i> Peta Wilayah Produksi</h1>
     <p>Jelajahi distribusi dan informasi geografis area produksi hortikultura</p>
 </div>
 
+<div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
     <!-- Statistik -->
     <div class="stats-row">
         <div class="stat-box">
@@ -46,37 +49,501 @@
         </div>
     </div>
 
-    <!-- Status Info -->
-    <div style="background: #ecf0f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
+    <!-- Kontrol Peta -->
+    <div class="wilayah-controls">
+        <div class="controls-wrapper">
+            <!-- Baris 1: Filter Fields -->
+            <div class="controls-row">
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar-alt"></i> Tahun
+                    </label>
+                    <input type="hidden" id="tahunSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('tahun')">
+                        <span id="tahunSelected" class="grid-selected-text">Pilih Tahun...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="tahunGrid" class="button-grid" style="display: none;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar"></i> Bulan
+                    </label>
+                    <input type="hidden" id="bulanSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('bulan')">
+                        <span id="bulanSelected" class="grid-selected-text">Pilih Bulan...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="bulanGrid" class="button-grid" style="display: none;">
+                        <button class="grid-btn" data-value="1" onclick="selectGridOption('bulan', '1', 'Januari')">Januari</button>
+                        <button class="grid-btn" data-value="2" onclick="selectGridOption('bulan', '2', 'Februari')">Februari</button>
+                        <button class="grid-btn" data-value="3" onclick="selectGridOption('bulan', '3', 'Maret')">Maret</button>
+                        <button class="grid-btn" data-value="4" onclick="selectGridOption('bulan', '4', 'April')">April</button>
+                        <button class="grid-btn" data-value="5" onclick="selectGridOption('bulan', '5', 'Mei')">Mei</button>
+                        <button class="grid-btn" data-value="6" onclick="selectGridOption('bulan', '6', 'Juni')">Juni</button>
+                        <button class="grid-btn" data-value="7" onclick="selectGridOption('bulan', '7', 'Juli')">Juli</button>
+                        <button class="grid-btn" data-value="8" onclick="selectGridOption('bulan', '8', 'Agustus')">Agustus</button>
+                        <button class="grid-btn" data-value="9" onclick="selectGridOption('bulan', '9', 'September')">September</button>
+                        <button class="grid-btn" data-value="10" onclick="selectGridOption('bulan', '10', 'Oktober')">Oktober</button>
+                        <button class="grid-btn" data-value="11" onclick="selectGridOption('bulan', '11', 'November')">November</button>
+                        <button class="grid-btn" data-value="12" onclick="selectGridOption('bulan', '12', 'Desember')">Desember</button>
+                    </div>
+                </div>
+
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar-week"></i> Minggu
+                    </label>
+                    <input type="hidden" id="mingguSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('minggu')">
+                        <span id="mingguSelected" class="grid-selected-text">Pilih Minggu ke-...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="mingguGrid" class="button-grid" style="display: none;">
+                        <button class="grid-btn" data-value="1" onclick="selectGridOption('minggu', '1', 'Minggu ke-1')">Ke-1</button>
+                        <button class="grid-btn" data-value="2" onclick="selectGridOption('minggu', '2', 'Minggu ke-2')">Ke-2</button>
+                        <button class="grid-btn" data-value="3" onclick="selectGridOption('minggu', '3', 'Minggu ke-3')">Ke-3</button>
+                        <button class="grid-btn" data-value="4" onclick="selectGridOption('minggu', '4', 'Minggu ke-4')">Ke-4</button>
+                    </div>
+                </div>
+
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-map-pin"></i> Pilih Wilayah
+                    </label>
+                    <input type="hidden" id="wilayahSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('wilayah')">
+                        <span id="wilayahSelected" class="grid-selected-text">Pilih Wilayah...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="wilayahButtonGrid" class="button-grid" style="display: none;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baris 2: Action Buttons -->
+            <div class="controls-buttons-row">
+                <button onclick="loadAllWilayah()" class="btn-secondary">
+                    <i class="fas fa-globe"></i> Semua Wilayah
+                </button>
+                <button onclick="loadWilayahMap()" class="btn-primary">
+                    <i class="fas fa-search"></i> Tampilkan Peta
+                </button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Status Info -->
+    <div id="periodInfo" style="background: #ecf0f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
         <i class="fas fa-info-circle" style="color: var(--primary-color); margin-right: 8px;"></i>
-        <span style="font-size: 13px; color: #2c3e50;">
-            <strong>Peta Interaktif QGIS</strong> - Data dikonversi dari UTM Zone 48S (EPSG:32748) ke WGS84 (EPSG:4326)
+        <span id="periodInfoText" style="font-size: 13px; color: #2c3e50;">
+            <strong>Memuat data...</strong>
         </span>
     </div>
 
-    <!-- Kontrol Peta -->
-    <div class="wilayah-controls">
-        <select id="wilayahSelect" style="flex: 1;">
-            <option value="">-- Pilih Wilayah --</option>
-        </select>
-        <button onclick="loadWilayahMap()">
-            <i class="fas fa-search"></i> Tampilkan Peta
-        </button>
-        <button onclick="loadAllWilayah()" style="background-color: #27ae60;">
-            <i class="fas fa-globe"></i> Semua Wilayah
-        </button>
-    </div>
+    <style>
+        .wilayah-controls {
+            background: linear-gradient(135deg, #ffffff 0%, #f7faf8 100%);
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(18, 130, 65, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(18, 130, 65, 0.1);
+            font-family: 'Poppins';
+            position: relative;
+            overflow: visible;
+        }
 
-    <div class="container">
+        .wilayah-controls::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #128241 0%, #0d5c2e 50%, #128241 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
+        }
+
+        .controls-wrapper {
+            max-width: 100%;
+            font-family: 'Poppins';
+            overflow: visible;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: nowrap;
+            margin-bottom: 16px;
+            overflow: visible;
+            position: relative;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins';
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            z-index: 100;
+            overflow: visible;
+        }
+
+        .control-item.compact {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .controls-buttons-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 1;
+        }
+
+        .control-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-family: 'Poppins';
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .control-item:hover .control-label {
+            color: #128241;
+        }
+
+        .control-label i {
+            font-size: 13px;
+            color: #128241;
+            width: 16px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .control-item:hover .control-label i {
+            transform: scale(1.15);
+        }
+
+        /* Button Grid Trigger */
+        .button-grid-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 14px;
+            border: 2px solid #e3eae8;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Poppins';
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c3e50;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .button-grid-trigger:hover {
+            border-color: #128241;
+            box-shadow: 0 6px 16px rgba(18, 130, 65, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+            background-color: #fafdfb;
+        }
+
+        .button-grid-trigger.active {
+            border-color: #128241;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            background-color: #fafdfb;
+        }
+
+        .grid-selected-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .grid-arrow {
+            font-size: 11px;
+            color: #128241;
+            transition: transform 0.3s ease;
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+
+        .button-grid-trigger.active .grid-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Button Grid */
+        .button-grid {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #128241;
+            border-radius: 10px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            z-index: 999999;
+            box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
+            animation: slideDown 0.3s ease;
+            min-width: max-content;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Khusus untuk Bulan - 6 kolom */
+        #bulanGrid.button-grid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid-btn {
+            padding: 13px 12px;
+            border: 2px solid #e3eae8;
+            border-radius: 8px;
+            background: white;
+            color: #2c3e50;
+            font-family: 'Poppins';
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: normal;
+            min-width: 80px;
+            line-height: 1.3;
+        }
+
+        .grid-btn:hover {
+            border-color: #128241;
+            background: #f0f8f5;
+            color: #128241;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(18, 130, 65, 0.15);
+        }
+
+        .grid-btn.selected {
+            background: linear-gradient(135deg, #128241 0%, #0d5c2e 100%);
+            color: white;
+            border-color: #128241;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
+        }
+
+        .grid-btn.selected:hover {
+            background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
+            transform: translateY(-2px);
+        }
+
+        .control-select {
+            display: none;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            flex: 1;
+            padding: 13px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.6px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+            font-family: 'Poppins';
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .btn-primary::before,
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before,
+        .btn-secondary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            box-shadow: 0 4px 14px rgba(18, 130, 65, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(18, 130, 65, 0.35);
+            background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(18, 130, 65, 0.3);
+        }
+
+        .btn-primary i {
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f7f6 100%);
+            color: #2c3e50;
+            border: 2px solid #d8e1dd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, #f5f9f7 0%, #edf4f0 100%);
+            border-color: #128241;
+            color: #128241;
+            box-shadow: 0 10px 25px rgba(18, 130, 65, 0.18);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(18, 130, 65, 0.12);
+        }
+
+        .btn-secondary i {
+            font-size: 14px;
+        }
+
+        @media (max-width: 1024px) {
+            .controls-row {
+                flex-wrap: wrap;
+            }
+
+            .control-item.compact {
+                flex: 1 1 calc(50% - 6px);
+                min-width: 0;
+            }
+
+            .wilayah-controls {
+                padding: 24px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(4, 1fr);
+                left: -20px;
+                right: -20px;
+                min-width: 400px;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wilayah-controls {
+                padding: 20px;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .control-item.compact {
+                flex: 1 1 100%;
+            }
+
+            .controls-buttons-row {
+                flex-direction: column;
+            }
+
+            .control-label {
+                font-size: 10px;
+            }
+
+            .button-grid-trigger {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                padding: 12px;
+                left: -10px;
+                right: -10px;
+                min-width: 320px;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .grid-btn {
+                padding: 11px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+
     <style>
         #mapContainer {
             background: white;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: var(--shadow);
             position: relative;
-            z-index: 1;
             display: block;
             margin-bottom: 30px;
         }
@@ -86,6 +553,8 @@
             height: 600px !important;
             border-radius: 8px;
             display: block;
+            position: relative;
+            z-index: 1;
         }
 
         .leaflet-popup-content {
@@ -125,14 +594,21 @@
 
         .map-legend {
             background: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             position: absolute;
             bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            min-width: 200px;
+            right: 5px;
+            z-index: 10;
+            min-width: 100px;
+        }
+
+        .map-legend h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
         }
 
         .legend-item {
@@ -143,7 +619,7 @@
         }
 
         .legend-item:last-child {
-            margin-bottom: 0;
+            margin-bottom: 3px;
         }
 
         .legend-color {
@@ -152,43 +628,6 @@
             margin-right: 10px;
             border-radius: 3px;
             border: 1px solid #ccc;
-        }
-
-        .wilayah-controls {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .wilayah-controls input,
-        .wilayah-controls select {
-            padding: 10px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .wilayah-controls button {
-            padding: 10px 25px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .wilayah-controls button:hover {
-            background-color: var(--secondary-color);
         }
 
         .stats-row {
@@ -222,34 +661,41 @@
             background: white;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: var(--shadow);
             position: relative;
             margin-bottom: 30px;
+            z-index: 1;
+        }
+
+        /* Ensure Leaflet controls don't overlap navbar */
+        .leaflet-control-zoom,
+        .leaflet-control-attribution {
+            z-index: 10 !important;
         }
 
         .wilayah-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 40px;
         }
 
         @media (max-width: 1400px) {
             .wilayah-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
         @media (max-width: 992px) {
             .wilayah-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
         @media (max-width: 576px) {
             .wilayah-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -276,33 +722,20 @@
 
         .wilayah-card:hover {
             transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 12px 24px rgba(25, 123, 64, 0.15);
+            box-shadow: 0 12px 24px rgba(18, 130, 65, 0.15);
             border-color: var(--primary-color);
         }
 
         .wilayah-card-header {
-            background: linear-gradient(135deg, #1a8c4a, #155A31);
+            background: linear-gradient(135deg, #128241, #128241);
             color: white;
-            padding: 18px 15px;
+            padding: 12px 10px;
             text-align: center;
             position: relative;
         }
 
-        .wilayah-card-header::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #155A31;
-        }
-
         .wilayah-card-header h3 {
-            font-size: 18px;
+            font-size: 14px;
             margin: 0;
             font-weight: 700;
             text-transform: uppercase;
@@ -310,15 +743,15 @@
         }
 
         .wilayah-card-body {
-            padding: 18px 15px;
+            padding: 12px 10px;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 8px 12px;
+            margin-bottom: 8px;
+            padding: 6px 10px;
             background: #f8f9fa;
             border-radius: 6px;
             transition: all 0.3s ease;
@@ -336,23 +769,23 @@
         .info-label {
             font-weight: 600;
             color: #2c3e50;
-            font-size: 12px;
+            font-size: 11px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .info-label i {
             color: var(--primary-color);
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .info-value {
             color: var(--primary-color);
             font-weight: 700;
-            font-size: 13px;
+            font-size: 11px;
             background: white;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 15px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
@@ -382,7 +815,7 @@
                 <span><strong>Bersih</strong></span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #27ae60;"></div>
+                <div class="legend-color" style="background: #128241;"></div>
                 <span><strong>Ringan</strong></span>
             </div>
             <div class="legend-item">
@@ -398,7 +831,6 @@
                 <span><strong>Tidak ada Data</strong></span>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Daftar Wilayah -->
@@ -423,7 +855,7 @@
             <option value="berat">🔴 Berat</option>
             <option value="bersih">🔵 Bersih</option>
         </select>
-        <button onclick="filterWilayah()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); box-shadow: 0 4px 8px rgba(25, 123, 64, 0.2);">
+        <button onclick="filterWilayah()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); box-shadow: 0 4px 8px rgba(18, 130, 65, 0.2);">
             <i class="fas fa-filter"></i> Filter
         </button>
     </div>
@@ -440,6 +872,90 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // ==================
+    // ==================
+    // DEPRECATED - OLD CUSTOM SELECT (Now using Button Grid)
+    // ==================
+    function initCustomSelect(selectId, placeholder = 'Pilih...', emoji = '📅') {
+        // Deprecated - no longer needed with button grid system
+        console.log('initCustomSelect is deprecated - using button grid system');
+    }
+
+    // ===================
+    // BUTTON GRID FUNCTIONS
+    // ===================
+    function toggleButtonGrid(type) {
+        let gridId = type + 'Grid';
+        // Special handling for wilayah button grid
+        if (type === 'wilayah') {
+            gridId = 'wilayahButtonGrid';
+        }
+        
+        const grid = document.getElementById(gridId);
+        const trigger = grid.previousElementSibling;
+        
+        // Toggle current grid
+        if (grid.style.display === 'none' || grid.style.display === '') {
+            // Close all other grids
+            document.querySelectorAll('.button-grid').forEach(g => {
+                g.style.display = 'none';
+            });
+            document.querySelectorAll('.button-grid-trigger').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Open this grid
+            grid.style.display = 'grid';
+            trigger.classList.add('active');
+        } else {
+            // Close this grid
+            grid.style.display = 'none';
+            trigger.classList.remove('active');
+        }
+    }
+
+    function selectGridOption(type, value, label) {
+        // Update hidden input
+        document.getElementById(type + 'Select').value = value;
+        
+        // Update display text
+        document.getElementById(type + 'Selected').textContent = label;
+        
+        // Update selected button
+        // Special handling for wilayah button grid
+        let gridId = type + 'Grid';
+        if (type === 'wilayah') {
+            gridId = 'wilayahButtonGrid';
+        }
+        const grid = document.getElementById(gridId);
+        
+        grid.querySelectorAll('.grid-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        event.target.classList.add('selected');
+        
+        // Close grid
+        grid.style.display = 'none';
+        grid.previousElementSibling.classList.remove('active');
+    }
+
+    // Close grids when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.control-item')) {
+            document.querySelectorAll('.button-grid').forEach(grid => {
+                grid.style.display = 'none';
+            });
+            document.querySelectorAll('.button-grid-trigger').forEach(trigger => {
+                trigger.classList.remove('active');
+            });
+        }
+    });
+
+    function toggleDropdown(element) {
+        // This function is deprecated, keeping for compatibility
+        console.log('toggleDropdown called - using new button grid system');
+    }
+
     // ===================
     // MAP INITIALIZATION
     // ===================
@@ -447,6 +963,8 @@
     let geoJsonLayers = {};
     let allWilayahData = [];
     let wilayahData = [];
+    let currentPeriod = null; // Store current selected period
+    let latestPeriod = null; // Store latest available period
 
     // Initialize map
     function initMap() {
@@ -473,7 +991,11 @@
     }
 
     // Load single wilayah
-    function loadWilayahMap() {
+    async function loadWilayahMap() {
+        // Check period first
+        const periodOk = await checkPeriodAndLoadData();
+        if (!periodOk) return;
+        
         const wilayahNumber = document.getElementById('wilayahSelect').value;
         
         if (!wilayahNumber) {
@@ -548,7 +1070,11 @@
     }
 
     // Load all wilayah
-    function loadAllWilayah() {
+    async function loadAllWilayah() {
+        // Check period first
+        const periodOk = await checkPeriodAndLoadData();
+        if (!periodOk) return;
+        
         // Initialize map if not exists
         if (!map) {
             initMap();
@@ -646,8 +1172,8 @@
                 fillColor = '#3498db'; // Biru
                 borderColor = '#3498db';
             } else if (status.includes('ringan')) {
-                fillColor = '#27ae60'; // Hijau
-                borderColor = '#27ae60';
+                fillColor = '#128241'; // Hijau
+                borderColor = '#128241';
             } else if (status.includes('sedang')) {
                 fillColor = '#f1c40f'; // Kuning
                 borderColor = '#f1c40f';
@@ -679,7 +1205,7 @@
         
         // Header dengan Lokasi
         if (props.Lokasi || props.LOKASI) {
-            html += `<h3 style="margin: 0 0 10px 0; color: #197B40; font-size: 16px;">📍 ${props.Lokasi || props.LOKASI}</h3>`;
+            html += `<h3 style="margin: 0 0 10px 0; color: #128241; font-size: 16px;">📍 ${props.Lokasi || props.LOKASI}</h3>`;
         }
 
         // Status Gulma dengan warna
@@ -691,7 +1217,7 @@
             statusColor = '#3498db';
             textColor = 'white';
         } else if (statusGulma.toLowerCase().includes('ringan')) {
-            statusColor = '#27ae60';
+            statusColor = '#128241';
             textColor = 'white';
         } else if (statusGulma.toLowerCase().includes('sedang')) {
             statusColor = '#f1c40f';
@@ -753,14 +1279,18 @@
                 allWilayahData = data.data;
                 wilayahData = data.data; // Store untuk filtering
 
-                // Populate select dropdown
-                const select = document.getElementById('wilayahSelect');
-                select.innerHTML = '<option value="">-- Pilih Wilayah --</option>';
+                // Populate wilayah button grid (for filter)
+                const wilayahButtonGrid = document.getElementById('wilayahButtonGrid');
+                wilayahButtonGrid.innerHTML = '';
+                
                 data.data.forEach(wilayah => {
-                    const option = document.createElement('option');
-                    option.value = wilayah.wilayah;
-                    option.textContent = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
-                    select.appendChild(option);
+                    const btn = document.createElement('button');
+                    btn.className = 'grid-btn';
+                    btn.setAttribute('data-value', wilayah.wilayah);
+                    btn.textContent = wilayah.wilayah;
+                    btn.title = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
+                    btn.onclick = () => selectGridOption('wilayah', wilayah.wilayah, `Wilayah ${wilayah.wilayah}`);
+                    wilayahButtonGrid.appendChild(btn);
                 });
 
                 // Update statistics
@@ -835,7 +1365,7 @@
             card.innerHTML = `
                 <div class="wilayah-card-header">
                     <h3>Wilayah ${wilayah.wilayah}</h3>
-                    <div style="margin-top: 5px; font-size: 11px; opacity: 0.9;">
+                    <div style="margin-top: 3px; font-size: 9px; opacity: 0.9;">
                         <i class="fas fa-map-pin"></i> Lampung Tengah
                     </div>
                 </div>
@@ -863,12 +1393,12 @@
                             <i class="fas fa-seedling"></i>
                             <span>Status</span>
                         </span>
-                        <span class="info-value" style="background: #e8f5e9; color: #2e7d32;">
+                        <span class="info-value" style="background: #e8f5e9; color: #128241;">
                             Aktif
                         </span>
                     </div>
-                    <div style="margin-top: 15px; padding-top: 12px; border-top: 2px dashed #e0e0e0; text-align: center;">
-                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(25, 123, 64, 0.2);">
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #e0e0e0; text-align: center;">
+                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);">
                             <i class="fas fa-map"></i> Lihat Peta
                         </button>
                     </div>
@@ -897,54 +1427,156 @@
     document.getElementById('searchWilayah').addEventListener('keyup', filterWilayah);
     document.getElementById('filterKomoditas').addEventListener('change', filterWilayah);
 
+    // Update period info display
+    function updatePeriodInfoDisplay(period) {
+        const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const bulanName = bulanNames[parseInt(period.bulan)];
+        
+        document.getElementById('periodInfoText').innerHTML = 
+            `<strong>Menampilkan Data Terbaru</strong> - Tahun ${period.tahun}, ${bulanName}, Minggu ke-${period.minggu}`;
+    }
+
+    // Load available periods (tahun, bulan, minggu)
+    async function loadAvailablePeriods() {
+        try {
+            const response = await fetch('/api/wilayah/periods');
+            const data = await response.json();
+            
+            if (data.success) {
+                // Populate tahun button grid
+                const tahunGrid = document.getElementById('tahunGrid');
+                tahunGrid.innerHTML = '';
+                
+                data.tahun_list.forEach(tahun => {
+                    const btn = document.createElement('button');
+                    btn.className = 'grid-btn';
+                    btn.setAttribute('data-value', tahun);
+                    btn.textContent = tahun;
+                    btn.onclick = () => selectGridOption('tahun', tahun, tahun);
+                    tahunGrid.appendChild(btn);
+                });
+                
+                // Store latest period
+                latestPeriod = data.latest_period;
+                
+                // Set default to latest period if available
+                if (latestPeriod) {
+                    document.getElementById('tahunSelect').value = latestPeriod.tahun;
+                    document.getElementById('bulanSelect').value = latestPeriod.bulan;
+                    document.getElementById('mingguSelect').value = latestPeriod.minggu;
+                    
+                    // Update display
+                    document.getElementById('tahunSelected').textContent = latestPeriod.tahun;
+                    const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    document.getElementById('bulanSelected').textContent = bulanNames[parseInt(latestPeriod.bulan)];
+                    document.getElementById('mingguSelected').textContent = 'Minggu ke-' + latestPeriod.minggu;
+                    
+                    // Mark selected buttons
+                    tahunGrid.querySelector(`[data-value="${latestPeriod.tahun}"]`)?.classList.add('selected');
+                    document.getElementById('bulanGrid').querySelector(`[data-value="${latestPeriod.bulan}"]`)?.classList.add('selected');
+                    document.getElementById('mingguGrid').querySelector(`[data-value="${latestPeriod.minggu}"]`)?.classList.add('selected');
+                    
+                    currentPeriod = latestPeriod;
+                    
+                    // Update period info display (fixed, won't change unless manually selected)
+                    updatePeriodInfoDisplay(latestPeriod);
+                    
+                    console.log('Loading data for latest period:', latestPeriod);
+                }
+                
+                // Load wilayah data and stats
+                loadWilayahDataAndStats();
+                
+                // Auto-load all wilayah map with latest data
+                if (latestPeriod) {
+                    setTimeout(() => {
+                        loadAllWilayah();
+                    }, 500);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading periods:', error);
+            // Still try to load data even if periods fail
+            loadWilayahDataAndStats();
+        }
+    }
+
+    // Check and load data for selected period
+    async function checkPeriodAndLoadData() {
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        if (!tahun || !bulan || !minggu) {
+            alert('Silakan pilih Tahun, Bulan, dan Minggu terlebih dahulu');
+            return false;
+        }
+        
+        // Check if user is selecting the same as latest period
+        const isLatestPeriod = latestPeriod && 
+            latestPeriod.tahun == tahun && 
+            latestPeriod.bulan == bulan && 
+            latestPeriod.minggu == minggu;
+        
+        try {
+            const response = await fetch(`/api/wilayah/data-by-period?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`);
+            const data = await response.json();
+            
+            if (!data.data_available) {
+                // Show notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: #f39c12;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    max-width: 400px;
+                `;
+                notification.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i> ${data.message}
+                `;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+                
+                // Update to latest period
+                if (data.showing_latest && data.period) {
+                    document.getElementById('tahunSelect').value = data.period.tahun;
+                    document.getElementById('bulanSelect').value = data.period.bulan;
+                    document.getElementById('mingguSelect').value = data.period.minggu;
+                    currentPeriod = data.period;
+                    // Don't update display - keep showing "Data Terbaru"
+                }
+            } else {
+                currentPeriod = { tahun, bulan, minggu };
+                // Only update display if user manually selected different period
+                if (!isLatestPeriod) {
+                    updatePeriodInfoDisplay(currentPeriod);
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error checking period:', error);
+            return true; // Continue anyway
+        }
+    }
+
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
-        console.log('Initializing wilayah page...');
+        console.log('Initializing GulmaTrack Wilayah Map...');
         initMap();
-        loadWilayahDataAndStats();
+        loadAvailablePeriods(); // Load periods and then auto-load map
     });
-    // Load statistics and populate dropdown
-        function loadStats() {
-            fetch('/api/wilayah/data')
-                .then(r => r.json())
-                .then(data => {
-                    // Update stats
-                    document.getElementById('totalWilayah').textContent = data.total_wilayah;
-                    
-                    let totalArea = 0;
-                    let totalPlot = 0;
-                    data.data.forEach(w => {
-                        totalArea += w.total_area;
-                        totalPlot += w.feature_count;
-                    });
-                    
-                    document.getElementById('totalArea').textContent = totalArea.toFixed(2);
-                    document.getElementById('totalPlot').textContent = totalPlot;
-
-                    // Populate dropdown
-                    const select = document.getElementById('wilayahSelect');
-                    data.data.forEach(wilayah => {
-                        const option = document.createElement('option');
-                        option.value = wilayah.wilayah;
-                        option.textContent = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
-                        select.appendChild(option);
-                    });
-
-                    console.log('✓ Stats loaded');
-                })
-                .catch(error => {
-                    console.error('Error loading stats:', error);
-                });
-        }
-
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('Initializing GulmaTrack Map...');
-            initMap();
-            loadStats();
-            // Auto-load all wilayah on start
-            setTimeout(() => loadAllWilayah(), 500);
-        });
     </script>
+</div>
 
 @endsection

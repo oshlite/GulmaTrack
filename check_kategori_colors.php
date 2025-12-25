@@ -26,7 +26,7 @@ foreach ($kategoris as $kategori) {
 
 echo "\n=== MAPPING WARNA ===\n";
 echo "Bersih  -> Biru (#3498db)\n";
-echo "Ringan  -> Hijau (#27ae60)\n";
+echo "Ringan  -> Hijau (#128241)\n";
 echo "Sedang  -> Kuning (#f1c40f)\n";
 echo "Berat   -> Merah (#e74c3c)\n";
 echo "Null/Kosong -> Putih (#ffffff)\n";

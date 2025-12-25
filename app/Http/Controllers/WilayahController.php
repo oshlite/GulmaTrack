@@ -223,4 +223,124 @@ class WilayahController extends Controller
     {
         return view('pages.wilayah');
     }
+
+    /**
+     * Get available periods (tahun, bulan, minggu) from import logs
+     */
+    public function getPeriods(): JsonResponse
+    {
+        try {
+            $periods = \App\Models\ImportLog::where('status', 'success')
+                ->whereNotNull('tahun')
+                ->whereNotNull('bulan')
+                ->whereNotNull('minggu')
+                ->select('tahun', 'bulan', 'minggu')
+                ->distinct()
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->orderBy('minggu', 'desc')
+                ->get();
+
+            // Get unique years
+            $tahun_list = $periods->pluck('tahun')->unique()->values();
+            
+            // Get latest publication info
+            $latest = \App\Models\MapPublication::getLatestPublished();
+            $latestPeriod = null;
+            
+            if ($latest) {
+                // Get the import log associated with the latest publication
+                // Assuming the latest published is the most recent import
+                $latestImport = \App\Models\ImportLog::where('status', 'success')
+                    ->whereNotNull('tahun')
+                    ->latest('created_at')
+                    ->first();
+                    
+                if ($latestImport) {
+                    $latestPeriod = [
+                        'tahun' => $latestImport->tahun,
+                        'bulan' => $latestImport->bulan,
+                        'minggu' => $latestImport->minggu
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'periods' => $periods,
+                'tahun_list' => $tahun_list,
+                'latest_period' => $latestPeriod
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get data for specific period
+     */
+    public function getDataByPeriod(Request $request): JsonResponse
+    {
+        try {
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
+
+            // Check if data exists for this period
+            $importLog = \App\Models\ImportLog::where('status', 'success')
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
+                ->where('minggu', $minggu)
+                ->first();
+
+            if (!$importLog) {
+                // Return latest data instead with a message
+                $latestImport = \App\Models\ImportLog::where('status', 'success')
+                    ->whereNotNull('tahun')
+                    ->latest('created_at')
+                    ->first();
+
+                if (!$latestImport) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tidak ada data yang tersedia',
+                        'data_available' => false
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Data untuk periode {$tahun} Bulan {$bulan} Minggu {$minggu} tidak tersedia. Menampilkan data terbaru.",
+                    'data_available' => false,
+                    'showing_latest' => true,
+                    'period' => [
+                        'tahun' => $latestImport->tahun,
+                        'bulan' => $latestImport->bulan,
+                        'minggu' => $latestImport->minggu
+                    ],
+                    'import_log_id' => $latestImport->id
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data ditemukan',
+                'data_available' => true,
+                'period' => [
+                    'tahun' => $importLog->tahun,
+                    'bulan' => $importLog->bulan,
+                    'minggu' => $importLog->minggu
+                ],
+                'import_log_id' => $importLog->id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -29,6 +29,14 @@ Route::get('/wilayah/data', [WilayahController::class, 'getData'])
     ->name('api.wilayah.data')
     ->withoutMiddleware('api'); // Bypass API middleware if needed
 
+Route::get('/wilayah/periods', [WilayahController::class, 'getPeriods'])
+    ->name('api.wilayah.periods')
+    ->withoutMiddleware('api');
+
+Route::get('/wilayah/data-by-period', [WilayahController::class, 'getDataByPeriod'])
+    ->name('api.wilayah.data-by-period')
+    ->withoutMiddleware('api');
+
 // Excel data endpoint
 Route::get('/excel-data', [ExcelDataController::class, 'getExcelData'])
     ->name('api.excel.data')

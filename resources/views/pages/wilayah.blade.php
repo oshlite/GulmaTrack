@@ -56,7 +56,7 @@
             <div class="controls-row">
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-calendar-alt"></i> Tahun
+                        <i class="fas fa-calendar"></i> Tahun
                     </label>
                     <input type="hidden" id="tahunSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('tahun')">
@@ -70,7 +70,7 @@
 
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-calendar"></i> Bulan
+                        <i class="fas fa-calendar-alt"></i> Bulan
                     </label>
                     <input type="hidden" id="bulanSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('bulan')">
@@ -112,7 +112,7 @@
 
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-map-pin"></i> Pilih Wilayah
+                        <i class="fas fa-map-pin"></i> Wilayah
                     </label>
                     <input type="hidden" id="wilayahSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('wilayah')">
@@ -127,10 +127,10 @@
 
             <!-- Baris 2: Action Buttons -->
             <div class="controls-buttons-row">
-                <button onclick="loadAllWilayah()" class="btn-secondary">
+                <button onclick="loadAllWilayah()" class="btn-primary">
                     <i class="fas fa-globe"></i> Semua Wilayah
                 </button>
-                <button onclick="loadWilayahMap()" class="btn-primary">
+                <button onclick="loadWilayahMap()" class="btn-secondary">
                     <i class="fas fa-search"></i> Tampilkan Peta
                 </button>
             </div>
@@ -139,8 +139,8 @@
 
         <!-- Status Info -->
     <div id="periodInfo" style="background: #ecf0f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--primary-color);">
-        <i class="fas fa-info-circle" style="color: var(--primary-color); margin-right: 8px;"></i>
-        <span id="periodInfoText" style="font-size: 13px; color: #2c3e50;">
+        <i class="fas fa-info-circle" style="color: var(--accent-color); margin-right: 8px;"></i>
+        <span id="periodInfoText" style="font-size: 13px; color: #FBA919;">
             <strong>Memuat data...</strong>
         </span>
     </div>
@@ -153,6 +153,7 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 20px rgba(18, 130, 65, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
             border: 1px solid rgba(18, 130, 65, 0.1);
+            border-left: 4px solid #128241;
             font-family: 'Poppins';
             position: relative;
             overflow: visible;
@@ -165,7 +166,6 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #128241 0%, #0d5c2e 50%, #128241 100%);
             background-size: 200% 100%;
             animation: shimmer 3s ease-in-out infinite;
         }
@@ -237,7 +237,7 @@
 
         .control-label i {
             font-size: 13px;
-            color: #128241;
+            color: #FBA919;
             width: 16px;
             text-align: center;
             transition: transform 0.3s ease;
@@ -308,7 +308,7 @@
             background: white;
             border: 2px solid #128241;
             border-radius: 10px;
-            padding: 14px;
+            padding: 12px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
@@ -378,90 +378,69 @@
             display: none;
         }
 
-        .btn-primary,
-        .btn-secondary {
-            flex: 1;
-            padding: 13px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            letter-spacing: 0.6px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-            font-family: 'Poppins';
-            position: relative;
-            overflow: hidden;
-            white-space: nowrap;
-        }
+/* BASE BUTTON */
+.btn-primary,
+.btn-secondary {
+    flex: 1;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.6px;
+    font-family: 'Poppins';
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+}
 
-        .btn-primary::before,
-        .btn-secondary::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
+.btn-primary {
+    background: white;
+    border: 2px solid #d8e1dd;
+    color: #128241;
+    box-shadow: none;
+}
 
-        .btn-primary:hover::before,
-        .btn-secondary:hover::before {
-            width: 300px;
-            height: 300px;
-        }
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background: #128241;
+    border-color: #128241;
+    color: white;
+    box-shadow: none;
+    outline: none;
+}
 
-        .btn-primary {
-            box-shadow: 0 4px 14px rgba(18, 130, 65, 0.25);
-        }
+.btn-primary::before {
+    display: none;
+}
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(18, 130, 65, 0.35);
-            background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
-        }
+.btn-secondary {
+    background: white;
+    border: 2px solid #d8e1dd;
+    color: #FBA919;
+    box-shadow: none;
+}
 
-        .btn-primary:active {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(18, 130, 65, 0.3);
-        }
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active {
+    background: #FBA919;
+    border-color: #FBA919;
+    color: white;
+    box-shadow: none;
+    outline: none;
+}
 
-        .btn-primary i {
-            font-size: 14px;
-        }
+.btn-secondary::before {
+    display: none;
+}
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #ffffff 0%, #f5f7f6 100%);
-            color: #2c3e50;
-            border: 2px solid #d8e1dd;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-3px);
-            background: linear-gradient(135deg, #f5f9f7 0%, #edf4f0 100%);
-            border-color: #128241;
-            color: #128241;
-            box-shadow: 0 10px 25px rgba(18, 130, 65, 0.18);
-        }
-
-        .btn-secondary:active {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(18, 130, 65, 0.12);
-        }
-
-        .btn-secondary i {
-            font-size: 14px;
-        }
 
         @media (max-width: 1024px) {
             .controls-row {
@@ -605,17 +584,25 @@
         }
 
         .map-legend h4 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
+            margin: 0 0 2px 6px;
+            font-size: 16px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #FBA919;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
             font-size: 13px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(18, 130, 65, 0.1);
+            transform: translateX(5px);
         }
 
         .legend-item:last-child {
@@ -803,61 +790,239 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* Tooltip styling */
+        .leaflet-tooltip {
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            padding: 8px 12px !important;
+            font-family: 'Poppins';
+        }
+        .leaflet-tooltip-top:before {
+            border-top-color: var(--primary-color);
+        }
+        
+        /* Permanent location label styling */
+        .location-label {
+            background: rgba(18, 130, 65, 0.9) !important;
+            border: 2px solid white !important;
+            border-radius: 4px !important;
+            color: white !important;
+            font-weight: 600 !important;
+            font-size: 11px !important;
+            padding: 4px 8px !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+            font-family: 'Poppins', sans-serif !important;
+        }
+        .location-label:before {
+            display: none !important;
+        }
+        
+        /* Location Details Table */
+        .location-details-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        
+        .location-details-container.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .location-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Poppins';
+        }
+        
+        .location-table thead {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .location-table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .location-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+        }
+        
+        .location-table tbody tr:hover {
+            background: #f0f8f5;
+            cursor: pointer;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-bersih { background: #3498db; color: white; }
+        .status-ringan { background: #128241; color: white; }
+        .status-sedang { background: #f1c40f; color: #333; }
+        .status-berat { background: #e74c3c; color: white; }
+        .status-unknown { background: #ecf0f1; color: #666; }
     </style>
 
     <!-- Map Container -->
     <div class="map-container">
         <div id="map"></div>
         <div class="map-legend">
-            <h4><i class="fas fa-info-circle"></i> Status Gulma</h4>
-            <div class="legend-item">
+            <h4 onclick="filterByStatus('')" style="cursor:pointer;">
+    <i class="fas fa-info-circle"></i>  Status Gulma
+</h4>
+            <div class="legend-item" onclick="filterByStatus('bersih')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #3498db;"></div>
                 <span><strong>Bersih</strong></span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="filterByStatus('ringan')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #128241;"></div>
                 <span><strong>Ringan</strong></span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="filterByStatus('sedang')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #f1c40f;"></div>
                 <span><strong>Sedang</strong></span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="filterByStatus('berat')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #e74c3c;"></div>
                 <span><strong>Berat</strong></span>
             </div>
-            <div class="legend-item">
+            <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #ecf0f1; border-color: #8b8b8b;"></div>
-                <span><strong>Tidak ada Data</strong></span>
+                <span><strong>Belum Dimonitoring</strong></span>
             </div>
         </div>
     </div>
 
     <!-- Daftar Wilayah -->
     <div style="margin: 30px 0 20px;">
-        <h2 style="font-size: 24px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+        <h2 style="font-size: 35px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
             <i class="fas fa-map-marked-alt" style="color: var(--primary-color);"></i>
-            Daftar Wilayah Produksi
+            Daftar Wilayah
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button
+onclick="toggleLocationDetails()"
+style="
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+color: white;
+border: none;
+padding: 10px 16px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 12px;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+
+
+
+transition: transform 0.2s ease;
+"
+onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,0,0,0.18), 0 0 16px rgba(18,130,65,0.45)'"
+onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.15), 0 0 12px rgba(18,130,65,0.35)'"
+>
+
+                <i class="fas fa-table" id="toggleIcon"></i>
+                <span id="toggleText">Tampilkan Tabel Lokasi</span>
+            </button>
+        </div>
         </h2>
-        <p style="color: #7f8c8d; font-size: 13px; margin: 0;">Klik kartu wilayah untuk melihat detail peta</p>
+        
+    </div>
+    
+    <!-- Location Details Table -->
+    <div class="location-details-container" id="locationDetailsTable">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: var(--primary-color); font-size: 18px;">
+                <i class="fas fa-list-alt"></i> Detail Lokasi per Wilayah
+            </h3>
+            <span id="tableInfoText" style="font-size: 12px; color: #666;"></span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="location-table" id="locationTable">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> No</th>
+                        <th><i class="fas fa-map-marker-alt"></i> Wilayah</th>
+                        <th><i class="fas fa-map-pin"></i> Kode Lokasi</th>
+                        <th><i class="fas fa-seedling"></i> Status Gulma</th>
+                        <th><i class="fas fa-ruler-combined"></i> Luas (Ha)</th>
+                    </tr>
+                </thead>
+                <tbody id="locationTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                            Pilih wilayah atau filter status untuk melihat data lokasi
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     
     <!-- Kontrol Wilayah -->
-    <div class="wilayah-controls" style="margin-bottom: 25px;">
-        <div style="flex: 1; position: relative;">
-            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999;"></i>
-            <input type="text" id="searchWilayah" placeholder="Cari wilayah..." style="padding-left: 45px;">
+    <div class="wilayah-controls" style="margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-start;">
+        <div style="flex: 0 0 30%; position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #FBA919; font-size: 16px;"></i>
+            <input type="text" id="searchWilayah" placeholder="Cari wilayah..." style="width: 100%; padding: 14px 15px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; transition: all 0.3s ease; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onfocus="this.style.borderColor='#FBA919'; this.style.boxShadow='0 0 0 4px rgba(251, 169, 25, 0.1), 0 2px 8px rgba(0,0,0,0.08)';" onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
         </div>
-        <select id="filterKomoditas" style="min-width: 180px;">
-            <option value="">🔍 Semua Kategori</option>
-            <option value="ringan">🟢 Ringan</option>
-            <option value="sedang">🟡 Sedang</option>
-            <option value="berat">🔴 Berat</option>
-            <option value="bersih">🔵 Bersih</option>
-        </select>
-        <button onclick="filterWilayah()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); box-shadow: 0 4px 8px rgba(18, 130, 65, 0.2);">
-            <i class="fas fa-filter"></i> Filter
-        </button>
+        <div class="control-item" style="flex: 1; position: relative;">
+            <!-- Hidden input to store selected value -->
+            <input type="hidden" id="filterKomoditas" value="">
+            
+            <!-- Button Grid Trigger -->
+            <div class="button-grid-trigger" onclick="toggleButtonGrid('statusGulma')" style="width: 100%; padding: 14px 50px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; font-weight: 500; background: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; position: relative;">
+                <i class="fas fa-filter" style="position: absolute; left: 15px; color: #FBA919; font-size: 16px;"></i>
+                <span class="grid-selected-text" id="statusGulmaSelected" style="flex: 1; color: #2c3e50;">Kategori Status Gulma</span>
+                <i class="fas fa-chevron-down grid-arrow" style="color: #FBA919; font-size: 14px; transition: transform 0.3s ease;"></i>
+            </div>
+            
+            <!-- Button Grid -->
+            <div class="button-grid" id="statusGulmaGrid" style="display: none; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 5px; background: white; border: 2px solid #e0e0e0; border-radius: 10px; margin-top: 0px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); position: absolute; width: 100%; z-index: 0; animation: slideDown 0.3s ease;">
+                <button class="grid-btn" data-value="bersih" data-color="#3498db" onclick="selectStatusGulma('bersih', 'Bersih', '#3498db')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #3498db; background: #3498db; flex-shrink: 0;"></div>
+                    <span>Bersih</span>
+                </button>
+                <button class="grid-btn" data-value="ringan" data-color="#128241" onclick="selectStatusGulma('ringan', 'Ringan', '#128241')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #128241; background: #128241; flex-shrink: 0;"></div>
+                    <span>Ringan</span>
+                </button>
+                <button class="grid-btn" data-value="sedang" data-color="#f1c40f" onclick="selectStatusGulma('sedang', 'Sedang', '#f1c40f')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #f1c40f; background: #f1c40f; flex-shrink: 0;"></div>
+                    <span>Sedang</span>
+                </button>
+                <button class="grid-btn" data-value="berat" data-color="#e74c3c" onclick="selectStatusGulma('berat', 'Berat', '#e74c3c')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #e74c3c; background: #e74c3c; flex-shrink: 0;"></div>
+                    <span>Berat</span>
+                </button>
+                <button class="grid-btn" data-value="belum_dimonitoring" data-color="#ecf0f1" onclick="selectStatusGulma('belum_dimonitoring', 'Belum Dimonitoring', '#ecf0f1')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #999; background: #ecf0f1; flex-shrink: 0;"></div>
+                    <span>Belum Dimonitoring</span>
+                </button>
+                <!-- <button class="grid-btn selected" data-value="" data-color="linear-gradient(135deg, #3498db, #e74c3c)" onclick="selectStatusGulma('', 'Kategori Status Gulma', 'linear-gradient(135deg, #3498db, #e74c3c)')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center; grid-column: 1 / -1;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #ddd; background: linear-gradient(135deg, #3498db, #e74c3c); flex-shrink: 0;"></div>
+                    <span style="color: #2c3e50; display: inline-block; font-weight: 500;">Semua Data</span>
+                </button> -->
+            </div>
+        </div>
     </div>
     
     <div class="wilayah-grid" id="wilayahGrid">
@@ -884,6 +1049,28 @@
     // ===================
     // BUTTON GRID FUNCTIONS
     // ===================
+    function selectStatusGulma(value, label, color) {
+        // Update hidden input
+        document.getElementById('filterKomoditas').value = value;
+        
+        // Update display text
+        document.getElementById('statusGulmaSelected').textContent = label;
+        
+        // Update selected button
+        const grid = document.getElementById('statusGulmaGrid');
+        grid.querySelectorAll('.grid-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        event.target.closest('.grid-btn').classList.add('selected');
+        
+        // Close grid
+        grid.style.display = 'none';
+        grid.previousElementSibling.classList.remove('active');
+        
+        // Trigger filter
+        filterWilayah();
+    }
+    
     function toggleButtonGrid(type) {
         let gridId = type + 'Grid';
         // Special handling for wilayah button grid
@@ -956,6 +1143,56 @@
         console.log('toggleDropdown called - using new button grid system');
     }
 
+    // Toggle location details table
+    function toggleLocationDetails() {
+        const table = document.getElementById('locationDetailsTable');
+        const icon = document.getElementById('toggleIcon');
+        const text = document.getElementById('toggleText');
+        
+        if (table.classList.contains('active')) {
+            table.classList.remove('active');
+            icon.className = 'fas fa-table';
+            text.textContent = 'Tampilkan Tabel Lokasi';
+        } else {
+            table.classList.add('active');
+            icon.className = 'fas fa-times';
+            text.textContent = 'Sembunyikan Tabel';
+        }
+    }
+    
+    // Filter by status (from legend click)
+    function filterByStatus(status) {
+        currentStatusFilter = status;
+        
+        // Set filter dropdown to match
+        document.getElementById('filterKomoditas').value = status;
+        
+        // Enable location labels when status filter is active
+        if (status) {
+            showLocationLabels = true;
+            // Open location details table
+            document.getElementById('locationDetailsTable').classList.add('active');
+            document.getElementById('toggleIcon').className = 'fas fa-times';
+            document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
+        } else {
+            // Reset: no labels, no table, reload all
+            showLocationLabels = false;
+            currentStatusFilter = '';
+            // Hide table when clicking "Semua Data"
+            document.getElementById('locationDetailsTable').classList.remove('active');
+            document.getElementById('toggleIcon').className = 'fas fa-table';
+            document.getElementById('toggleText').textContent = 'Tampilkan Tabel Lokasi';
+        }
+        
+        // Reload map with filter applied
+        if (Object.keys(geoJsonLayers).length > 0) {
+            loadAllWilayah();
+        }
+        
+        // Scroll to map
+        document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+    }
+
     // ===================
     // MAP INITIALIZATION
     // ===================
@@ -965,6 +1202,9 @@
     let wilayahData = [];
     let currentPeriod = null; // Store current selected period
     let latestPeriod = null; // Store latest available period
+    let showLocationLabels = false; // Track whether to show location code labels
+    let currentStatusFilter = ''; // Track current status filter
+    let allLocationData = []; // Store all location data for table
 
     // Initialize map
     function initMap() {
@@ -976,7 +1216,7 @@
         // Create map centered on Lampung Tengah
         map = L.map('map', {
             center: [-4.85, 105.0],
-            zoom: 11,
+            zoom: 12,
             zoomControl: true,
             attributionControl: true
         });
@@ -1007,6 +1247,9 @@
         if (!map) {
             initMap();
         }
+
+        // Enable location labels when specific wilayah is selected
+        showLocationLabels = true;
 
         // Clear existing layers
         clearAllLayers();
@@ -1049,6 +1292,40 @@
                                 maxHeight: 600,
                                 autoPan: true
                             });
+                            
+                            // Add tooltip for hover (quick info)
+                            layer.bindTooltip(createTooltipContent(feature.properties), {
+                                permanent: false,
+                                sticky: true,
+                                direction: 'top',
+                                offset: [0, -10]
+                            });
+                            
+                            // Add permanent label if showLocationLabels is true
+                            if (showLocationLabels) {
+                                const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
+                                layer.bindTooltip(lokasi, {
+                                    permanent: true,
+                                    direction: 'center',
+                                    className: 'location-label'
+                                });
+                            }
+                            
+                            // Add hover effect - lift on hover
+                            layer.on('mouseover', function(e) {
+                                const originalStyle = getFeatureStyle(feature);
+                                this.setStyle({
+                                    weight: 8,
+                                    fillOpacity: 0.8,
+                                    opacity: 1,
+                                    color: originalStyle.color
+                                });
+                                this.bringToFront();
+                            });
+                            
+                            layer.on('mouseout', function(e) {
+                                this.setStyle(getFeatureStyle(feature));
+                            });
                         }
                     }
                 }).addTo(map);
@@ -1058,10 +1335,13 @@
                 // Fit map to bounds
                 const bounds = layer.getBounds();
                 if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [50, 50] });
+                    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14 });
                 }
 
                 console.log(`Wilayah ${wilayahNumber} loaded: ${data.features.length} features`);
+                
+                // Populate location table
+                populateLocationTable(data.features, wilayahNumber);
             })
             .catch(error => {
                 console.error('Error loading wilayah:', error);
@@ -1079,6 +1359,9 @@
         if (!map) {
             initMap();
         }
+
+        // Disable location labels when showing all wilayah (keep map clean)
+        showLocationLabels = false;
 
         // Clear existing layers
         clearAllLayers();
@@ -1105,7 +1388,23 @@
 
                 results.forEach(({ wilayah, data }) => {
                     if (data.features && data.features.length > 0) {
-                        const layer = L.geoJSON(data, {
+                        // Filter features by status if filter is active
+                        let features = data.features;
+                        if (currentStatusFilter) {
+                            features = features.filter(f => {
+                                const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                                if (currentStatusFilter === 'belum_dimonitoring') {
+                                    // Filter untuk belum dimonitoring (status kosong atau tidak dikenali)
+                                    return !status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'));
+                                }
+                                return status.includes(currentStatusFilter);
+                            });
+                        }
+                        
+                        // Skip if no features match filter
+                        if (features.length === 0) return;
+                        
+                        const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
                             style: function(feature) {
                                 return getFeatureStyle(feature);
                             },
@@ -1116,6 +1415,40 @@
                                         minWidth: 320,
                                         maxHeight: 600,
                                         autoPan: true
+                                    });
+                                    
+                                    // Add tooltip for hover (quick info)
+                                    layer.bindTooltip(createTooltipContent(feature.properties), {
+                                        permanent: false,
+                                        sticky: true,
+                                        direction: 'top',
+                                        offset: [0, -10]
+                                    });
+                                    
+                                    // Add permanent label if showLocationLabels is true
+                                    if (showLocationLabels) {
+                                        const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
+                                        layer.bindTooltip(lokasi, {
+                                            permanent: true,
+                                            direction: 'top',
+                                            className: 'location-label'
+                                        });
+                                    }
+                                    
+                                    // Add hover effect - lift on hover
+                                    layer.on('mouseover', function(e) {
+                                        const originalStyle = getFeatureStyle(feature);
+                                        this.setStyle({
+                                            weight: 8,
+                                            fillOpacity: 0.8,
+                                            opacity: 1,
+                                            color: originalStyle.color
+                                        });
+                                        this.bringToFront();
+                                    });
+                                    
+                                    layer.on('mouseout', function(e) {
+                                        this.setStyle(getFeatureStyle(feature));
                                     });
                                 }
                             }
@@ -1136,10 +1469,28 @@
                         return acc.extend(bounds);
                     }, L.latLngBounds(allBounds[0]));
                     
-                    map.fitBounds(combinedBounds, { padding: [50, 50] });
+                    map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: 13 });
                 }
 
                 console.log(`Loaded ${results.length} wilayah successfully`);
+                
+                // Populate location table with all data (filtered if needed)
+                const allFeatures = results.flatMap(r => {
+                    if (!r.data.features) return [];
+                    if (currentStatusFilter) {
+                        return r.data.features.filter(f => {
+                            const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                            return status.includes(currentStatusFilter);
+                        });
+                    }
+                    return r.data.features;
+                });
+                populateLocationTable(allFeatures);
+                
+                // Apply status filter to table if active
+                if (currentStatusFilter) {
+                    filterLocationsByStatus(currentStatusFilter);
+                }
             })
             .catch(error => {
                 console.error('Error loading all wilayah:', error);
@@ -1190,6 +1541,29 @@
             fillColor: fillColor,
             fillOpacity: 0.6
         };
+    }
+
+    // Create tooltip content for hover (quick info)
+    function createTooltipContent(props) {
+        const statusGulma = props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
+        const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
+        
+        // Get color for status
+        let statusColor = '#9ca3af';
+        if (statusGulma.toLowerCase().includes('bersih')) {
+            statusColor = '#3498db';
+        } else if (statusGulma.toLowerCase().includes('ringan')) {
+            statusColor = '#128241';
+        } else if (statusGulma.toLowerCase().includes('sedang')) {
+            statusColor = '#f1c40f';
+        } else if (statusGulma.toLowerCase().includes('berat')) {
+            statusColor = '#e74c3c';
+        }
+        
+        return `<div style="font-family: 'Poppins'; font-size: 13px; padding: 5px;">
+            <strong>📍 Kode Lokasi:</strong> ${lokasi}<br>
+            <strong>Status Gulma:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusGulma}</span>
+        </div>`;
     }
 
     // Create popup content
@@ -1287,7 +1661,7 @@
                     const btn = document.createElement('button');
                     btn.className = 'grid-btn';
                     btn.setAttribute('data-value', wilayah.wilayah);
-                    btn.textContent = wilayah.wilayah;
+                    btn.textContent = `Wil. ${wilayah.wilayah}`;
                     btn.title = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
                     btn.onclick = () => selectGridOption('wilayah', wilayah.wilayah, `Wilayah ${wilayah.wilayah}`);
                     wilayahButtonGrid.appendChild(btn);
@@ -1397,9 +1771,12 @@
                             Aktif
                         </span>
                     </div>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #e0e0e0; text-align: center;">
-                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);">
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #e0e0e0; text-align: center; display: flex; gap: 8px; justify-content: center;">
+                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="flex: 1; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(18, 130, 65, 0.2)';">
                             <i class="fas fa-map"></i> Lihat Peta
+                        </button>
+                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('locationDetailsTable').classList.add('active'); document.getElementById('toggleIcon').className = 'fas fa-times'; document.getElementById('toggleText').textContent = 'Sembunyikan Tabel'; document.getElementById('locationDetailsTable').scrollIntoView({ behavior: 'smooth' });" style="flex: 1; background: linear-gradient(135deg, #FBA919, #f39c12); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(251, 169, 25, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(251, 169, 25, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(251, 169, 25, 0.2)';">
+                            <i class="fas fa-table"></i> Tabel
                         </button>
                     </div>
                 </div>
@@ -1409,23 +1786,188 @@
         });
     }
 
+    // Populate location table
+    function populateLocationTable(features, wilayahNumber = null) {
+        allLocationData = [];
+        const tbody = document.getElementById('locationTableBody');
+        tbody.innerHTML = '';
+        
+        if (!features || features.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
+            return;
+        }
+        
+        features.forEach((feature, index) => {
+            const props = feature.properties;
+            const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
+            const status = (props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
+            const wilayah = wilayahNumber || props.Wilayah || props.gulma_Wilayah || '-';
+            const luas = props.Luas_Bruto || props.Bruto || props.bruto || '-';
+            
+            // Store for filtering
+            allLocationData.push({
+                wilayah,
+                lokasi,
+                status,
+                luas,
+                feature
+            });
+            
+            // Determine status class
+            let statusClass = 'status-unknown';
+            let statusText = 'Tidak Ada Data';
+            if (status.includes('bersih')) {
+                statusClass = 'status-bersih';
+                statusText = 'Bersih';
+            } else if (status.includes('ringan')) {
+                statusClass = 'status-ringan';
+                statusText = 'Ringan';
+            } else if (status.includes('sedang')) {
+                statusClass = 'status-sedang';
+                statusText = 'Sedang';
+            } else if (status.includes('berat')) {
+                statusClass = 'status-berat';
+                statusText = 'Berat';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${wilayah}</td>
+                <td><strong>${lokasi}</strong></td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${luas}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        updateTableInfo();
+    }
+    
+    // Update table info text
+    function updateTableInfo() {
+        const tbody = document.getElementById('locationTableBody');
+        const count = tbody.querySelectorAll('tr').length;
+        const infoText = document.getElementById('tableInfoText');
+        
+        if (currentStatusFilter) {
+            let displayStatus = currentStatusFilter.charAt(0).toUpperCase() + currentStatusFilter.slice(1);
+            if (currentStatusFilter === 'belum_dimonitoring') {
+                displayStatus = 'Belum Dimonitoring';
+            }
+            infoText.textContent = `Menampilkan ${count} lokasi dengan status: ${displayStatus}`;
+        } else {
+            infoText.textContent = `Total: ${count} lokasi`;
+        }
+    }
+    
+    // Filter locations in table and map by status
+    function filterLocationsByStatus(statusFilter) {
+        const tbody = document.getElementById('locationTableBody');
+        tbody.innerHTML = '';
+        
+        let filteredData;
+        if (statusFilter) {
+            if (statusFilter === 'belum_dimonitoring') {
+                // Filter untuk belum dimonitoring
+                filteredData = allLocationData.filter(loc => {
+                    return !loc.status || (!loc.status.includes('bersih') && !loc.status.includes('ringan') && !loc.status.includes('sedang') && !loc.status.includes('berat'));
+                });
+            } else {
+                filteredData = allLocationData.filter(loc => loc.status.includes(statusFilter));
+            }
+        } else {
+            filteredData = allLocationData;
+        }
+        
+        if (filteredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Tidak ada data dengan status ini</td></tr>';
+            return;
+        }
+        
+        filteredData.forEach((loc, index) => {
+            let statusClass = 'status-unknown';
+            let statusText = 'Tidak Ada Data';
+            if (loc.status.includes('bersih')) {
+                statusClass = 'status-bersih';
+                statusText = 'Bersih';
+            } else if (loc.status.includes('ringan')) {
+                statusClass = 'status-ringan';
+                statusText = 'Ringan';
+            } else if (loc.status.includes('sedang')) {
+                statusClass = 'status-sedang';
+                statusText = 'Sedang';
+            } else if (loc.status.includes('berat')) {
+                statusClass = 'status-berat';
+                statusText = 'Berat';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${loc.wilayah}</td>
+                <td><strong>${loc.lokasi}</strong></td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${loc.luas}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        updateTableInfo();
+    }
+
     function filterWilayah() {
         const search = document.getElementById('searchWilayah').value.toLowerCase();
         const komoditas = document.getElementById('filterKomoditas').value;
 
+        // Filter kartu hanya berdasarkan search, bukan komoditas
         const filtered = wilayahData.filter(w => {
             const wilayahName = `wilayah ${w.wilayah}`.toLowerCase();
-            const matchSearch = wilayahName.includes(search) || w.wilayah.toString().includes(search);
-            const matchKomoditas = !komoditas || (w.kategori && w.kategori.toLowerCase().includes(komoditas));
-            return matchSearch && matchKomoditas;
+            const matchSearch = !search || wilayahName.includes(search) || w.wilayah.toString().includes(search);
+            return matchSearch;
         });
+
+        // Enable location labels and filter when filter is active
+        if (komoditas) {
+            // Filter kategori aktif
+            showLocationLabels = true;
+            currentStatusFilter = komoditas;
+            
+            // Show location table
+            document.getElementById('locationDetailsTable').classList.add('active');
+            document.getElementById('toggleIcon').className = 'fas fa-times';
+            document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
+            
+            // Filter table if data exists
+            if (allLocationData.length > 0) {
+                filterLocationsByStatus(komoditas);
+            }
+            
+            // Reload map with filtered data and labels
+            if (Object.keys(geoJsonLayers).length > 0) {
+                loadAllWilayah();
+            }
+        } else if (search) {
+            // Hanya search tanpa filter kategori - tidak show tabel
+            showLocationLabels = false;
+            currentStatusFilter = '';
+            document.getElementById('locationDetailsTable').classList.remove('active');
+            document.getElementById('toggleIcon').className = 'fas fa-table';
+            document.getElementById('toggleText').textContent = 'Tampilkan Tabel Lokasi';
+        } else {
+            // Reset semua
+            showLocationLabels = false;
+            currentStatusFilter = '';
+            document.getElementById('locationDetailsTable').classList.remove('active');
+            document.getElementById('toggleIcon').className = 'fas fa-table';
+            document.getElementById('toggleText').textContent = 'Tampilkan Tabel Lokasi';
+        }
 
         renderWilayah(filtered);
     }
 
     // Real-time search
     document.getElementById('searchWilayah').addEventListener('keyup', filterWilayah);
-    document.getElementById('filterKomoditas').addEventListener('change', filterWilayah);
 
     // Update period info display
     function updatePeriodInfoDisplay(period) {
@@ -1434,7 +1976,7 @@
         const bulanName = bulanNames[parseInt(period.bulan)];
         
         document.getElementById('periodInfoText').innerHTML = 
-            `<strong>Menampilkan Data Terbaru</strong> - Tahun ${period.tahun}, ${bulanName}, Minggu ke-${period.minggu}`;
+            `Menampilkan Data Terbaru - <strong>Tahun ${period.tahun}, ${bulanName}, Minggu ke-${period.minggu}</strong>`;
     }
 
     // Load available periods (tahun, bulan, minggu)

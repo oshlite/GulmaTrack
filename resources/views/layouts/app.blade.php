@@ -107,7 +107,7 @@
         }
 
         .logo-img {
-            width: 80px;
+            width: 85px;
             height: 60px;
             object-fit: contain;
             transition: all 0.3s ease;

@@ -175,6 +175,17 @@
         .leaflet-popup-content table {
             font-size: 13px;
         }
+        .leaflet-tooltip {
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            padding: 8px 12px !important;
+            font-family: 'Poppins';
+        }
+        .leaflet-tooltip-top:before {
+            border-top-color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -262,6 +273,17 @@
                 fillColor: color,
                 fillOpacity: 0.6
             };
+        }
+
+        // Create tooltip content for hover (quick info)
+        function createTooltip(props) {
+            const kategori = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || 'Tidak Ada Data';
+            const lokasi = props.seksi || props.Lokasi || props.id_feature || 'N/A';
+            
+            return `<div style="font-family: 'Poppins'; font-size: 13px; padding: 5px;">
+                <strong>📍 Kode Lokasi:</strong> ${lokasi}<br>
+                <strong>Status Gulma:</strong> <span style="color: ${kategoriColors[kategori] || '#9ca3af'}; font-weight: bold;">${kategori}</span>
+            </div>`;
         }
 
         // Create popup content
@@ -373,6 +395,12 @@
                         onEachFeature: (feature, layer) => {
                             if (feature.properties) {
                                 layer.bindPopup(createPopup(feature.properties));
+                                layer.bindTooltip(createTooltip(feature.properties), {
+                                    permanent: false,
+                                    sticky: true,
+                                    direction: 'top',
+                                    offset: [0, -10]
+                                });
                             }
                         }
                     }).addTo(map);
@@ -420,6 +448,12 @@
                                 onEachFeature: (feature, layer) => {
                                     if (feature.properties) {
                                         layer.bindPopup(createPopup(feature.properties));
+                                        layer.bindTooltip(createTooltip(feature.properties), {
+                                            permanent: false,
+                                            sticky: true,
+                                            direction: 'top',
+                                            offset: [0, -10]
+                                        });
                                     }
                                 }
                             }).addTo(map);

@@ -13,6 +13,7 @@ class MapPublication extends Model
         'status',
         'published_at',
         'published_by',
+        'import_log_id',
         'notes'
     ];
 
@@ -23,6 +24,11 @@ class MapPublication extends Model
     public function publisher()
     {
         return $this->belongsTo(User::class, 'published_by');
+    }
+
+    public function importLog()
+    {
+        return $this->belongsTo(ImportLog::class, 'import_log_id');
     }
 
     public static function getLatestPublished()

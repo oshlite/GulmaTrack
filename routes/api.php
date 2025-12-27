@@ -46,3 +46,13 @@ Route::get('/excel-data', [ExcelDataController::class, 'getExcelData'])
 Route::get('/kategori-colors', [\App\Http\Controllers\AdminController::class, 'getKategoriColors'])
     ->name('api.kategori.colors')
     ->withoutMiddleware('api');
+
+// Map publications - get latest published
+Route::get('/map-publications/latest-published', [\App\Http\Controllers\AdminController::class, 'getLatestPublished'])
+    ->name('api.map-publications.latest')
+    ->withoutMiddleware('api');
+
+// Data gulma by import ID
+Route::get('/data-gulma/by-import/{importId}', [\App\Http\Controllers\AdminController::class, 'getDataByImport'])
+    ->name('api.data-gulma.by-import')
+    ->withoutMiddleware('api');

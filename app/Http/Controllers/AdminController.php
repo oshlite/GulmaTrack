@@ -25,7 +25,9 @@ class AdminController extends Controller
         $totalDataGulma = DataGulma::count();
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
-        $importTerbaru = ImportLog::latest('created_at')->limit(5)->get();
+        
+        // Paginate import logs - 10 per page
+        $importTerbaru = ImportLog::latest('created_at')->paginate(10);
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -336,6 +338,57 @@ class AdminController extends Controller
                     'uploadTerbaru' => $uploadTerbaru
                 ]
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get latest published data for map
+     */
+    public function getLatestPublished()
+    {
+        try {
+            // Get latest successful import
+            $latest = ImportLog::where('status', 'success')
+                ->latest('created_at')
+                ->first();
+            
+            if (!$latest) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No published data found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'import_id' => $latest->id,
+                'tahun' => $latest->tahun ?? null,
+                'bulan' => $latest->bulan ?? null,
+                'minggu' => $latest->minggu ?? null,
+                'created_at' => $latest->created_at->format('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get data gulma by import ID
+     */
+    public function getDataByImport($importId)
+    {
+        try {
+            $data = DataGulma::where('import_log_id', $importId)->get();
+            
+            return response()->json($data);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -890,7 +890,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('admin.gallery.index') }}" class="nav-link">
                     <i class="fas fa-images"></i> Galeri
                 </a>
             </li>

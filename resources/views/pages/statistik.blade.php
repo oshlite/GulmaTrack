@@ -470,7 +470,7 @@
     </div>
 </div>
 
-<script>
+<!-- <script>
     const wilayahStatsData = [
         { id: 1, wilayah: 'Wilayah 16', luas: 320, neto: 2800, gulma: 8.75, umur: '3.5 tahun', tenagaKerja: 125, tahun: 2025 },
         { id: 2, wilayah: 'Wilayah 17', luas: 250, neto: 2125, gulma: 8.5, umur: '3.2 tahun', tenagaKerja: 95, tahun: 2025 },
@@ -533,4 +533,236 @@
     } else {
         renderDetailStats();
     }
+</script> -->
+
+<script>
+// Variables
+let currentPeriod = {
+    tahun: null,
+    bulan: null,
+    minggu: null
+};
+
+// Load statistik data on page load
+async function loadStatistikData() {
+    try {
+        // Show loading
+        showLoading();
+        
+        // Load all data in parallel
+        const [summaryRes, rankingRes, productivityRes, yearlyRes] = await Promise.all([
+            fetch('/api/statistik/summary'),
+            fetch('/api/statistik/ranking'),
+            fetch('/api/statistik/productivity'),
+            fetch('/api/statistik/yearly-comparison')
+        ]);
+        
+        const summaryData = await summaryRes.json();
+        const rankingData = await rankingRes.json();
+        const productivityData = await productivityRes.json();
+        const yearlyData = await yearlyRes.json();
+        
+        // Check if data loaded successfully
+        if (summaryData.success) renderDetailStats(summaryData.data);
+        if (rankingData.success) renderRanking(rankingData.data);
+        if (productivityData.success) renderProductivity(productivityData.data);
+        if (yearlyData.success) renderYearlyComparison(yearlyData.data);
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Error loading statistik:', error);
+        alert('Gagal memuat data statistik: ' + error.message);
+        hideLoading();
+    }
+}
+
+// Render detail stats table
+function renderDetailStats(data) {
+    const tbody = document.getElementById('detailStatsTable');
+    tbody.innerHTML = '';
+    
+    if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data tersedia</td></tr>';
+        return;
+    }
+    
+    data.forEach((item, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><strong>${index + 1}</strong></td>
+            <td><strong>Wilayah ${item.wilayah_id}</strong></td>
+            <td class="stat-value">${parseFloat(item.total_luas || 0).toFixed(2)} Ha</td>
+            <td class="stat-value">${parseFloat(item.total_luas || 0).toFixed(2)} Ha</td>
+            <td class="stat-value">${parseFloat(item.avg_hasil || 0).toFixed(2)} T/Ha</td>
+            <td>${parseFloat(item.avg_umur || 0).toFixed(1)} tahun</td>
+            <td>${parseInt(item.total_tenaga_kerja || 0)} Orang</td>
+            <td><strong>2025</strong></td>
+            <td>
+                <button class="export-btn" onclick="viewDetail(${item.wilayah_id})">
+                    <i class="fas fa-eye"></i> Detail
+                </button>
+            </td>
+        `;
+    });
+}
+
+// Render ranking bar chart
+function renderRanking(data) {
+    const container = document.querySelector('.bar-chart');
+    container.innerHTML = '';
+    
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;"><i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data ranking</p>';
+        return;
+    }
+    
+    // Find max value for percentage calculation
+    const maxValue = Math.max(...data.map(d => parseFloat(d.total_hasil) || 0));
+    
+    data.forEach(item => {
+        const hasilValue = parseFloat(item.total_hasil) || 0;
+        const percentage = maxValue > 0 ? (hasilValue / maxValue) * 100 : 0;
+        
+        const barItem = document.createElement('div');
+        barItem.className = 'bar-item';
+        barItem.innerHTML = `
+            <div class="bar-label">Wilayah ${item.wilayah_id}</div>
+            <div class="bar-container">
+                <div class="bar-fill" style="width: ${percentage}%;">${hasilValue.toFixed(2)} Ton</div>
+            </div>
+            <div class="bar-value">${hasilValue.toFixed(2)} T</div>
+        `;
+        container.appendChild(barItem);
+    });
+}
+
+// Render productivity analysis
+function renderProductivity(data) {
+    const tbody = document.querySelector('.stat-section:nth-last-of-type(1) tbody');
+    
+    if (!tbody) {
+        console.error('Productivity table body not found');
+        return;
+    }
+    
+    tbody.innerHTML = `
+        <tr>
+            <td><strong>Produktivitas Tinggi (>9 T/Ha)</strong></td>
+            <td>${data.tinggi?.count || 0}</td>
+            <td class="stat-value">${data.tinggi?.avg || 0} T/Ha</td>
+            <td>${Math.max(0, (10 - (data.tinggi?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td><span class="trend-indicator trend-up">✓ Optimal</span></td>
+        </tr>
+        <tr>
+            <td><strong>Produktivitas Sedang (8-9 T/Ha)</strong></td>
+            <td>${data.sedang?.count || 0}</td>
+            <td class="stat-value">${data.sedang?.avg || 0} T/Ha</td>
+            <td>${Math.max(0, (9 - (data.sedang?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td><span class="trend-indicator trend-up">⚠ Dapat Ditingkatkan</span></td>
+        </tr>
+        <tr>
+            <td><strong>Produktivitas Rendah (<8 T/Ha)</strong></td>
+            <td>${data.rendah?.count || 0}</td>
+            <td class="stat-value">${data.rendah?.avg || 0} T/Ha</td>
+            <td>${Math.max(0, (8 - (data.rendah?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td><span class="trend-indicator trend-down">✕ Perlu Intervensi</span></td>
+        </tr>
+    `;
+}
+
+// Render yearly comparison
+function renderYearlyComparison(data) {
+    const container = document.querySelector('.year-comparison');
+    container.innerHTML = '';
+    
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;"><i class="fas fa-calendar" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data tahunan</p>';
+        return;
+    }
+    
+    data.forEach((item, index) => {
+        const isLatest = index === data.length - 1;
+        const yearItem = document.createElement('div');
+        yearItem.className = 'year-item';
+        if (isLatest) {
+            yearItem.style.borderLeftColor = 'var(--secondary-color)';
+        }
+        
+        yearItem.innerHTML = `
+            <div class="year">${item.tahun}</div>
+            <div class="value" ${isLatest ? 'style="color: var(--secondary-color);"' : ''}>${parseFloat(item.total_hasil || 0).toLocaleString('id-ID', {maximumFractionDigits: 2})}</div>
+            <div class="label">Ton ${isLatest ? '(Current)' : ''}</div>
+        `;
+        container.appendChild(yearItem);
+    });
+}
+
+// View detail (redirect to wilayah page)
+function viewDetail(wilayahId) {
+    window.location.href = `/wilayah?wilayah=${wilayahId}`;
+}
+
+// Update stats with filter
+async function updateStats() {
+    const tahun = document.getElementById('filterTahun').value;
+    const bulan = document.getElementById('filterBulan').value;
+    
+    if (!tahun || !bulan) {
+        alert('Pilih tahun dan bulan terlebih dahulu');
+        return;
+    }
+    
+    try {
+        showLoading();
+        
+        // Load with filters (minggu default = 1)
+        const [summaryRes, rankingRes] = await Promise.all([
+            fetch(`/api/statistik/summary?tahun=${tahun}&bulan=${bulan}&minggu=1`),
+            fetch(`/api/statistik/ranking?tahun=${tahun}&bulan=${bulan}&minggu=1`)
+        ]);
+        
+        const summaryData = await summaryRes.json();
+        const rankingData = await rankingRes.json();
+        
+        if (summaryData.success) renderDetailStats(summaryData.data);
+        if (rankingData.success) renderRanking(rankingData.data);
+        
+        hideLoading();
+    } catch (error) {
+        console.error('Error updating stats:', error);
+        alert('Gagal memuat data: ' + error.message);
+        hideLoading();
+    }
+}
+
+// Loading helpers
+function showLoading() {
+    document.body.style.cursor = 'wait';
+    // Optional: show loading overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;';
+    overlay.innerHTML = '<div style="text-align: center;"><div class="loading" style="margin: 0 auto 20px;"></div><p style="color: var(--primary-color); font-weight: 600;">Memuat data...</p></div>';
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    document.body.style.cursor = 'default';
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.remove();
+}
+
+// Load on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Loading statistik data...');
+    loadStatistikData();
+});
+
+// Backup: load if DOM already ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadStatistikData);
+} else {
+    loadStatistikData();
+}
 </script>

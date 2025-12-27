@@ -6,19 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('import_logs', function (Blueprint $table) {
             $table->id();
             $table->string('nama_file');
-            $table->string('wilayah_id');
+            $table->string('wilayah_id'); // Comma-separated: "16,17,18"
+            
+            $table->integer('tahun')->nullable();
+            $table->integer('bulan')->nullable();
+            $table->integer('minggu')->nullable();
+            
             $table->integer('jumlah_records')->default(0);
             $table->integer('jumlah_berhasil')->default(0);
             $table->integer('jumlah_gagal')->default(0);
-            $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
+            $table->enum('status', ['pending', 'success', 'partial', 'failed'])->default('pending');
             $table->text('error_log')->nullable();
             $table->unsignedBigInteger('user_id');
             $table->timestamps();
@@ -27,9 +29,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('import_logs');

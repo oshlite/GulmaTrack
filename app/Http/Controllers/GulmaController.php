@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataGulma;
+use App\Models\ImportLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GulmaController extends Controller
 {
     /**
-     * Get GeoJSON dengan data gulma yang sudah dimergde
+     * Get GeoJSON dengan data gulma yang sudah merged
      */
     public function getGeoJSONWithData($wilayahId)
     {
@@ -20,7 +22,7 @@ class GulmaController extends Controller
         }
 
         // Load GeoJSON file dari datafix
-        $geoJsonPath = storage_path("../datafix/Wil{$wilayahId}.geojson");
+        $geoJsonPath = base_path("datafix/Wil{$wilayahId}.geojson");
         
         if (!file_exists($geoJsonPath)) {
             return response()->json([
@@ -118,7 +120,7 @@ class GulmaController extends Controller
     }
 
     /**
-     * Get statistics
+     * Get statistics (untuk admin dashboard)
      */
     public function getStatistics()
     {
@@ -126,6 +128,7 @@ class GulmaController extends Controller
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         
         $statusCount = DataGulma::selectRaw('status_gulma, COUNT(*) as count')
+            ->whereNotNull('status_gulma')
             ->groupBy('status_gulma')
             ->pluck('count', 'status_gulma');
 
@@ -135,5 +138,233 @@ class GulmaController extends Controller
             'wilayah_aktif' => $wilayahAktif,
             'status_count' => $statusCount
         ]);
+    }
+
+    // ============================================
+    // NEW METHODS FOR STATISTIK PAGE
+    // ============================================
+
+    /**
+     * Get statistik summary untuk halaman statistik
+     */
+    public function getStatistikSummary(Request $request)
+    {
+        try {
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
+            
+            // Base query
+            $query = DataGulma::query();
+            
+            // Filter by period if provided
+            if ($tahun && $bulan && $minggu) {
+                $query->whereHas('importLog', function($q) use ($tahun, $bulan, $minggu) {
+                    $q->where('tahun', $tahun)
+                      ->where('bulan', $bulan)
+                      ->where('minggu', $minggu)
+                      ->where('status', 'success');
+                });
+            } else {
+                // Get latest period data
+                $latestImport = ImportLog::where('status', 'success')
+                    ->whereNotNull('tahun')
+                    ->latest('created_at')
+                    ->first();
+                    
+                if ($latestImport) {
+                    $query->where('import_log_id', $latestImport->id);
+                }
+            }
+            
+            // Get summary by wilayah
+            $summary = $query->select(
+                    'wilayah_id',
+                    DB::raw('COUNT(*) as total_plot'),
+                    DB::raw('COALESCE(SUM(neto), 0) as total_luas'),
+                    DB::raw('COALESCE(AVG(hasil), 0) as avg_hasil'),
+                    DB::raw('COALESCE(AVG(umur_tanaman), 0) as avg_umur'),
+                    DB::raw('COALESCE(SUM(total_tk), 0) as total_tenaga_kerja')
+                )
+                ->groupBy('wilayah_id')
+                ->orderBy('wilayah_id')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $summary,
+                'period' => [
+                    'tahun' => $tahun,
+                    'bulan' => $bulan,
+                    'minggu' => $minggu
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get ranking wilayah berdasarkan hasil
+     */
+    public function getStatistikRanking(Request $request)
+    {
+        try {
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
+            
+            $query = DataGulma::query();
+            
+            // Filter by period
+            if ($tahun && $bulan && $minggu) {
+                $query->whereHas('importLog', function($q) use ($tahun, $bulan, $minggu) {
+                    $q->where('tahun', $tahun)
+                      ->where('bulan', $bulan)
+                      ->where('minggu', $minggu)
+                      ->where('status', 'success');
+                });
+            } else {
+                $latestImport = ImportLog::where('status', 'success')
+                    ->whereNotNull('tahun')
+                    ->latest('created_at')
+                    ->first();
+                    
+                if ($latestImport) {
+                    $query->where('import_log_id', $latestImport->id);
+                }
+            }
+            
+            // Get ranking
+            $ranking = $query->select(
+                    'wilayah_id',
+                    DB::raw('COALESCE(SUM(hasil), 0) as total_hasil'),
+                    DB::raw('COALESCE(AVG(hasil), 0) as avg_hasil_per_ha'),
+                    DB::raw('COUNT(*) as jumlah_plot')
+                )
+                ->whereNotNull('hasil')
+                ->groupBy('wilayah_id')
+                ->orderBy('total_hasil', 'desc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $ranking
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get productivity analysis
+     */
+    public function getStatistikProductivity(Request $request)
+    {
+        try {
+            $query = DataGulma::query();
+            
+            // Get latest import
+            $latestImport = ImportLog::where('status', 'success')
+                ->whereNotNull('tahun')
+                ->latest('created_at')
+                ->first();
+                
+            if ($latestImport) {
+                $query->where('import_log_id', $latestImport->id);
+            }
+            
+            // Kategorisasi berdasarkan hasil (T/Ha)
+            $tinggi = $query->clone()->where('hasil', '>', 9)->count();
+            $sedang = $query->clone()->whereBetween('hasil', [8, 9])->count();
+            $rendah = $query->clone()->where('hasil', '<', 8)->where('hasil', '>', 0)->count();
+            
+            // Average untuk masing-masing kategori
+            $avgTinggi = $query->clone()->where('hasil', '>', 9)->avg('hasil');
+            $avgSedang = $query->clone()->whereBetween('hasil', [8, 9])->avg('hasil');
+            $avgRendah = $query->clone()->where('hasil', '<', 8)->where('hasil', '>', 0)->avg('hasil');
+            
+            $productivity = [
+                'tinggi' => [
+                    'count' => $tinggi,
+                    'avg' => round($avgTinggi ?? 0, 2)
+                ],
+                'sedang' => [
+                    'count' => $sedang,
+                    'avg' => round($avgSedang ?? 0, 2)
+                ],
+                'rendah' => [
+                    'count' => $rendah,
+                    'avg' => round($avgRendah ?? 0, 2)
+                ],
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => $productivity
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get yearly comparison
+     */
+    public function getYearlyComparison(Request $request)
+    {
+        try {
+            // Get unique years from import logs
+            $years = ImportLog::where('status', 'success')
+                ->whereNotNull('tahun')
+                ->distinct()
+                ->pluck('tahun')
+                ->sort()
+                ->values();
+            
+            $yearlyHasil = [];
+            
+            foreach ($years as $year) {
+                // Get total hasil for this year
+                $totalHasil = DataGulma::whereHas('importLog', function($q) use ($year) {
+                        $q->where('tahun', $year)
+                          ->where('status', 'success');
+                    })
+                    ->sum('hasil');
+                
+                // Count wilayah
+                $wilayahCount = DataGulma::whereHas('importLog', function($q) use ($year) {
+                        $q->where('tahun', $year)
+                          ->where('status', 'success');
+                    })
+                    ->distinct('wilayah_id')
+                    ->count('wilayah_id');
+                    
+                $yearlyHasil[] = [
+                    'tahun' => $year,
+                    'total_hasil' => round($totalHasil, 2),
+                    'wilayah_count' => $wilayahCount
+                ];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $yearlyHasil
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

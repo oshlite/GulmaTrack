@@ -19,15 +19,42 @@ class AdminController extends Controller
     /**
      * Tampilkan dashboard admin dengan data dari database
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         // Query data dari database
         $totalDataGulma = DataGulma::count();
         $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
         $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
         
-        // Paginate import logs - 10 per page
-        $importTerbaru = ImportLog::latest('created_at')->paginate(10);
+        // Build query for import logs
+        $query = ImportLog::latest('created_at');
+        
+        // Apply search filter if provided
+        if ($request->has('search') && $request->search) {
+            $search = str_replace('#', '', $request->search); // Strip # prefix to allow searching like "#5"
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_file', 'LIKE', "%{$search}%")
+                  ->orWhere('tahun', 'LIKE', "%{$search}%")
+                  ->orWhere('bulan', 'LIKE', "%{$search}%")
+                  ->orWhere('minggu', 'LIKE', "%{$search}%")
+                  ->orWhere('status', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Apply period filters if provided
+        if ($request->has('tahun') && $request->tahun) {
+            $query->where('tahun', $request->tahun);
+        }
+        if ($request->has('bulan') && $request->bulan) {
+            $query->where('bulan', $request->bulan);
+        }
+        if ($request->has('minggu') && $request->minggu) {
+            $query->where('minggu', $request->minggu);
+        }
+        
+        // Paginate after filtering - 10 per page
+        $importTerbaru = $query->paginate(10)->withQueryString();
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -45,6 +72,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:csv,txt|max:10240',
+            'tahun' => 'required|integer|min:1900|digits:4',
             'bulan' => 'required|integer|min:1|max:12',
             'minggu' => 'required|integer|min:1|max:4',
         ], [
@@ -52,6 +80,10 @@ class AdminController extends Controller
             'file.file' => 'File tidak valid',
             'file.mimes' => 'File harus berformat CSV atau TXT',
             'file.max' => 'Ukuran file maksimal 10MB',
+            'tahun.required' => 'Tahun harus diisi',
+            'tahun.integer' => 'Tahun harus berupa angka',
+            'tahun.min' => 'Tahun minimal 1900',
+            'tahun.digits' => 'Tahun harus 4 digit',
             'bulan.required' => 'Bulan harus dipilih',
             'bulan.min' => 'Bulan harus antara 1-12',
             'bulan.max' => 'Bulan harus antara 1-12',
@@ -105,7 +137,7 @@ class AdminController extends Controller
             $importLog = ImportLog::create([
                 'nama_file' => $file->getClientOriginalName(),
                 'wilayah_id' => $wilayahList,
-                'tahun' => $request->tahun ?? now()->year,
+                'tahun' => $request->tahun,
                 'bulan' => $request->bulan,
                 'minggu' => $request->minggu,
                 'jumlah_records' => 0,

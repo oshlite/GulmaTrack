@@ -614,6 +614,11 @@
         overflow: hidden;
     }
 
+    .map-container #map {
+        width: 100%;
+        height: 100%;
+    }
+
     .map-legend {
         background: white;
         padding: 15px;
@@ -667,6 +672,35 @@
         border-radius: 3px;
         border: 1px solid #ccc;
         flex-shrink: 0;
+    }
+
+    /* Wilayah filter items */
+    .wilayah-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        background: white;
+        color: #333;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e0e0e0;
+    }
+
+    .wilayah-item:hover {
+        background: #f5f5f5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(251, 169, 25, 0.5);
+    }
+
+    .wilayah-item.active {
+        background: #128241;
+        color: white;
+        border-color: #0a4a26;
+        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.5);
     }
 
     .loading-spinner {
@@ -1114,31 +1148,73 @@
             </div>
         </div>
         
-        <div id="map" class="map-container"></div>
+        <!-- Data Period Display -->
+        <div id="dataPeriodDisplay" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 12px 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #1976d2; display: none;">
+            <div style="display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif;">
+                <i class="fas fa-calendar-check" style="color: #1976d2; font-size: 18px;"></i>
+                <span style="font-weight: 600; color: #1976d2; font-size: 14px;" id="periodText">Menampilkan Semua Data</span>
+            </div>
+        </div>
         
-        <div class="map-legend">
-            <h4 onclick="filterByStatus('')" style="cursor:pointer;">
-                <i class="fas fa-info-circle"></i> Status Gulma
-            </h4>
-            <div class="legend-item" onclick="filterByStatus('bersih')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #3498db;"></div>
-                <span><strong>Bersih</strong></span>
-            </div>
-            <div class="legend-item" onclick="filterByStatus('ringan')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #128241;"></div>
-                <span><strong>Ringan</strong></span>
-            </div>
-            <div class="legend-item" onclick="filterByStatus('sedang')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #f1c40f;"></div>
-                <span><strong>Sedang</strong></span>
-            </div>
-            <div class="legend-item" onclick="filterByStatus('berat')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #e74c3c;"></div>
-                <span><strong>Berat</strong></span>
-            </div>
-            <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #ecf0f1; border-color: #8b8b8b;"></div>
-                <span><strong>Belum Dimonitoring</strong></span>
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-legend">
+                <h4 onclick="filterByStatus('')" style="cursor:pointer;">
+                    <i class="fas fa-info-circle"></i> Status Gulma
+                </h4>
+                <div class="legend-item" onclick="filterByStatus('bersih')" title="Klik untuk filter">
+                    <div class="legend-color" style="background: #3498db;"></div>
+                    <span><strong>Bersih</strong></span>
+                </div>
+                <div class="legend-item" onclick="filterByStatus('ringan')" title="Klik untuk filter">
+                    <div class="legend-color" style="background: #128241;"></div>
+                    <span><strong>Ringan</strong></span>
+                </div>
+                <div class="legend-item" onclick="filterByStatus('sedang')" title="Klik untuk filter">
+                    <div class="legend-color" style="background: #f1c40f;"></div>
+                    <span><strong>Sedang</strong></span>
+                </div>
+                <div class="legend-item" onclick="filterByStatus('berat')" title="Klik untuk filter">
+                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <span><strong>Berat</strong></span>
+                </div>
+                <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
+                    <div class="legend-color" style="background: #ecf0f1; border-color: #8b8b8b;"></div>
+                    <span><strong>Belum Dimonitoring</strong></span>
+                </div>
+                
+                <!-- Wilayah Filter -->
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0;">
+                    <h4 onclick="filterByWilayah('all')" style="cursor:pointer; color: #FBA919; margin-bottom: 12px;">
+                        <i class="fas fa-map-marked-alt"></i> Wilayah
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                        <div class="wilayah-item" onclick="toggleWilayah(16)" data-wilayah="16" title="Klik untuk filter Wilayah 16">
+                            <span style="font-weight: 700; font-size: 14px;">16</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(17)" data-wilayah="17" title="Klik untuk filter Wilayah 17">
+                            <span style="font-weight: 700; font-size: 14px;">17</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(18)" data-wilayah="18" title="Klik untuk filter Wilayah 18">
+                            <span style="font-weight: 700; font-size: 14px;">18</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(19)" data-wilayah="19" title="Klik untuk filter Wilayah 19">
+                            <span style="font-weight: 700; font-size: 14px;">19</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(20)" data-wilayah="20" title="Klik untuk filter Wilayah 20">
+                            <span style="font-weight: 700; font-size: 14px;">20</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(21)" data-wilayah="21" title="Klik untuk filter Wilayah 21">
+                            <span style="font-weight: 700; font-size: 14px;">21</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(22)" data-wilayah="22" title="Klik untuk filter Wilayah 22">
+                            <span style="font-weight: 700; font-size: 14px;">22</span>
+                        </div>
+                        <div class="wilayah-item" onclick="toggleWilayah(23)" data-wilayah="23" title="Klik untuk filter Wilayah 23">
+                            <span style="font-weight: 700; font-size: 14px;">23</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div><br><br>
@@ -1147,16 +1223,92 @@
     <div class="card full-width">
         <h2><i class="fas fa-history"></i> Riwayat Upload</h2>
         
+        <!-- Search and Filters Form -->
+        <form method="GET" action="{{ route('admin.dashboard') }}" id="filterForm">
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+                <!-- Search -->
+                <div style="flex: 1; min-width: 250px;">
+                    <input type="text" id="searchInput" value="{{ request('search') }}" 
+                        placeholder="🔍 Cari berdasarkan ID (#5), Nama File, atau data lainnya..." 
+                        onkeypress="return event.keyCode !== 13;"
+                        style="width: 100%; padding: 12px 16px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;">
+                </div>
+                
+                <!-- Filter Tahun -->
+                <div style="min-width: 140px; position: relative;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                        <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Tahun
+                    </label>
+                    <select name="tahun" id="filterTahun" onchange="document.getElementById('filterForm').submit()" 
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        <option value="">Semua Tahun</option>
+                        @php
+                            $years = \App\Models\ImportLog::distinct()->pluck('tahun')->filter()->sort()->reverse();
+                        @endphp
+                        @foreach($years as $year)
+                            <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <!-- Filter Bulan -->
+                <div style="min-width: 140px; position: relative;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                        <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Bulan
+                    </label>
+                    <select name="bulan" id="filterBulan" onchange="document.getElementById('filterForm').submit()" 
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        <option value="">Semua Bulan</option>
+                        @for($i = 1; $i <= 12; $i++)
+                            @php
+                                $monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                            @endphp
+                            <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>{{ $monthNames[$i] }}</option>
+                        @endfor
+                    </select>
+                </div>
+                
+                <!-- Filter Minggu -->
+                <div style="min-width: 140px; position: relative;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                        <i class="fas fa-calendar-week" style="color: var(--accent-color);"></i> Minggu
+                    </label>
+                    <select name="minggu" id="filterMinggu" onchange="document.getElementById('filterForm').submit()" 
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        <option value="">Semua Minggu</option>
+                        @for($i = 1; $i <= 4; $i++)
+                            <option value="{{ $i }}" {{ request('minggu') == $i ? 'selected' : '' }}>Minggu {{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+                
+                <!-- Search Button -->
+                <button type="submit" 
+                    style="padding: 12px 20px; background: linear-gradient(135deg, #128241, #2ecc71); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3); margin-top: 18px;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(18, 130, 65, 0.3)'">
+                    <i class="fas fa-search"></i> Cari
+                </button>
+                
+                <!-- Reset Button -->
+                <a href="{{ route('admin.dashboard') }}" 
+                    style="padding: 12px 20px; background: linear-gradient(135deg, #E74C3C, #c0392b); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3); margin-top: 18px; text-decoration: none; display: inline-block;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(231, 76, 60, 0.3)'">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+        
         @if (isset($importTerbaru) && $importTerbaru->total() > 0)
             <div class="table-wrapper">
-                <table>
+                <table id="importTable">
                     <thead>
                         <tr>
                             <th><i class="fas fa-hashtag"></i> ID</th>
                             <th><i class="fas fa-file"></i> Nama File</th>
-                            <th><i class="fas fa-map-marker-alt"></i> Wilayah</th>
                             <th><i class="fas fa-calendar"></i> Periode</th>
-                            <th><i class="fas fa-database"></i> Total Records</th>
+                            <th><i class="fas fa-database"></i> Data</th>
                             <th><i class="fas fa-info-circle"></i> Status</th>
                             <th><i class="fas fa-clock"></i> Waktu Upload</th>
                             <th><i class="fas fa-cog"></i> Aksi</th>
@@ -1164,32 +1316,26 @@
                     </thead>
                     <tbody>
                         @foreach ($importTerbaru as $log)
-                            <tr>
+                            @php
+                                // Check if this is the latest for its period
+                                $isLatest = \App\Models\ImportLog::where('tahun', $log->tahun)
+                                    ->where('bulan', $log->bulan)
+                                    ->where('minggu', $log->minggu)
+                                    ->where('status', 'success')
+                                    ->orderBy('created_at', 'desc')
+                                    ->first()?->id === $log->id;
+                                
+                                $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                            @endphp
+                            <tr data-id="{{ $log->id }}" data-wilayah="{{ $log->wilayah_ids }}" data-tahun="{{ $log->tahun }}" data-bulan="{{ $log->bulan }}" data-minggu="{{ $log->minggu }}" 
+                                data-search="{{ strtolower($log->id . ' ' . $log->nama_file . ' ' . $log->tahun . ' ' . ($log->bulan ? $monthNames[$log->bulan] : '') . ' ' . $log->minggu . ' ' . $log->jumlah_records . ' ' . $log->status . ' ' . $log->created_at->locale('id')->isoFormat('D MMMM YYYY HH:mm')) }}">
                                 <td><strong>#{{ $log->id }}</strong></td>
                                 <td>{{ $log->nama_file }}</td>
-                                <td>
-                                    @php
-                                        $wilayahIds = explode(',', $log->wilayah_id);
-                                        $wilayahCount = count($wilayahIds);
-                                    @endphp
-                                    
-                                    @if ($wilayahCount > 1)
-                                        <span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #f3e5f5, #e1bee7); border-radius: 12px; font-size: 11px; font-weight: 600; color: #7b1fa2; font-family: 'Poppins', sans-serif; border: 1px solid #ce93d8;">
-                                            <i class="fas fa-map-marked-alt"></i>
-                                            {{ $wilayahCount }} Wilayah ({{ $log->wilayah_id }})
-                                        </span>
-                                    @else
-                                        <span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 12px; font-size: 11px; font-weight: 600; color: #128241; font-family: 'Poppins', sans-serif; border: 1px solid #a5d6a7;">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            Wilayah {{ $log->wilayah_id }}
-                                        </span>
-                                    @endif
-                                </td>
                                 <td>
                                     @if ($log->tahun && $log->bulan && $log->minggu)
                                         <span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins', sans-serif; border: 1px solid #90caf9;">
                                             <i class="fas fa-calendar"></i>
-                                            {{ $log->tahun }} / {{ DateTime::createFromFormat('!m', $log->bulan)->format('M') }} - Minggu {{ $log->minggu }}
+                                            {{ $log->tahun }} / {{ $monthNames[$log->bulan] }} - Minggu {{ $log->minggu }}
                                         </span>
                                     @else
                                         <span style="color: #999;">-</span>
@@ -1212,15 +1358,23 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td>{{ $log->created_at->format('d M Y H:i') }}</td>
+                                <td>{{ $log->created_at->locale('id')->isoFormat('D MMMM YYYY HH:mm') }}</td>
                                 <td>
-                                    <button onclick="loadImportDataOnMap({{ $log->id }}, '{{ $log->wilayah_id }}', {{ $log->tahun ?? 'null' }}, {{ $log->bulan ?? 'null' }}, {{ $log->minggu ?? 'null' }})" 
-                                            style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
-                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
-                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                        <i class="fas fa-map"></i>
-                                        <span>Tampilkan di Peta</span>
-                                    </button>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        
+                                        <button onclick="loadImportDataOnMap({{ $log->id }}, '{{ $log->wilayah_id }}', {{ $log->tahun ?? 'null' }}, {{ $log->bulan ?? 'null' }}, {{ $log->minggu ?? 'null' }})" 
+                                                style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
+                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
+                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                            <i class="fas fa-map"></i>
+                                            <span>Tampilkan di Peta</span>
+                                        </button>
+                                        @if($isLatest && $log->status === 'success')
+                                            <span title="Data Terbaru untuk periode ini" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: linear-gradient(135deg, #128241, #2ecc71); border-radius: 50%; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3);">
+                                                <i class="fas fa-check" style="color: white; font-size: 11px;"></i>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -1700,24 +1854,27 @@
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const tahun = document.getElementById('tahun').value;
         const bulan = document.getElementById('bulan').value;
         const minggu = document.getElementById('minggu').value;
         const file = document.getElementById('csvFile').files[0];
         const messageDiv = document.getElementById('uploadMessage');
 
-        const tahun = document.getElementById('tahun').value;
-        const bulan = document.getElementById('bulan').value;
-        const minggu = document.getElementById('minggu').value;
-
         if (!tahun || !bulan || !minggu) {
-            messageDiv.innerHTML = '✗ Pilih tahun, bulan, dan minggu terlebih dahulu';
+            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih tahun, bulan, dan minggu terlebih dahulu';
             messageDiv.className = 'message show error';
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 4000);
             return;
         }
 
         if (!file) {
-            messageDiv.innerHTML = '✗ Pilih file CSV terlebih dahulu';
+            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih file CSV terlebih dahulu';
             messageDiv.className = 'message show error';
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 4000);
             return;
         }
 
@@ -1729,6 +1886,7 @@
         formData.append('_token', document.querySelector('[name="_token"]').value);
 
         document.getElementById('uploadBtn').disabled = true;
+        document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses file...';
         messageDiv.innerHTML = '<div class="loading-spinner"></div> Memproses file...';
         messageDiv.className = 'message show';
 
@@ -1744,25 +1902,26 @@
             if (res.ok) {
                 const data = await res.json();
                 const fileName = file.name;
-                messageDiv.innerHTML = `✓ ${data.message}<br><small style="font-size: 12px; opacity: 0.9;">File: ${fileName}</small>`;
+                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}<br><small style="font-size: 12px; opacity: 0.9;">File: ${fileName}</small>`;
                 messageDiv.className = 'message show success';
                 
-                console.log('Upload berhasil, mulai reload peta...');
+                console.log('✓ Upload berhasil, mulai reload peta...');
                 
                 // Clear form
                 document.getElementById('csvFile').value = '';
                 document.getElementById('fileStatus').style.display = 'none';
+                document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
                 document.getElementById('uploadBtn').disabled = true;
                 document.getElementById('uploadBtn').style.opacity = '0.5';
                 document.getElementById('uploadBtn').style.cursor = 'not-allowed';
                 
                 // Update statistics
-                console.log('Update statistics...');
+                console.log('✓ Update statistics...');
                 updateStatistics();
                 
                 // Reload map with new data
                 if (map) {
-                    console.log('Clear existing layers...');
+                    console.log('✓ Clear existing layers...');
                     // Clear existing layers
                     Object.keys(geoJsonLayers).forEach(key => {
                         if (geoJsonLayers[key]) {
@@ -1772,25 +1931,30 @@
                     geoJsonLayers = {};
                     
                     // Reload all wilayah with new data immediately
-                    console.log('Reload all wilayah...');
+                    console.log('✓ Reload all wilayah...');
                     setTimeout(() => {
                         loadAllWilayah();
                     }, 500);
                 } else {
-                    console.error('Map tidak ditemukan!');
+                    console.error('❌ Map tidak ditemukan!');
                 }
                 
-                // Message tetap tampil (tidak dihilangkan)
+                // Reload page after 2 seconds to refresh import history table
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
             } else {
                 const errorData = await res.json();
-                messageDiv.innerHTML = `✗ ${errorData.message || 'Terjadi kesalahan'}`;
+                messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorData.message || 'Terjadi kesalahan'}`;
                 messageDiv.className = 'message show error';
             }
         } catch (error) {
-            messageDiv.innerHTML = `✗ Error: ${error.message}`;
+            messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
             messageDiv.className = 'message show error';
         } finally {
             document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
             document.getElementById('uploadBtn').style.opacity = '1';
             document.getElementById('uploadBtn').style.cursor = 'pointer';
         }
@@ -2035,53 +2199,42 @@
         }
     }
 
-    // Filter by status function
-    let currentFilter = '';
+    // Filter by status - Consistent with wilayah.blade (reload with filter)
+    let currentStatusFilter = '';
+    let currentLoadedImportId = null;
+    let currentLoadedPeriod = { tahun: null, bulan: null, minggu: null };
+    
     function filterByStatus(status) {
         console.log('Filter by status:', status);
-        currentFilter = status;
+        currentStatusFilter = status;
         
-        Object.keys(geoJsonLayers).forEach(wilayahKey => {
-            const layer = geoJsonLayers[wilayahKey];
-            if (!layer) return;
-            
-            layer.eachLayer(function(featureLayer) {
-                const props = featureLayer.feature.properties;
-                
-                if (!status) {
-                    // Show all
-                    featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
-                } else {
-                    // Filter based on kategori
-                    const kategori = (props.kategori || '').toLowerCase().trim();
-                    const statusGulma = (props.status_gulma || '').toLowerCase().trim();
-                    
-                    let match = false;
-                    if (status === 'bersih' && (kategori === 'bersih' || statusGulma === 'bersih')) {
-                        match = true;
-                    } else if (status === 'ringan' && (kategori === 'ringan' || statusGulma === 'ringan')) {
-                        match = true;
-                    } else if (status === 'sedang' && (kategori === 'sedang' || statusGulma === 'sedang')) {
-                        match = true;
-                    } else if (status === 'berat' && (kategori === 'berat' || statusGulma === 'berat')) {
-                        match = true;
-                    } else if (status === 'belum_dimonitoring' && !kategori && !statusGulma) {
-                        match = true;
-                    }
-                    
-                    if (match) {
-                        featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
-                    } else {
-                        featureLayer.setStyle({ fillOpacity: 0.1, opacity: 0.2 });
-                    }
-                }
-            });
-        });
+        // Reload map with current data and filter applied
+        if (currentLoadedImportId) {
+            // Reload the same import data with filter
+            const row = document.querySelector(`tr[data-id="${currentLoadedImportId}"]`);
+            if (row) {
+                const wilayahIds = row.getAttribute('data-wilayah');
+                const tahun = row.getAttribute('data-tahun');
+                const bulan = row.getAttribute('data-bulan');
+                const minggu = row.getAttribute('data-minggu');
+                loadImportDataOnMap(currentLoadedImportId, wilayahIds, tahun, bulan, minggu);
+            }
+        }
+        
+        // Scroll to map
+        document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     // Load import data on map
     async function loadImportDataOnMap(importId, wilayahIds, tahun, bulan, minggu) {
         console.log(`Loading import data: ID=${importId}, Wilayah=${wilayahIds}, Period=${tahun}/${bulan}/${minggu}`);
+        
+        // Store current state for filter reloads
+        currentLoadedImportId = importId;
+        currentLoadedPeriod = { tahun, bulan, minggu };
+        
+        // Update period display with import ID
+        updatePeriodDisplay(tahun, bulan, minggu, importId);
         
         // Clear existing layers
         Object.keys(geoJsonLayers).forEach(key => {
@@ -2120,7 +2273,24 @@
                 
                 const { wilayah, data } = result;
                 
-                const layer = L.geoJSON(data, {
+                // Apply status filter if active
+                let features = data.features;
+                if (currentStatusFilter) {
+                    features = features.filter(feature => {
+                        const props = feature.properties;
+                        const kategori = (props.kategori || '').toLowerCase().trim();
+                        const statusGulma = (props.status_gulma || '').toLowerCase().trim();
+                        
+                        if (currentStatusFilter === 'belum_dimonitoring') {
+                            return !kategori && !statusGulma;
+                        }
+                        return kategori === currentStatusFilter || statusGulma === currentStatusFilter;
+                    });
+                }
+                
+                if (features.length === 0) return;
+                
+                const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
                     style: function(feature) {
                         return getFeatureStyle(feature);
                     },
@@ -2163,10 +2333,104 @@
         });
     }
 
+    // Update period display
+    function updatePeriodDisplay(tahun, bulan, minggu, importId) {
+        const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const display = document.getElementById('dataPeriodDisplay');
+        const periodText = document.getElementById('periodText');
+        
+        if (tahun && bulan && minggu) {
+            const idText = importId ? ` #${importId}` : '';
+            periodText.textContent = `Menampilkan Data Terbaru - Tahun ${tahun}, ${monthNames[bulan]}, Minggu ke-${minggu}${idText}`;
+            display.style.display = 'block';
+        } else {
+            periodText.textContent = 'Menampilkan Semua Data';
+            display.style.display = 'block';
+        }
+    }
+
+    // Wilayah filter functionality
+    let selectedWilayah = [];
+    
+    function toggleWilayah(wilayahNum) {
+        const wilayahItem = document.querySelector(`.wilayah-item[data-wilayah="${wilayahNum}"]`);
+        
+        if (selectedWilayah.includes(wilayahNum)) {
+            // Remove from selection
+            selectedWilayah = selectedWilayah.filter(w => w !== wilayahNum);
+            wilayahItem.classList.remove('active');
+        } else {
+            // Add to selection
+            selectedWilayah.push(wilayahNum);
+            wilayahItem.classList.add('active');
+        }
+        
+        // Apply filter - only show/hide layers, don't reload
+        filterByWilayah();
+    }
+    
+    function filterByWilayah(reset = false) {
+        if (reset === 'all') {
+            // Reset all selections
+            selectedWilayah = [];
+            document.querySelectorAll('.wilayah-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+        
+        Object.keys(geoJsonLayers).forEach(wilayahKey => {
+            const layer = geoJsonLayers[wilayahKey];
+            if (!layer) return;
+            
+            const wilayahNum = parseInt(wilayahKey);
+            
+            if (selectedWilayah.length === 0) {
+                // Show all if nothing selected
+                map.addLayer(layer);
+                layer.eachLayer(featureLayer => {
+                    featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
+                });
+            } else {
+                // Show only selected wilayah
+                if (selectedWilayah.includes(wilayahNum)) {
+                    map.addLayer(layer);
+                    layer.eachLayer(featureLayer => {
+                        featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
+                    });
+                } else {
+                    map.removeLayer(layer);
+                }
+            }
+        });
+        
+        console.log('Filtered wilayah:', selectedWilayah.length === 0 ? 'All' : selectedWilayah.join(', '));
+    }
+
     // Initialize map when page loads
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing map...');
         initMap();
+        
+        // Show all data by default
+        updatePeriodDisplay(null, null, null);
+        
+        // Setup client-side search
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchValue = this.value.toLowerCase().replace(/^#/, ''); // Remove # prefix
+                const rows = document.querySelectorAll('table tbody tr[data-search]');
+                
+                rows.forEach(row => {
+                    const searchData = row.getAttribute('data-search');
+                    if (searchData.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
     });
 </script>
 
@@ -2218,5 +2482,7 @@
         }
     });
 </script>
+
+@include('footer')
 
 @endsection

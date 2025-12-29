@@ -13,7 +13,7 @@ class WilayahController extends Controller
      * Get GeoJSON data for specific wilayah with coordinate conversion
      * and merge with status_gulma data from database
      */
-    public function getGeojson($wilayah_number): JsonResponse
+    public function getGeojson($wilayah_number, Request $request = null): JsonResponse
     {
         try {
             \Log::info("=== Getting GeoJSON for Wilayah {$wilayah_number} ===");
@@ -49,8 +49,37 @@ class WilayahController extends Controller
             $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
             \Log::info("After conversion features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
-            // Get all data from database for this wilayah
-            $gulmaData = DataGulma::where('wilayah_id', $wilayah_number)->get();
+            // Get filter parameters if provided
+            $tahun = $request ? $request->query('tahun') : null;
+            $bulan = $request ? $request->query('bulan') : null;
+            $minggu = $request ? $request->query('minggu') : null;
+
+            // Query data from database for this wilayah
+            $query = DataGulma::where('wilayah_id', $wilayah_number);
+
+            // If period filters are provided, get only the latest import for that period
+            if ($tahun && $bulan && $minggu) {
+                // Find the latest import_log_id for this period
+                $latestImportLog = \App\Models\ImportLog::where('tahun', $tahun)
+                    ->where('bulan', $bulan)
+                    ->where('minggu', $minggu)
+                    ->where('status', 'success')
+                    ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($latestImportLog) {
+                    \Log::info("Using latest import log ID: {$latestImportLog->id} for period {$tahun}/{$bulan}/W{$minggu}");
+                    $query->where('import_log_id', $latestImportLog->id);
+                } else {
+                    \Log::info("No data found for period {$tahun}/{$bulan}/W{$minggu}, returning empty");
+                    // Return empty features if no matching period
+                    $geojson['features'] = [];
+                    return response()->json($geojson);
+                }
+            }
+            
+            $gulmaData = $query->get();
             \Log::info("Database records for wilayah {$wilayah_number}: " . $gulmaData->count());
             
             // Create a lookup map by id_feature

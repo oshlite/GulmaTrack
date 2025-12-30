@@ -225,6 +225,17 @@ class AdminController extends Controller
                 'error_log' => !empty($errors) ? json_encode($errors) : null
             ]);
 
+            // Auto-publish if upload successful
+            if ($berhasil > 0) {
+                \App\Models\MapPublication::create([
+                    'import_log_id' => $importLog->id,
+                    'status' => 'published',
+                    'published_at' => now(),
+                    'published_by' => auth()->id(),
+                    'notes' => 'Auto-published after successful CSV upload'
+                ]);
+            }
+
             $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
             $message = "File CSV berhasil diproses! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
             

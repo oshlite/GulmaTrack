@@ -10,6 +10,7 @@ class MapPublication extends Model
     use HasFactory;
 
     protected $fillable = [
+        'import_log_id',
         'status',
         'published_at',
         'published_by',

@@ -53,8 +53,8 @@ class AdminController extends Controller
             $query->where('minggu', $request->minggu);
         }
         
-        // Paginate after filtering - 10 per page
-        $importTerbaru = $query->paginate(10)->withQueryString();
+        // Get all data without pagination - pagination will be handled client-side
+        $importTerbaru = $query->get();
 
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
@@ -307,6 +307,21 @@ class AdminController extends Controller
     public function publishMap(Request $request)
     {
         try {
+            // Get the latest successful import log
+            $latestImport = \App\Models\ImportLog::where('status', 'success')
+                ->latest('created_at')
+                ->first();
+
+            if (!$latestImport) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data import yang berhasil untuk dipublikasikan'
+                ], 400);
+            }
+
+            // Delete previous publications to ensure only latest is published
+            \App\Models\MapPublication::where('status', 'published')->delete();
+
             // Create new publication record
             $publication = \App\Models\MapPublication::create([
                 'status' => 'published',
@@ -340,7 +355,8 @@ class AdminController extends Controller
                 'success' => true,
                 'is_published' => $latest !== null,
                 'published_at' => $latest ? $latest->published_at->format('d M Y H:i') : null,
-                'published_by' => $latest && $latest->publisher ? $latest->publisher->name : null
+                'published_by' => $latest && $latest->publisher ? $latest->publisher->name : null,
+                'import_log_id' => $latest ? $latest->import_log_id : null
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -384,30 +400,60 @@ class AdminController extends Controller
     public function getLatestPublished()
     {
         try {
-            // Get latest successful import
+            \Log::info('=== getLatestPublished called ===');
+            
+            // Get latest published map (for admin to see what's being shown to public)
+            $published = \App\Models\MapPublication::getLatestPublished();
+            
+            \Log::info('Published data:', ['published' => $published ? $published->toArray() : null]);
+            
+            if ($published && $published->importLog) {
+                \Log::info('Returning published import log ID: ' . $published->import_log_id);
+                
+                return response()->json([
+                    'success' => true,
+                    'import_id' => (int) $published->import_log_id,
+                    'tahun' => $published->importLog->tahun ?? null,
+                    'bulan' => $published->importLog->bulan ?? null,
+                    'minggu' => $published->importLog->minggu ?? null,
+                    'published_at' => $published->published_at->format('Y-m-d H:i:s')
+                ]);
+            }
+            
+            \Log::info('No published data found, looking for latest successful import');
+            
+            // If no published data, return the latest successful import instead (fallback)
             $latest = ImportLog::where('status', 'success')
                 ->latest('created_at')
                 ->first();
             
+            \Log::info('Latest import log:', ['latest' => $latest ? $latest->toArray() : null]);
+            
             if (!$latest) {
+                \Log::warning('No import logs found at all');
                 return response()->json([
                     'success' => false,
-                    'message' => 'No published data found'
+                    'message' => 'No data found'
                 ], 404);
             }
 
             return response()->json([
                 'success' => true,
-                'import_id' => $latest->id,
+                'import_id' => (int) $latest->id,
                 'tahun' => $latest->tahun ?? null,
                 'bulan' => $latest->bulan ?? null,
                 'minggu' => $latest->minggu ?? null,
-                'created_at' => $latest->created_at->format('Y-m-d H:i:s')
+                'created_at' => $latest->created_at->format('Y-m-d H:i:s'),
+                'note' => 'Using latest upload (no published data)'
             ]);
         } catch (\Exception $e) {
+            \Log::error('Error in getLatestPublished: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ], 500);
         }
     }

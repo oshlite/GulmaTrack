@@ -64,3 +64,52 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+##  GULMATRACK APPLICATION
+
+**GulmaTrack** adalah aplikasi geospasial untuk tracking dan monitoring gulma (tanaman pengganggu) di berbagai wilayah produksi.
+
+###  Dokumentasi Lengkap
+- **README2.md** - Dokumentasi komprehensif (instalasi, fitur, API, troubleshooting)
+- **testing/README.md** - Panduan testing & debugging files
+
+###  Struktur Folder Penting
+\\\
+ app/                 - Kode aplikasi Laravel (Controllers, Models)
+ resources/           - Views (Blade templates), CSS, JavaScript
+ routes/              - API & web routes
+ database/            - Migrations, seeders, factories
+ public/              - Assets publik (images, compiled CSS/JS)
+ testing/             - Testing & development files (organized by purpose)
+ data/ & dataya/      - GeoJSON polygon data untuk mapping
+ storage/             - Logs, uploads, cache
+\\\
+
+###  Quick Start
+\\\ash
+# Setup
+php artisan migrate
+php artisan db:seed
+
+# Development
+php artisan serve
+npm run dev
+
+# Testing
+php testing/api-testing/test_api.php
+php testing/database-check/check_data_count.php
+\\\
+
+###  Testing Folder Structure
+Semua testing & debug files sudah diorganisir dalam folder **testing/**:
+- **api-testing/** - API endpoint testing (10 files)
+- **database-check/** - Database validation scripts (15 files)
+- **data-migration/** - Data import/export tools (4 files)
+- **sample-data/** - Sample CSV & test files (4 files)
+- **web-testing/** - Browser-based tests (7 files)
+- **deprecated/** - Old/obsolete files (9 files)
+- **data/ & datafix/** - GeoJSON data (16 files)
+
+Lihat [testing/README.md](testing/README.md) untuk detail lengkap tentang setiap folder.

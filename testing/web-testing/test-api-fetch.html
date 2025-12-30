@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Fetch</title>
+</head>
+<body>
+    <h1>Test API Wilayah 16</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/wilayah/geojson/16?admin=1', {
+                    headers: {
+                        'X-Admin-Request': '1',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                const featuresWithKategori = data.features?.filter(f => f.properties?.kategori) || [];
+                
+                result.textContent = JSON.stringify({
+                    totalFeatures: data.features?.length || 0,
+                    featuresWithKategori: featuresWithKategori.length,
+                    sample: featuresWithKategori.slice(0, 3).map(f => ({
+                        seksi: f.properties.seksi,
+                        kategori: f.properties.kategori
+                    }))
+                }, null, 2);
+            } catch (err) {
+                result.textContent = 'Error: ' + err.message;
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

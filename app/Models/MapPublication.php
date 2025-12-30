@@ -13,7 +13,6 @@ class MapPublication extends Model
         'status',
         'published_at',
         'published_by',
-        'import_log_id',
         'notes'
     ];
 

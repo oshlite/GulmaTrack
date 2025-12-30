@@ -644,6 +644,21 @@
             opacity: 0.9;
         }
 
+        .map-error-container {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .map-error-container .error-message {
+            color: #856404;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
         .map-container {
             background: white;
             border: 1px solid var(--border-color);
@@ -882,6 +897,7 @@
 
     <!-- Map Container -->
     <div class="map-container">
+        <div class="map-error-container"></div>
         <div id="map"></div>
         <div class="map-legend">
             <h4 onclick="filterByStatus('')" style="cursor:pointer;">
@@ -1208,8 +1224,10 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 
     // Initialize map
     function initMap() {
+        console.log('🗺️  [WILAYAH] Starting initMap...');
         // Check if map already exists
         if (map) {
+            console.log('🔄 [WILAYAH] Removing existing map...');
             map.remove();
         }
 
@@ -1227,7 +1245,25 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             maxZoom: 19
         }).addTo(map);
 
-        console.log('Map initialized successfully');
+        console.log('✅ [WILAYAH] Map initialized successfully');
+    }
+
+    // Error handling functions
+    function showMapError(message) {
+        console.error('❌ Map Error:', message);
+        // For wilayah.blade.php, display in alert or console
+        const errorContainer = document.querySelector('.map-error-container');
+        if (errorContainer) {
+            errorContainer.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+            errorContainer.style.display = 'block';
+        }
+    }
+
+    function hideMapError() {
+        const errorContainer = document.querySelector('.map-error-container');
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
     }
 
     // Load single wilayah
@@ -1368,134 +1404,178 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 
         console.log('Loading all wilayah...');
 
-        // Get list of all wilayah from API
-        fetch('/api/wilayah/data')
-            .then(response => response.json())
-            .then(summary => {
-                const wilayahNumbers = summary.data.map(w => w.wilayah);
-                
-                // Load each wilayah
-                const promises = wilayahNumbers.map(num => 
-                    fetch(`/api/wilayah/geojson/${num}`)
-                        .then(r => r.json())
-                        .then(data => ({ wilayah: num, data }))
-                );
-
-                return Promise.all(promises);
-            })
-            .then(results => {
-                const allBounds = [];
-
-                results.forEach(({ wilayah, data }) => {
-                    if (data.features && data.features.length > 0) {
-                        // Filter features by status if filter is active
-                        let features = data.features;
-                        if (currentStatusFilter) {
-                            features = features.filter(f => {
-                                const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
-                                if (currentStatusFilter === 'belum_dimonitoring') {
-                                    // Filter untuk belum dimonitoring (status kosong atau tidak dikenali)
-                                    return !status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'));
-                                }
-                                return status.includes(currentStatusFilter);
-                            });
+        try {
+            // Get list of all wilayah from API
+            console.log('🔍 [wilayah.blade] loadAllWilayah() dimulai...');
+            const summaryResponse = await fetch('/api/wilayah/data');
+            console.log('🌐 [wilayah.blade] API /wilayah/data response status:', summaryResponse.status);
+            console.log('🌐 [wilayah.blade] Response headers:', {
+                'content-type': summaryResponse.headers.get('content-type'),
+                'content-length': summaryResponse.headers.get('content-length')
+            });
+            
+            if (!summaryResponse.ok) {
+                throw new Error(`API /wilayah/data returned status ${summaryResponse.status}`);
+            }
+            
+            const summary = await summaryResponse.json();
+            console.log('📊 [wilayah.blade] API /wilayah/data response:', summary);
+            
+            if (summary.error) {
+                throw new Error('API error: ' + summary.error);
+            }
+            
+            if (!summary.data || summary.data.length === 0) {
+                console.warn('⚠️  [wilayah.blade] No wilayah data available');
+                console.warn('⚠️  Response object:', summary);
+                showMapError('Tidak ada data wilayah yang tersedia. Periksa console untuk detail.');
+                return;
+            }
+            
+            const wilayahNumbers = summary.data.map(w => w.wilayah);
+            console.log('📍 [wilayah.blade] Will load wilayah:', wilayahNumbers);
+            
+            // Load each wilayah
+            const promises = wilayahNumbers.map(num => {
+                console.log(`🌍 [wilayah.blade] Fetching wilayah ${num}...`);
+                return fetch(`/api/wilayah/geojson/${num}`)
+                    .then(r => {
+                        console.log(`📥 [wilayah.blade] Wilayah ${num} response: status ${r.status}`);
+                        if (!r.ok) {
+                            console.error(`Failed to fetch wilayah ${num}: status ${r.status}`);
+                            return null;
                         }
-                        
-                        // Skip if no features match filter
-                        if (features.length === 0) return;
-                        
-                        const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
-                            style: function(feature) {
-                                return getFeatureStyle(feature);
-                            },
-                            onEachFeature: function(feature, layer) {
-                                if (feature.properties) {
-                                    layer.bindPopup(createPopupContent(feature.properties), {
-                                        maxWidth: 350,
-                                        minWidth: 320,
-                                        maxHeight: 600,
-                                        autoPan: true
-                                    });
-                                    
-                                    // Add tooltip for hover (quick info)
-                                    layer.bindTooltip(createTooltipContent(feature.properties), {
-                                        permanent: false,
-                                        sticky: true,
-                                        direction: 'top',
-                                        offset: [0, -10]
-                                    });
-                                    
-                                    // Add permanent label if showLocationLabels is true
-                                    if (showLocationLabels) {
-                                        const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
-                                        layer.bindTooltip(lokasi, {
-                                            permanent: true,
-                                            direction: 'top',
-                                            className: 'location-label'
-                                        });
-                                    }
-                                    
-                                    // Add hover effect - lift on hover
-                                    layer.on('mouseover', function(e) {
-                                        const originalStyle = getFeatureStyle(feature);
-                                        this.setStyle({
-                                            weight: 8,
-                                            fillOpacity: 0.8,
-                                            opacity: 1,
-                                            color: originalStyle.color
-                                        });
-                                        this.bringToFront();
-                                    });
-                                    
-                                    layer.on('mouseout', function(e) {
-                                        this.setStyle(getFeatureStyle(feature));
-                                    });
-                                }
-                            }
-                        }).addTo(map);
-
-                        geoJsonLayers[wilayah] = layer;
-                        
-                        const bounds = layer.getBounds();
-                        if (bounds.isValid()) {
-                            allBounds.push(bounds);
+                        return r.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            console.log(`✅ [wilayah.blade] Wilayah ${num}: ${data.features?.length || 0} features loaded`);
+                            const withKategori = data.features?.filter(f => f.properties?.kategori || f.properties?.Kelas_weed).length || 0;
+                            console.log(`   └─ Features with kategori/status: ${withKategori}`);
                         }
-                    }
-                });
+                        return data ? ({ wilayah: num, data }) : null;
+                    })
+                    .catch(err => {
+                        console.error(`Error loading wilayah ${num}:`, err);
+                        return null;
+                    });
+            });
 
-                // Fit map to show all wilayah
-                if (allBounds.length > 0) {
-                    const combinedBounds = allBounds.reduce((acc, bounds) => {
-                        return acc.extend(bounds);
-                    }, L.latLngBounds(allBounds[0]));
-                    
-                    map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: 13 });
-                }
+            const results = await Promise.all(promises);
+            const validResults = results.filter(r => r !== null);
+            const allBounds = [];
 
-                console.log(`Loaded ${results.length} wilayah successfully`);
-                
-                // Populate location table with all data (filtered if needed)
-                const allFeatures = results.flatMap(r => {
-                    if (!r.data.features) return [];
+            validResults.forEach(({ wilayah, data }) => {
+                if (data.features && data.features.length > 0) {
+                    // Filter features by status if filter is active
+                    let features = data.features;
                     if (currentStatusFilter) {
-                        return r.data.features.filter(f => {
-                            const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                        features = features.filter(f => {
+                            const status = (f.properties.kategori || f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                            if (currentStatusFilter === 'belum_dimonitoring') {
+                                // Filter untuk belum dimonitoring (status kosong atau tidak dikenali)
+                                return !status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'));
+                            }
                             return status.includes(currentStatusFilter);
                         });
                     }
-                    return r.data.features;
-                });
-                populateLocationTable(allFeatures);
-                
-                // Apply status filter to table if active
-                if (currentStatusFilter) {
-                    filterLocationsByStatus(currentStatusFilter);
+                    
+                    // Skip if no features match filter
+                    if (features.length === 0) return;
+                    
+                    const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
+                        style: function(feature) {
+                            return getFeatureStyle(feature);
+                        },
+                        onEachFeature: function(feature, layer) {
+                            if (feature.properties) {
+                                layer.bindPopup(createPopupContent(feature.properties), {
+                                    maxWidth: 350,
+                                    minWidth: 320,
+                                    maxHeight: 600,
+                                    autoPan: true
+                                });
+                                
+                                // Add tooltip for hover (quick info)
+                                layer.bindTooltip(createTooltipContent(feature.properties), {
+                                    permanent: false,
+                                    sticky: true,
+                                    direction: 'top',
+                                    offset: [0, -10]
+                                });
+                                
+                                // Add permanent label if showLocationLabels is true
+                                if (showLocationLabels) {
+                                    const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
+                                    layer.bindTooltip(lokasi, {
+                                        permanent: true,
+                                        direction: 'top',
+                                        className: 'location-label'
+                                    });
+                                }
+                                
+                                // Add hover effect - lift on hover
+                                layer.on('mouseover', function(e) {
+                                    const originalStyle = getFeatureStyle(feature);
+                                    this.setStyle({
+                                        weight: 8,
+                                        fillOpacity: 0.8,
+                                        opacity: 1,
+                                        color: originalStyle.color
+                                    });
+                                    this.bringToFront();
+                                });
+                                
+                                layer.on('mouseout', function(e) {
+                                    this.setStyle(getFeatureStyle(feature));
+                                });
+                            }
+                        }
+                    }).addTo(map);
+
+                    geoJsonLayers[wilayah] = layer;
+                    
+                    const bounds = layer.getBounds();
+                    if (bounds.isValid()) {
+                        allBounds.push(bounds);
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Error loading all wilayah:', error);
-                alert('Gagal memuat data wilayah: ' + error.message);
             });
+
+            // Fit map to show all wilayah
+            if (allBounds.length > 0) {
+                const combinedBounds = allBounds.reduce((acc, bounds) => {
+                    return acc.extend(bounds);
+                }, L.latLngBounds(allBounds[0]));
+                
+                map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: 13 });
+            }
+
+            console.log(`Loaded ${validResults.length} wilayah successfully`);
+            
+            // Populate location table with all data (filtered if needed)
+            const allFeatures = validResults.flatMap(r => {
+                if (!r.data.features) return [];
+                if (currentStatusFilter) {
+                    return r.data.features.filter(f => {
+                        const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                        return status.includes(currentStatusFilter);
+                    });
+                }
+                return r.data.features;
+            });
+            populateLocationTable(allFeatures);
+            
+            // Apply status filter to table if active
+            if (currentStatusFilter) {
+                filterLocationsByStatus(currentStatusFilter);
+            }
+        } catch (error) {
+            console.error('❌ Error loading all wilayah:', error);
+            console.error('Error stack:', error.stack);
+            const errorMsg = error.message || 'Gagal memuat data wilayah';
+            showMapError(`Error: ${errorMsg}`);
+        }
     }
 
     // Clear all layers from map
@@ -1515,8 +1595,8 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         let borderColor = '#8b8b8b'; // default hitam untuk tidak ada data
         let weight = 2;
         
-        // Check multiple status fields: Kelas_weed, gulma_KATEGORI, atau Status
-        const status = (props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+        // Check multiple status fields: kategori (from API), Kelas_weed, gulma_KATEGORI, atau Status
+        const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
         
         if (status) {
             if (status.includes('bersih')) {
@@ -1545,7 +1625,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 
     // Create tooltip content for hover (quick info)
     function createTooltipContent(props) {
-        const statusGulma = props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
+        const statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
         const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
         
         // Get color for status
@@ -1583,7 +1663,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         }
 
         // Status Gulma dengan warna
-        const statusGulma = props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
+        const statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
         let statusColor = '#ecf0f1';
         let textColor = '#333333';
         
@@ -2030,17 +2110,35 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                 // Load wilayah data and stats
                 loadWilayahDataAndStats();
                 
-                // Auto-load all wilayah map with latest data
-                if (latestPeriod) {
+                // Auto-load all wilayah map with latest data - LANGSUNG!
+                console.log('🗺️  Auto-loading map dengan data terbaru...');
+                if (map) {
+                    loadAllWilayah();
+                } else {
+                    console.log('Map belum ready, tunggu sebentar...');
                     setTimeout(() => {
-                        loadAllWilayah();
-                    }, 500);
+                        if (map) {
+                            loadAllWilayah();
+                        } else {
+                            console.error('Map masih belum ready setelah delay!');
+                        }
+                    }, 200);
                 }
             }
         } catch (error) {
             console.error('Error loading periods:', error);
             // Still try to load data even if periods fail
             loadWilayahDataAndStats();
+            // CRITICAL: Auto-load map as fallback
+            console.warn('⚠️  Periods gagal, auto-loading map anyway...');
+            setTimeout(() => {
+                if (map) {
+                    loadAllWilayah();
+                } else {
+                    initMap();
+                    setTimeout(() => loadAllWilayah(), 200);
+                }
+            }, 300);
         }
     }
 
@@ -2115,8 +2213,27 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
         console.log('Initializing GulmaTrack Wilayah Map...');
-        initMap();
-        loadAvailablePeriods(); // Load periods and then auto-load map
+        
+        // Ensure Leaflet is loaded
+        if (typeof L === 'undefined') {
+            console.error('⚠️  Leaflet library not yet loaded, waiting...');
+            // Wait for Leaflet to load
+            let retries = 0;
+            const checkLeaflet = setInterval(() => {
+                if (typeof L !== 'undefined') {
+                    clearInterval(checkLeaflet);
+                    initMap();
+                    loadAvailablePeriods();
+                    console.log('✅ Leaflet loaded, map initialized');
+                } else if (retries++ > 30) {
+                    clearInterval(checkLeaflet);
+                    console.error('❌ Leaflet failed to load!');
+                }
+            }, 100);
+        } else {
+            initMap();
+            loadAvailablePeriods(); // Load periods and then auto-load map
+        }
     });
     </script>
 </div>

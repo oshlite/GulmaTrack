@@ -612,11 +612,15 @@
         z-index: 1;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .map-container #map {
-        width: 100%;
-        height: 100%;
+        width: 100% !important;
+        height: 100% !important;
+        flex: 1;
+        background: #fff;
     }
 
     .map-legend {
@@ -1002,7 +1006,7 @@
                 <i class="fas fa-file-upload"></i>
             </div>
             <div class="stat-label"><i class="fas fa-file-upload"></i> Upload Terbaru</div>
-            <div class="stat-value" id="statUploadTerbaru">{{ $importTerbaru->total() ?? 0 }}</div>
+            <div class="stat-value" id="statUploadTerbaru">{{ $importTerbaru->count() ?? 0 }}</div>
         </div>
     </div>
 
@@ -1158,6 +1162,18 @@
         
         <div class="map-container">
             <div id="map"></div>
+            <div id="mapLoadingIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins', sans-serif; text-align: center;">
+                <div style="font-size: 16px; color: #128241; margin-bottom: 10px;">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat Peta...
+                </div>
+                <div style="font-size: 12px; color: #666;">Silakan tunggu sebentar</div>
+            </div>
+            <div id="mapErrorIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins', sans-serif; text-align: center; max-width: 300px;">
+                <div style="font-size: 16px; color: #e74c3c; margin-bottom: 10px;">
+                    <i class="fas fa-exclamation-circle"></i> Error
+                </div>
+                <div style="font-size: 12px; color: #666;" id="mapErrorText">Peta gagal dimuat</div>
+            </div>
             <div class="map-legend">
                 <h4 onclick="filterByStatus('')" style="cursor:pointer;">
                     <i class="fas fa-info-circle"></i> Status Gulma
@@ -1223,16 +1239,30 @@
     <div class="card full-width">
         <h2><i class="fas fa-history"></i> Riwayat Upload</h2>
         
-        <!-- Search and Filters Form -->
+        
+        
+        @if (isset($importTerbaru) && $importTerbaru->count() > 0)
+            <div class="table-wrapper">
+                <!-- Display Selector & Search Controls -->
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <select id="recordsPerPage" onchange="changeRecordsPerPage()" style="padding: 10px 14px; border: 2px solid #128241; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                            <option value="10">10 baris</option>    
+                            <option value="25">25 baris</option>
+                            <option value="50">50 baris</option>
+                            <option value="100">100 baris</option>
+                            <option value="all">Semua</option>
+                        </select>
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 250px;">
+                        <input type="text" id="tableSearchInput" placeholder="🔍 Cari berdasarkan ID (#5), Nama File, atau data lainnya..." 
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s ease;">
+                    </div>
+                    
+                    <!-- Search and Filters Form -->
         <form method="GET" action="{{ route('admin.dashboard') }}" id="filterForm">
             <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
-                <!-- Search -->
-                <div style="flex: 1; min-width: 250px;">
-                    <input type="text" id="searchInput" value="{{ request('search') }}" 
-                        placeholder="🔍 Cari berdasarkan ID (#5), Nama File, atau data lainnya..." 
-                        onkeypress="return event.keyCode !== 13;"
-                        style="width: 100%; padding: 12px 16px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;">
-                </div>
                 
                 <!-- Filter Tahun -->
                 <div style="min-width: 140px; position: relative;">
@@ -1299,125 +1329,157 @@
                 </a>
             </div>
         </form>
-        
-        @if (isset($importTerbaru) && $importTerbaru->total() > 0)
-            <div class="table-wrapper">
-                <table id="importTable">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-hashtag"></i> ID</th>
-                            <th><i class="fas fa-file"></i> Nama File</th>
-                            <th><i class="fas fa-calendar"></i> Periode</th>
-                            <th><i class="fas fa-database"></i> Data</th>
-                            <th><i class="fas fa-info-circle"></i> Status</th>
-                            <th><i class="fas fa-clock"></i> Waktu Upload</th>
-                            <th><i class="fas fa-cog"></i> Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($importTerbaru as $log)
-                            @php
-                                // Check if this is the latest for its period
-                                $isLatest = \App\Models\ImportLog::where('tahun', $log->tahun)
-                                    ->where('bulan', $log->bulan)
-                                    ->where('minggu', $log->minggu)
-                                    ->where('status', 'success')
-                                    ->orderBy('created_at', 'desc')
-                                    ->first()?->id === $log->id;
-                                
-                                $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                            @endphp
-                            <tr data-id="{{ $log->id }}" data-wilayah="{{ $log->wilayah_ids }}" data-tahun="{{ $log->tahun }}" data-bulan="{{ $log->bulan }}" data-minggu="{{ $log->minggu }}" 
-                                data-search="{{ strtolower($log->id . ' ' . $log->nama_file . ' ' . $log->tahun . ' ' . ($log->bulan ? $monthNames[$log->bulan] : '') . ' ' . $log->minggu . ' ' . $log->jumlah_records . ' ' . $log->status . ' ' . $log->created_at->locale('id')->isoFormat('D MMMM YYYY HH:mm')) }}">
-                                <td><strong>#{{ $log->id }}</strong></td>
-                                <td>{{ $log->nama_file }}</td>
-                                <td>
-                                    @if ($log->tahun && $log->bulan && $log->minggu)
-                                        <span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins', sans-serif; border: 1px solid #90caf9;">
-                                            <i class="fas fa-calendar"></i>
-                                            {{ $log->tahun }} / {{ $monthNames[$log->bulan] }} - Minggu {{ $log->minggu }}
-                                        </span>
-                                    @else
-                                        <span style="color: #999;">-</span>
-                                    @endif
-                                </td>
-                                <td>{{ $log->jumlah_records }}</td>
-                                <td>
-                                    <span class="status-badge status-{{ $log->status }}">
-                                        @if ($log->status === 'success')
-                                            <i class="fas fa-check"></i> Berhasil
-                                        @elseif ($log->status === 'pending')
-                                            <i class="fas fa-hourglass-half"></i> Pending
-                                        @else
-                                            <i class="fas fa-times"></i> Gagal
-                                        @endif
-                                    </span>
-                                    @if ($log->status === 'failed' || $log->status === 'error')
-                                        <div style="font-size: 11px; color: #E74C3C; margin-top: 4px; font-style: italic;">
-                                            {{ $log->error_message ?? 'Format CSV tidak valid. Periksa kolom: PG, FM, Wilayah, SEKSI. Upload ulang dengan format yang benar.' }}
-                                        </div>
-                                    @endif
-                                </td>
-                                <td>{{ $log->created_at->locale('id')->isoFormat('D MMMM YYYY HH:mm') }}</td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        
-                                        <button onclick="loadImportDataOnMap({{ $log->id }}, '{{ $log->wilayah_id }}', {{ $log->tahun ?? 'null' }}, {{ $log->bulan ?? 'null' }}, {{ $log->minggu ?? 'null' }})" 
-                                                style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
-                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
-                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                            <i class="fas fa-map"></i>
-                                            <span>Tampilkan di Peta</span>
-                                        </button>
-                                        @if($isLatest && $log->status === 'success')
-                                            <span title="Data Terbaru untuk periode ini" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: linear-gradient(135deg, #128241, #2ecc71); border-radius: 50%; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3);">
-                                                <i class="fas fa-check" style="color: white; font-size: 11px;"></i>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            @if ($importTerbaru->hasPages())
-                <div style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;">
-                    @if ($importTerbaru->onFirstPage())
-                        <span style="padding: 10px 16px; background: #e3eae8; color: #999; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: not-allowed;">
-                            <i class="fas fa-chevron-left"></i>
-                        </span>
-                    @else
-                        <a href="{{ $importTerbaru->previousPageUrl() }}" style="padding: 10px 16px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.3s ease;">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    @endif
-
-                    @foreach ($importTerbaru->getUrlRange(1, $importTerbaru->lastPage()) as $page => $url)
-                        @if ($page == $importTerbaru->currentPage())
-                            <span style="padding: 10px 16px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);">
-                                {{ $page }}
-                            </span>
-                        @else
-                            <a href="{{ $url }}" style="padding: 10px 16px; background: white; color: var(--primary-color); border: 2px solid #e3eae8; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.3s ease;">
-                                {{ $page }}
-                            </a>
-                        @endif
-                    @endforeach
-
-                    @if ($importTerbaru->hasMorePages())
-                        <a href="{{ $importTerbaru->nextPageUrl() }}" style="padding: 10px 16px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.3s ease;">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    @else
-                        <span style="padding: 10px 16px; background: #e3eae8; color: #999; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: not-allowed;">
-                            <i class="fas fa-chevron-right"></i>
-                        </span>
-                    @endif
                 </div>
-            @endif
+
+                <!-- Table -->
+                <div style="overflow-x: auto;">
+                    <table id="importTable">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-file"></i> Nama File</th>
+                                <th><i class="fas fa-calendar"></i> Periode</th>
+                                <th><i class="fas fa-database"></i> Data</th>
+                                <th><i class="fas fa-info-circle"></i> Status</th>
+                                <th><i class="fas fa-clock"></i> Waktu Upload</th>
+                                <th><i class="fas fa-cog"></i> Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Info & Controls -->
+                <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div style="font-size: 12px; color: #666; font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        Menampilkan <span id="recordsStart">1</span> hingga <span id="recordsEnd">25</span> dari <span id="recordsTotal">0</span> data
+                    </div>
+                    <div id="paginationControls" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;">
+                    </div>
+                </div>
+
+                <script>
+                    const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                    let allTableData = @json($importTerbaru->toArray());
+                    let currentPage = 1;
+                    let recordsPerPage = 10;
+                    let filteredData = [...allTableData];
+
+                    function changeRecordsPerPage() {
+                        const value = document.getElementById('recordsPerPage').value;
+                        recordsPerPage = value === 'all' ? filteredData.length : parseInt(value);
+                        currentPage = 1;
+                        renderTable();
+                    }
+
+                    function renderTable() {
+                        const tbody = document.getElementById('tableBody');
+                        tbody.innerHTML = '';
+
+                        const startIdx = (currentPage - 1) * recordsPerPage;
+                        const endIdx = startIdx + recordsPerPage;
+                        const pageData = filteredData.slice(startIdx, endIdx);
+
+                        pageData.forEach(log => {
+                            const periodText = log.tahun && log.bulan && log.minggu 
+                                ? `<span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins', sans-serif; border: 1px solid #90caf9;"><i class="fas fa-calendar"></i> ${log.tahun} / ${monthNames[log.bulan]} - Minggu ${log.minggu}</span>`
+                                : '<span style="color: #999;">-</span>';
+                            
+                            const statusBadge = log.status === 'success' 
+                                ? '<span class="status-badge status-success"><i class="fas fa-check"></i> Berhasil</span>'
+                                : log.status === 'pending'
+                                ? '<span class="status-badge status-pending"><i class="fas fa-hourglass-half"></i> Pending</span>'
+                                : '<span class="status-badge status-failed"><i class="fas fa-times"></i> Gagal</span>';
+
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><strong>#${log.id}</strong></td>
+                                <td>${log.nama_file}</td>
+                                <td>${periodText}</td>
+                                <td>${log.jumlah_records}</td>
+                                <td>${statusBadge}</td>
+                                <td>${new Date(log.created_at).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</td>
+                                <td>
+                                    <button onclick="loadImportDataOnMap(${log.id}, '${log.wilayah_id}', ${log.tahun || null}, ${log.bulan || null}, ${log.minggu || null})" 
+                                            style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
+                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                        <i class="fas fa-map"></i> Peta
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+
+                        updatePaginationInfo();
+                        renderPaginationControls();
+                    }
+
+                    function updatePaginationInfo() {
+                        const totalRecords = filteredData.length;
+                        const startIdx = (currentPage - 1) * recordsPerPage + 1;
+                        let endIdx = currentPage * recordsPerPage;
+                        if (endIdx > totalRecords) endIdx = totalRecords;
+
+                        document.getElementById('recordsStart').textContent = totalRecords === 0 ? 0 : startIdx;
+                        document.getElementById('recordsEnd').textContent = endIdx;
+                        document.getElementById('recordsTotal').textContent = totalRecords;
+                    }
+
+                    function renderPaginationControls() {
+                        const paginationDiv = document.getElementById('paginationControls');
+                        paginationDiv.innerHTML = '';
+
+                        if (filteredData.length === 0) return;
+
+                        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+
+                        // Previous button
+                        if (currentPage > 1) {
+                            const prevBtn = document.createElement('button');
+                            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                            prevBtn.onclick = () => { currentPage--; renderTable(); };
+                            prevBtn.style.cssText = 'padding: 10px 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;';
+                            paginationDiv.appendChild(prevBtn);
+                        }
+
+                        // Page buttons
+                        for (let i = 1; i <= totalPages; i++) {
+                            const pageBtn = document.createElement('button');
+                            pageBtn.textContent = i;
+                            pageBtn.onclick = () => { currentPage = i; renderTable(); };
+                            pageBtn.style.cssText = i === currentPage 
+                                ? 'padding: 10px 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;'
+                                : 'padding: 10px 12px; background: white; color: var(--primary-color); border: 2px solid #e3eae8; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;';
+                            paginationDiv.appendChild(pageBtn);
+                        }
+
+                        // Next button
+                        if (currentPage < totalPages) {
+                            const nextBtn = document.createElement('button');
+                            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                            nextBtn.onclick = () => { currentPage++; renderTable(); };
+                            nextBtn.style.cssText = 'padding: 10px 12px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;';
+                            paginationDiv.appendChild(nextBtn);
+                        }
+                    }
+
+                    // Search functionality
+                    document.getElementById('tableSearchInput').addEventListener('keyup', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        filteredData = allTableData.filter(item => {
+                            const searchStr = `${item.id} ${item.nama_file} ${item.tahun} ${monthNames[item.bulan]} ${item.minggu} ${item.jumlah_records} ${item.status} ${item.created_at}`.toLowerCase();
+                            return searchStr.includes(searchTerm);
+                        });
+                        currentPage = 1;
+                        renderTable();
+                    });
+
+                    // Initial render
+                    renderTable();
+                </script>
+            </div>
         @else
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
@@ -1454,99 +1516,140 @@
     let map;
     let geoJsonLayers = {};
 
+    // Helper to show map error
+    function showMapError(message) {
+        const errorDiv = document.getElementById('mapErrorIndicator');
+        const loadingDiv = document.getElementById('mapLoadingIndicator');
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        if (errorDiv) {
+            document.getElementById('mapErrorText').textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    }
+
+    // Helper to hide error
+    function hideMapError() {
+        const errorDiv = document.getElementById('mapErrorIndicator');
+        if (errorDiv) errorDiv.style.display = 'none';
+    }
+
     // Initialize map
     function initMap() {
-        console.log('Starting initMap...');
+        console.log('🗺️  [DASHBOARD] Starting initMap...');
         const mapContainer = document.getElementById('map');
         
         if (!mapContainer) {
-            console.error('Map container not found!');
+            console.error('❌ [DASHBOARD] Map container not found!');
             return;
         }
         
-        console.log('Map container found, dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
+        console.log('✅ [DASHBOARD] Map container found, dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
         
         if (map) {
-            console.log('Removing existing map...');
+            console.log('🔄 [DASHBOARD] Removing existing map...');
             map.remove();
         }
         
         try {
-            console.log('Creating new map instance...');
+            console.log('🆕 [DASHBOARD] Creating new map instance...');
             map = L.map('map').setView([-7.5, 107], 11);
             
-            console.log('Adding tile layer...');
+            console.log('🗺️  [DASHBOARD] Adding tile layer...');
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
             }).addTo(map);
             
-            console.log('Map initialized successfully!');
+            console.log('✅ [DASHBOARD] Map initialized successfully!');
             
-            // Load all wilayah after map is initialized
-            setTimeout(() => {
-                console.log('Loading data...');
-                loadLatestPublishedData();
-            }, 500);
+            // Show loading indicator
+            const loadingDiv = document.getElementById('mapLoadingIndicator');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'block';
+            }
+            
+            // LANGSUNG LOAD SEMUA WILAYAH (admin always sees latest data)
+            console.log('📥 [DASHBOARD] LANGSUNG MEMUAT SEMUA DATA GULMA...');
+            loadAllWilayah();
         } catch (error) {
-            console.error('Error initializing map:', error);
+            console.error('❌ [DASHBOARD] Error initializing map:', error);
         }
     }
 
     // Load latest published data on map
     async function loadLatestPublishedData() {
-        console.log('=== Loading latest published data ===');
+        console.log('🗺️  === [DASHBOARD] Loading latest published data ===');
 
         try {
             // Get latest published import log
             const response = await fetch('/api/map-publications/latest-published');
+            console.log('📡 [DASHBOARD] API response status:', response.status);
             
             if (!response.ok) {
-                console.log('No published data found, loading all wilayah');
+                console.log(`⚠️  [DASHBOARD] API returned status ${response.status}, loading all wilayah`);
                 loadAllWilayah();
                 return;
             }
 
             const publication = await response.json();
-            console.log('Latest publication:', publication);
+            console.log('📊 [DASHBOARD] Latest publication:', publication);
+
+            if (publication.success === false) {
+                console.log('⚠️  [DASHBOARD] No published data (API returned success: false), loading all wilayah');
+                loadAllWilayah();
+                return;
+            }
 
             if (publication.import_id) {
                 // Load data from specific import
+                console.log('✅ [DASHBOARD] Loading published data with import_id:', publication.import_id);
                 await loadDataFromImport(publication.import_id, publication.tahun, publication.bulan, publication.minggu);
             } else {
                 // Fallback to load all wilayah
+                console.log('⚠️  [DASHBOARD] No import_id in publication, loading all wilayah');
                 loadAllWilayah();
             }
         } catch (error) {
-            console.error('Error loading latest published data:', error);
+            console.error('❌ [DASHBOARD] Error loading latest published data:', error);
+            showMapError('Gagal memuat data publikasi. Error: ' + error.message);
             // Fallback to load all wilayah
-            loadAllWilayah();
+            console.log('🔄 [DASHBOARD] Fallback: loading all wilayah...');
+            setTimeout(() => loadAllWilayah(), 1000);
         }
     }
 
     // Load data from specific import
     async function loadDataFromImport(importId, tahun, bulan, minggu) {
-        console.log(`Loading data from import ${importId}: ${tahun}/${bulan}/w${minggu}`);
+        console.log(`🚀 [DASHBOARD] Loading data from import ${importId}: ${tahun}/${bulan}/w${minggu}`);
         
         try {
             const response = await fetch(`/api/data-gulma/by-import/${importId}`);
+            if (!response.ok) {
+                throw new Error(`API returned status ${response.status}`);
+            }
             const data = await response.json();
             
-            console.log(`Loaded ${data.length} records from import ${importId}`);
+            console.log('📦 [DASHBOARD] Raw API response data count:', Array.isArray(data) ? data.length : 'Not array');
             
-            if (data.length === 0) {
-                console.log('No data found, loading all wilayah');
-                loadAllWilayah();
+            // Handle array or object response
+            const dataArray = Array.isArray(data) ? data : (data.data || data);
+            console.log(`📊 [DASHBOARD] Loaded ${dataArray.length} records from import ${importId}`);
+            
+            if (dataArray.length === 0) {
+                console.log('⚠️  [DASHBOARD] No data found, loading all wilayah');
+                showMapError('Data publikasi kosong, menampilkan semua wilayah');
+                setTimeout(() => loadAllWilayah(), 500);
                 return;
             }
 
             // Group by wilayah
             const byWilayah = {};
-            data.forEach(record => {
-                if (!byWilayah[record.wilayah]) {
-                    byWilayah[record.wilayah] = [];
+            dataArray.forEach(record => {
+                const wilayahId = record.wilayah_id || record.wilayah;
+                if (!byWilayah[wilayahId]) {
+                    byWilayah[wilayahId] = [];
                 }
-                byWilayah[record.wilayah].push(record);
+                byWilayah[wilayahId].push(record);
             });
 
             // Load each wilayah's geojson and merge with data
@@ -1556,7 +1659,15 @@
 
             for (const wilayahNum of wilayahNumbers) {
                 try {
-                    const geoResponse = await fetch(`/api/wilayah/geojson/${wilayahNum}`);
+                    const geoResponse = await fetch(`/api/wilayah/geojson/${wilayahNum}?admin=1`, {
+                        headers: {
+                            'X-Admin-Request': '1'
+                        }
+                    });
+                    if (!geoResponse.ok) {
+                        console.error(`Failed to fetch wilayah ${wilayahNum}: status ${geoResponse.status}`);
+                        continue;
+                    }
                     const geojson = await geoResponse.json();
                     
                     // Merge data dengan geojson
@@ -1619,74 +1730,93 @@
             }
 
             console.log(`✓ Loaded published data: ${featuresAdded} features from ${wilayahNumbers.length} wilayah`);
+            
+            // Hide loading indicator and error
+            hideMapError();
+            const loadingDiv = document.getElementById('mapLoadingIndicator');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
         } catch (error) {
             console.error('Error loading data from import:', error);
+            showMapError('Error: ' + error.message);
+            // Hide loading indicator on error
+            const loadingDiv = document.getElementById('mapLoadingIndicator');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
             loadAllWilayah();
         }
     }
 
     // Load all wilayah with data from database
     function loadAllWilayah() {
-        console.log('=== Loading all wilayah with data ===');
+        console.log('🌍 === [DASHBOARD] Loading all wilayah with data ===');
+        hideMapError();
 
-        // Get all wilayah that have data
-        fetch('/api/wilayah/data')
-            .then(response => {
-                console.log('Response from /api/wilayah/data:', response.status);
-                return response.json();
-            })
-            .then(summary => {
-                console.log('Summary data:', summary);
-                const wilayahNumbers = summary.data.map(w => w.wilayah);
-                console.log('Wilayah numbers to load:', wilayahNumbers);
-                
-                if (wilayahNumbers.length === 0) {
-                    console.log('No wilayah data found');
-                    return;
+        // Load semua wilayah 16-23 langsung
+        const wilayahNumbers = [16, 17, 18, 19, 20, 21, 22, 23];
+        console.log('✅ [DASHBOARD] Loading wilayah:', wilayahNumbers);
+        
+        // Load each wilayah with data merged
+        const promises = wilayahNumbers.map(num => {
+            console.log(`📡 Fetching wilayah ${num} with admin=1 header`);
+            return fetch(`/api/wilayah/geojson/${num}?admin=1`, {
+                headers: {
+                    'X-Admin-Request': '1',
+                    'Accept': 'application/json'
                 }
-
-                // Load each wilayah
-                const promises = wilayahNumbers.map(num => 
-                    fetch(`/api/wilayah/geojson/${num}`)
-                        .then(r => {
-                            console.log(`Loaded wilayah ${num}, status: ${r.status}`);
-                            return r.json();
-                        })
-                        .then(data => {
-                            console.log(`Wilayah ${num} has ${data.features ? data.features.length : 0} features`);
-                            return { wilayah: num, data };
-                        })
-                        .catch(err => {
-                            console.error(`Error loading wilayah ${num}:`, err);
-                            return null;
-                        })
-                );
-
-                return Promise.all(promises);
             })
+                .then(r => {
+                    console.log(`📥 Response for wilayah ${num}: status ${r.status}`);
+                    if (!r.ok) {
+                        console.warn(`HTTP ${r.status} for wilayah ${num}`);
+                        return { wilayah: num, data: { type: 'FeatureCollection', features: [] } };
+                    }
+                    return r.json().then(data => {
+                        console.log(`✅ Wilayah ${num} received ${data.features?.length || 0} features`);
+                        return { wilayah: num, data };
+                    });
+                })
+                .catch(err => {
+                    console.error(`Error loading wilayah ${num}:`, err);
+                    return { wilayah: num, data: { type: 'FeatureCollection', features: [] } };
+                });
+        });
+
+        Promise.all(promises)
             .then(results => {
-                if (!results) {
-                    console.log('No results to process');
-                    return;
-                }
-                
                 console.log(`Processing ${results.length} wilayah results...`);
                 const allBounds = [];
                 let featuresAdded = 0;
+                let wilayahWithData = 0;
 
                 results.forEach(result => {
-                    if (!result || !result.data || !result.data.features || result.data.features.length === 0) {
-                        console.log('Skipping empty result');
+                    if (!result || !result.data || !result.data.features) {
+                        console.warn(`Wilayah ${result?.wilayah}: no features`);
+                        return;
+                    }
+                    
+                    const { wilayah, data } = result;
+                    const featureCount = data.features.length;
+                    
+                    if (featureCount === 0) {
+                        console.log(`Wilayah ${wilayah}: 0 features (empty GeoJSON)`);
                         return;
                     }
 
-                    const { wilayah, data } = result;
-                    console.log(`Adding wilayah ${wilayah} to map with ${data.features.length} features`);
+                    console.log(`🗺️ Adding wilayah ${wilayah} to map with ${featureCount} features`);
+                    
+                    // Count how many features have kategori data
+                    let withKategori = 0;
+                    data.features.forEach(f => {
+                        if (f.properties && f.properties.kategori) withKategori++;
+                    });
+                    console.log(`  - ${withKategori} features have kategori data`);
 
                     const layer = L.geoJSON(data, {
                         style: function(feature) {
-                            const style = getFeatureStyle(feature);
-                            return style;
+                            return getFeatureStyle(feature);
                         },
                         onEachFeature: function(feature, layer) {
                             if (feature.properties) {
@@ -1706,10 +1836,11 @@
                     }).addTo(map);
 
                     geoJsonLayers[wilayah] = layer;
-                    featuresAdded += data.features.length;
+                    featuresAdded += featureCount;
+                    wilayahWithData++;
                     
                     const bounds = layer.getBounds();
-                    if (bounds.isValid()) {
+                    if (bounds && bounds.isValid && bounds.isValid()) {
                         allBounds.push(bounds);
                     }
                 });
@@ -1721,43 +1852,77 @@
                         combinedBounds.extend(bounds);
                     });
                     map.fitBounds(combinedBounds, { padding: [50, 50] });
-                    console.log(`✓ Map bounds adjusted to show all wilayah`);
+                    console.log(`✓ Map bounds adjusted`);
                 }
 
-                console.log(`✓ SUCCESS: Loaded ${Object.keys(geoJsonLayers).length} wilayah with ${featuresAdded} total features`);
+                const layerCount = Object.keys(geoJsonLayers).length;
+                console.log(`✅ [DASHBOARD] SUCCESS: Loaded ${layerCount} wilayah with ${featuresAdded} total features`);
+                console.log(`🎉 [DASHBOARD] PETA GULMA BERHASIL DIMUAT!`);
+                
+                // Hide loading indicator and error
+                hideMapError();
+                const loadingDiv = document.getElementById('mapLoadingIndicator');
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+                
+                // If no data found
+                if (featuresAdded === 0) {
+                    console.warn('⚠️ Peta berhasil dimuat tapi tanpa data. Silakan upload CSV terlebih dahulu.');
+                    showMapError('Peta siap, tapi belum ada data. Silakan upload CSV dari menu di atas.');
+                }
             })
             .catch(error => {
-                console.error('ERROR loading wilayah:', error);
+                console.error('❌ [DASHBOARD] ERROR loading wilayah:', error);
+                showMapError('Gagal memuat data: ' + error.message);
+                const loadingDiv = document.getElementById('mapLoadingIndicator');
+                if (loadingDiv) loadingDiv.style.display = 'none';
             });
     }
 
     // Get feature style based on data from CSV
     function getFeatureStyle(feature) {
         const props = feature.properties || {};
-        let fillColor = '#ffffff'; // default putih untuk tidak ada data
-        let borderColor = '#cccccc';
+        let fillColor = '#ecf0f1'; // default light gray untuk tidak ada data
+        let borderColor = '#bdc3c7';
+        let opacity = 0.9;
+        let fillOpacity = 0.6;
+        
+        // Log untuk debug
+        if (props.kategori) {
+            console.log(`Feature ${props.seksi || props.SEKSI || 'unknown'} - kategori="${props.kategori}"`);
+        }
         
         // Prioritas: kategori > status_gulma > activitas
         if (props.kategori) {
+            const kat = (props.kategori || '').toLowerCase().trim();
             fillColor = getColorByKategori(props.kategori);
             borderColor = fillColor;
-            console.log(`Feature ${props.seksi || props.id_feature} - Kategori: ${props.kategori} - Color: ${fillColor}`);
+            opacity = 1.0;
+            fillOpacity = 0.7;
         } else if (props.status_gulma) {
             fillColor = statusColors[props.status_gulma] || fillColor;
             borderColor = fillColor;
         } else if (props.activitas) {
-            const act = props.activitas.toLowerCase();
-            if (act.includes('pemupukan')) fillColor = '#128241';
-            else if (act.includes('penyemprotan')) fillColor = '#f1c40f';
-            else if (act.includes('pembersihan')) fillColor = '#3498db';
+            const act = (props.activitas || '').toLowerCase();
+            if (act.includes('pemupukan')) {
+                fillColor = '#128241';
+                borderColor = '#128241';
+            } else if (act.includes('penyemprotan')) {
+                fillColor = '#f1c40f';
+                borderColor = '#f1c40f';
+            } else if (act.includes('pembersihan')) {
+                fillColor = '#3498db';
+                borderColor = '#3498db';
+            }
         }
 
         return {
             color: borderColor,
             weight: 2,
-            opacity: 0.9,
+            opacity: opacity,
             fillColor: fillColor,
-            fillOpacity: 0.6
+            fillOpacity: fillOpacity
         };
     }
 
@@ -1850,6 +2015,51 @@
         return html;
     }
 
+    // Fetch latest import history without page reload
+    function fetchImportHistory() {
+        console.log('Fetching latest import history...');
+        
+        // Create a simple request to get fresh HTML and update table
+        const filters = new URLSearchParams();
+        const tahun = document.getElementById('filterTahun')?.value;
+        const bulan = document.getElementById('filterBulan')?.value;
+        const minggu = document.getElementById('filterMinggu')?.value;
+        
+        if (tahun) filters.append('tahun', tahun);
+        if (bulan) filters.append('bulan', bulan);
+        if (minggu) filters.append('minggu', minggu);
+        
+        fetch('{{ route("admin.dashboard") }}?' + filters.toString())
+            .then(response => response.text())
+            .then(html => {
+                // Parse table data from response - look for JavaScript variable
+                const match = html.match(/let allTableData = (\[[\s\S]*?\]);/);
+                if (match && match[1]) {
+                    try {
+                        const newData = JSON.parse(match[1]);
+                        allTableData = newData;
+                        console.log('✓ Updated import history with', allTableData.length, 'records');
+                        
+                        // Re-render table
+                        currentPage = 1;
+                        renderTable();
+                        
+                        // Update stats
+                        document.getElementById('statUploadTerbaru').textContent = allTableData.length;
+                    } catch (e) {
+                        console.error('Failed to parse table data:', e);
+                        // Fallback: just reload the page
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching import history:', error);
+                // Fallback: reload page if network error
+                window.location.reload();
+            });
+    }
+
     // Form upload
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1919,7 +2129,7 @@
                 console.log('✓ Update statistics...');
                 updateStatistics();
                 
-                // Reload map with new data
+                // Reload map with new data IMMEDIATELY
                 if (map) {
                     console.log('✓ Clear existing layers...');
                     // Clear existing layers
@@ -1930,19 +2140,22 @@
                     });
                     geoJsonLayers = {};
                     
+                    // Show loading indicator
+                    const loadingDiv = document.getElementById('mapLoadingIndicator');
+                    if (loadingDiv) {
+                        loadingDiv.style.display = 'block';
+                    }
+                    
                     // Reload all wilayah with new data immediately
-                    console.log('✓ Reload all wilayah...');
-                    setTimeout(() => {
-                        loadAllWilayah();
-                    }, 500);
+                    console.log('✓ Reload all wilayah with NEW data...');
+                    loadAllWilayah();
                 } else {
                     console.error('❌ Map tidak ditemukan!');
                 }
                 
-                // Reload page after 2 seconds to refresh import history table
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                // Refresh table data immediately
+                console.log('✓ Refreshing import history table...');
+                fetchImportHistory();
                 
             } else {
                 const errorData = await res.json();
@@ -2111,9 +2324,25 @@
         }
     });
 
-    // Initialize
-    initMap();
-    loadPublicationStatus();
+    // Initialize - Delay a bit to ensure DOM and Leaflet are ready
+    setTimeout(() => {
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded!');
+            showMapError('Library Leaflet gagal dimuat. Cek koneksi internet.');
+            return;
+        }
+        console.log('🗺️ DOM ready, Leaflet loaded, initializing map...');
+        
+        // Step 1: Initialize map
+        initMap();
+        
+        // Step 2: Load publication status
+        loadPublicationStatus();
+        
+        // Step 3: PENTING - Load peta gulma LANGSUNG setelah map initialized
+        // Data akan dimuat otomatis oleh loadLatestPublishedData() yang dipanggil di dalam initMap()
+        console.log('✅ Map initialization complete - data will load automatically');
+    }, 200);
 
     // Update statistics
     async function updateStatistics() {
@@ -2205,10 +2434,28 @@
     let currentLoadedPeriod = { tahun: null, bulan: null, minggu: null };
     
     function filterByStatus(status) {
-        console.log('Filter by status:', status);
+        console.log('🎯 [FILTER] Filter by status:', status);
         currentStatusFilter = status;
         
-        // Reload map with current data and filter applied
+        // Highlight active legend item
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.style.opacity = '0.5';
+        });
+        
+        if (status) {
+            const activeItem = document.querySelector(`.legend-item[onclick="filterByStatus('${status}')"]`);
+            if (activeItem) {
+                activeItem.style.opacity = '1';
+                activeItem.style.transform = 'scale(1.05)';
+            }
+        } else {
+            document.querySelectorAll('.legend-item').forEach(item => {
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            });
+        }
+        
+        // Reload map with filter
         if (currentLoadedImportId) {
             // Reload the same import data with filter
             const row = document.querySelector(`tr[data-id="${currentLoadedImportId}"]`);
@@ -2219,19 +2466,85 @@
                 const minggu = row.getAttribute('data-minggu');
                 loadImportDataOnMap(currentLoadedImportId, wilayahIds, tahun, bulan, minggu);
             }
+        } else {
+            // If no specific import loaded, filter the current map layers
+            console.log('🗺️  [FILTER] Filtering current map layers...');
+            filterCurrentMapLayers(status);
         }
         
         // Scroll to map
         document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    
+    // Filter current map layers without reloading
+    function filterCurrentMapLayers(status) {
+        console.log('🔍 [FILTER] Applying filter to current layers:', status);
+        
+        Object.keys(geoJsonLayers).forEach(wilayahKey => {
+            const layer = geoJsonLayers[wilayahKey];
+            if (!layer) return;
+            
+            layer.eachLayer(featureLayer => {
+                const props = featureLayer.feature.properties;
+                
+                if (!status) {
+                    // Show all
+                    featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
+                    return;
+                }
+                
+                // Check if feature matches filter
+                let matches = false;
+                
+                if (status === 'belum_dimonitoring') {
+                    // Belum dimonitoring = tidak punya kategori dan status_gulma
+                    matches = !props.kategori && !props.status_gulma;
+                } else {
+                    // Check multiple possible status field names
+                    const kategori = (props.kategori || '').toLowerCase().trim();
+                    const statusGulma = (props.status_gulma || '').toLowerCase().trim();
+                    const activitas = (props.activitas || '').toLowerCase().trim();
+                    
+                    matches = kategori.includes(status) || 
+                             statusGulma.includes(status) ||
+                             activitas.includes(status);
+                }
+                
+                if (matches) {
+                    // Show matching features
+                    featureLayer.setStyle({ fillOpacity: 0.8, opacity: 1 });
+                } else {
+                    // Hide non-matching features
+                    featureLayer.setStyle({ fillOpacity: 0.1, opacity: 0.2 });
+                }
+            });
+        });
+        
+        console.log('✅ [FILTER] Filter applied to', Object.keys(geoJsonLayers).length, 'wilayah layers');
+    }
 
     // Load import data on map
     async function loadImportDataOnMap(importId, wilayahIds, tahun, bulan, minggu) {
-        console.log(`Loading import data: ID=${importId}, Wilayah=${wilayahIds}, Period=${tahun}/${bulan}/${minggu}`);
+        console.log(`🗺️ Loading import data: ID=${importId}, Wilayah=${wilayahIds}, Period=${tahun}/${bulan}/${minggu}`);
+        
+        // Show loading indicator
+        const loadingDiv = document.getElementById('mapLoadingIndicator');
+        if (loadingDiv) {
+            loadingDiv.style.display = 'block';
+        }
+        hideMapError();
         
         // Store current state for filter reloads
         currentLoadedImportId = importId;
         currentLoadedPeriod = { tahun, bulan, minggu };
+        
+        // Reset legend highlight when loading new data (unless we're reloading for filter)
+        if (!currentStatusFilter) {
+            document.querySelectorAll('.legend-item').forEach(item => {
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            });
+        }
         
         // Update period display with import ID
         updatePeriodDisplay(tahun, bulan, minggu, importId);
@@ -2244,51 +2557,76 @@
         });
         geoJsonLayers = {};
         
-        // Parse wilayah IDs
-        const wilayahArray = wilayahIds.split(',').map(id => id.trim());
-        
-        // Load each wilayah with specific period filter
-        const promises = wilayahArray.map(wilayahNum => {
-            let url = `/api/wilayah/geojson/${wilayahNum}`;
-            if (tahun && bulan && minggu) {
-                url += `?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`;
-            }
+        try {
+            // Parse wilayah IDs
+            const wilayahArray = wilayahIds.split(',').map(id => id.trim());
+            console.log('📦 Loading wilayah:', wilayahArray);
             
-            return fetch(url)
-                .then(r => r.json())
-                .then(data => ({ wilayah: wilayahNum, data }))
-                .catch(err => {
-                    console.error(`Error loading wilayah ${wilayahNum}:`, err);
-                    return null;
-                });
-        });
-        
-        Promise.all(promises).then(results => {
+            // Load each wilayah - NO PERIOD FILTER, just admin flag
+            // The API will automatically use latest data for admin
+            const promises = wilayahArray.map(wilayahNum => {
+                const url = `/api/wilayah/geojson/${wilayahNum}?admin=1`;
+                
+                return fetch(url, {
+                    headers: {
+                        'X-Admin-Request': '1'
+                    }
+                })
+                    .then(r => {
+                        if (!r.ok) {
+                            throw new Error(`HTTP ${r.status} for wilayah ${wilayahNum}`);
+                        }
+                        return r.json();
+                    })
+                    .then(data => ({ wilayah: wilayahNum, data }))
+                    .catch(err => {
+                        console.error(`Error loading wilayah ${wilayahNum}:`, err);
+                        return null;
+                    });
+            });
+            
+            const results = await Promise.all(promises);
             const allBounds = [];
+            let featuresAdded = 0;
+            let wilayahWithData = 0;
             
             results.forEach(result => {
                 if (!result || !result.data || !result.data.features || result.data.features.length === 0) {
+                    console.warn(`Wilayah ${result?.wilayah}: no features`);
                     return;
                 }
                 
                 const { wilayah, data } = result;
+                console.log(`📍 Wilayah ${wilayah}: ${data.features.length} features`);
                 
                 // Apply status filter if active
                 let features = data.features;
                 if (currentStatusFilter) {
                     features = features.filter(feature => {
                         const props = feature.properties;
-                        const kategori = (props.kategori || '').toLowerCase().trim();
-                        const statusGulma = (props.status_gulma || '').toLowerCase().trim();
+                        // Check multiple possible status field names
+                        const status = (props.kategori || props.status_gulma || props.activitas || props.Kategori || props.KATEGORI || '').toLowerCase().trim();
                         
                         if (currentStatusFilter === 'belum_dimonitoring') {
-                            return !kategori && !statusGulma;
+                            // Belum dimonitoring = tidak punya kategori dan status_gulma
+                            return !props.kategori && !props.status_gulma;
                         }
-                        return kategori === currentStatusFilter || statusGulma === currentStatusFilter;
+                        
+                        // For other statuses, check if any status field contains the filter value
+                        const kategori = (props.kategori || '').toLowerCase().trim();
+                        const statusGulma = (props.status_gulma || '').toLowerCase().trim();
+                        const activitas = (props.activitas || '').toLowerCase().trim();
+                        
+                        return kategori.includes(currentStatusFilter) || 
+                               statusGulma.includes(currentStatusFilter) ||
+                               activitas.includes(currentStatusFilter);
                     });
                 }
                 
-                if (features.length === 0) return;
+                if (features.length === 0) {
+                    console.warn(`Wilayah ${wilayah}: 0 features after filter`);
+                    return;
+                }
                 
                 const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
                     style: function(feature) {
@@ -2312,9 +2650,11 @@
                 }).addTo(map);
                 
                 geoJsonLayers[wilayah] = layer;
+                featuresAdded += features.length;
+                wilayahWithData++;
                 
                 const bounds = layer.getBounds();
-                if (bounds.isValid()) {
+                if (bounds && bounds.isValid && bounds.isValid()) {
                     allBounds.push(bounds);
                 }
             });
@@ -2328,9 +2668,28 @@
                 map.fitBounds(combinedBounds, { padding: [50, 50] });
             }
             
+            // Hide loading indicator
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+            
+            if (featuresAdded === 0) {
+                console.warn(`⚠️ Tidak ada data untuk import ${importId}`);
+                showMapError('Tidak ada data gulma untuk ditampilkan. Mungkin belum ada yang dimonitoring.');
+            } else {
+                console.log(`✅ Loaded import ${importId}: ${featuresAdded} features from ${wilayahWithData} wilayah`);
+                hideMapError();
+            }
+            
             // Scroll to map
             document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
+        } catch (error) {
+            console.error('Error in loadImportDataOnMap:', error);
+            showMapError('Error: ' + error.message);
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+        }
     }
 
     // Update period display
@@ -2408,8 +2767,7 @@
 
     // Initialize map when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, initializing map...');
-        initMap();
+        console.log('DOM loaded');
         
         // Show all data by default
         updatePeriodDisplay(null, null, null);

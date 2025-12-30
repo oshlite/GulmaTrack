@@ -116,7 +116,7 @@ php artisan key:generate
 Edit file `.env` di root folder:
 
 ```env
-adalah pokoknya
+adalah pokoknya hehe
 ```
 
 **Catatan Penting:**

@@ -21,8 +21,8 @@ class GulmaController extends Controller
             ], 400);
         }
 
-        // Load GeoJSON file dari datafix
-        $geoJsonPath = base_path("datafix/Wil{$wilayahId}.geojson");
+        // Load GeoJSON file dari dataya
+        $geoJsonPath = base_path("dataya/Wil{$wilayahId}.geojson");
         
         if (!file_exists($geoJsonPath)) {
             return response()->json([

@@ -18,19 +18,38 @@ class WilayahController extends Controller
         try {
             \Log::info("=== Getting GeoJSON for Wilayah {$wilayah_number} ===");
             
-            // Check if map is published for guest users
-            if (!auth()->check() || !auth()->user()->is_admin) {
+            // Check custom admin header (most reliable)
+            $hasAdminHeader = $request && $request->header('X-Admin-Request') === '1';
+            
+            // Check if user is authenticated admin OR if admin header is passed
+            $isAdminParam = $request && $request->query('admin') == '1';
+            
+            // PENTING: Prioritaskan header dan param, karena session bisa expire
+            $isAdmin = $hasAdminHeader || $isAdminParam || (auth()->check() && optional(auth()->user())->is_admin === 1);
+            
+            \Log::info("X-Admin-Request header: " . ($hasAdminHeader ? 'YES' : 'NO'));
+            \Log::info("Admin param: " . ($isAdminParam ? 'YES' : 'NO'));
+            \Log::info("User auth: " . (auth()->check() ? 'authenticated' : 'guest'));
+            \Log::info("Final is_admin: " . ($isAdmin ? 'YES (ADMIN MODE)' : 'NO (GUEST MODE)'));
+            
+            // Check if map is published for guest users ONLY
+            if (!$isAdmin) {
                 $isPublished = \App\Models\MapPublication::isDataPublished();
+                \Log::info("Is published: " . ($isPublished ? 'YES' : 'NO'));
+                
                 if (!$isPublished) {
+                    \Log::warning("Guest user accessing unpublished map");
                     return response()->json([
-                        'error' => 'Peta belum dipublikasikan oleh admin',
+                        'type' => 'FeatureCollection',
                         'features' => []
-                    ], 200); // Return empty data instead of error
+                    ], 200); // Return empty GeoJSON structure
                 }
+            } else {
+                \Log::info("ADMIN MODE: Will load latest data without publication check");
             }
 
-            // Use base_path instead of storage_path for datafix folder
-            $filePath = base_path("datafix/Wil{$wilayah_number}.geojson");
+            // Use base_path instead of storage_path for dataya folder
+            $filePath = base_path("dataya/Wil{$wilayah_number}.geojson");
             \Log::info("File path: {$filePath}");
             \Log::info("File exists: " . (file_exists($filePath) ? 'YES' : 'NO'));
 
@@ -77,40 +96,68 @@ class WilayahController extends Controller
                     $geojson['features'] = [];
                     return response()->json($geojson);
                 }
+            } else {
+                // Both guest (when published) and admin should show latest import data
+                $latestImportLog = \App\Models\ImportLog::where('status', 'success')
+                    ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                if ($latestImportLog) {
+                    $userType = $isAdmin ? 'Admin' : 'Guest';
+                    \Log::info("{$userType} user: showing latest import_log_id {$latestImportLog->id}");
+                    $query->where('import_log_id', $latestImportLog->id);
+                } else {
+                    \Log::warning("No import logs found for wilayah {$wilayah_number}");
+                    // For admin, still show features even if no data in DB
+                    // This way map loads but without gulma data
+                }
             }
             
             $gulmaData = $query->get();
             \Log::info("Database records for wilayah {$wilayah_number}: " . $gulmaData->count());
             
-            // Create a lookup map by id_feature
+            // Create a lookup map by seksi (normalized)
             $gulmaMap = [];
             foreach ($gulmaData as $data) {
-                $gulmaMap[$data->id_feature] = $data;
+                // Normalize seksi for matching - remove spaces, lowercase
+                $normalizedSeksi = strtolower(trim($data->seksi));
+                $gulmaMap[$normalizedSeksi] = $data;
             }
             \Log::info("Gulma map size: " . count($gulmaMap));
+            if (count($gulmaMap) > 0) {
+                \Log::info("Sample seksi from database: " . implode(', ', array_slice(array_keys($gulmaMap), 0, 5)));
+            }
 
             // Merge data into GeoJSON features
             $mergedCount = 0;
             if (isset($geojson['features'])) {
+                // Log sample property names from first feature for debugging
+                if (count($geojson['features']) > 0 && isset($geojson['features'][0]['properties'])) {
+                    \Log::info("Sample GeoJSON property keys: " . implode(', ', array_keys($geojson['features'][0]['properties'])));
+                }
+                
                 foreach ($geojson['features'] as &$feature) {
                     if (isset($feature['properties'])) {
-                        // Try to get id_feature from various property names
-                        $idFeature = $feature['properties']['Lokasi'] 
+                        // Try to get seksi from various property names
+                        $seksiValue = $feature['properties']['Lokasi'] 
                                   ?? $feature['properties']['SEKSI'] 
                                   ?? $feature['properties']['Seksi'] 
                                   ?? $feature['properties']['seksi']
-                                  ?? $feature['properties']['id_feature']
+                                  ?? $feature['properties']['LOKASI']
                                   ?? null;
 
-                        // If we found a matching id_feature in database, merge the data
-                        if ($idFeature && isset($gulmaMap[$idFeature])) {
-                            $data = $gulmaMap[$idFeature];
+                        // Normalize seksi for matching
+                        $normalizedSeksiValue = $seksiValue ? strtolower(trim($seksiValue)) : null;
+                        
+                        // If we found a matching seksi in database, merge the data
+                        if ($normalizedSeksiValue && isset($gulmaMap[$normalizedSeksiValue])) {
+                            $data = $gulmaMap[$normalizedSeksiValue];
                             
                             // Inject semua data CSV ke properties
-                            $feature['properties']['id_feature'] = $data->id_feature;
+                            $feature['properties']['seksi'] = $data->seksi;
                             $feature['properties']['pg'] = $data->pg;
                             $feature['properties']['fm'] = $data->fm;
-                            $feature['properties']['seksi'] = $data->seksi;
                             $feature['properties']['neto'] = $data->neto;
                             $feature['properties']['hasil'] = $data->hasil;
                             $feature['properties']['umur_tanaman'] = $data->umur_tanaman;
@@ -155,8 +202,8 @@ class WilayahController extends Controller
     public function getData(): JsonResponse
     {
         try {
-            // Use base_path instead of storage_path for datafix folder
-            $dataPath = base_path('datafix');
+            // Use base_path instead of storage_path for dataya folder
+            $dataPath = base_path('dataya');
             $files = glob("{$dataPath}/Wil*.geojson");
 
             $wilayahSummary = [];

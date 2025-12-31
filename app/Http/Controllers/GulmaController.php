@@ -48,7 +48,7 @@ class GulmaController extends Controller
                 DB::raw('SUM(hasil) AS total_hasil'),
                 DB::raw('AVG(hasil) AS avg_hasil'),
                 DB::raw('AVG(umur_tanaman) AS avg_umur'),
-                DB::raw('SUM(total_tk) AS total_tenaga_kerja')
+                DB::raw('SUM(tk_ha) AS total_tenaga_kerja')
             )
             ->groupBy('wilayah_id')
             ->orderBy('wilayah_id');

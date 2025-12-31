@@ -61,11 +61,28 @@ class WilayahController extends Controller
                 ], 404);
             }
 
-            $geojson = json_decode(file_get_contents($filePath), true);
-            \Log::info("Original GeoJSON features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
+            // Cache key untuk converted GeoJSON (1 jam cache)
+            $cacheKey = "geojson_wgs84_wil_{$wilayah_number}";
+            $cacheTTL = 3600; // 1 jam
             
-            // Convert dari UTM Zone 48S ke WGS84
-            $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
+            // Try to get from cache first
+            $geojson = \Cache::get($cacheKey);
+            
+            if (!$geojson) {
+                \Log::info("Cache miss for {$cacheKey}, converting coordinates...");
+                $geojson = json_decode(file_get_contents($filePath), true);
+                \Log::info("Original GeoJSON features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
+                
+                // Convert dari UTM Zone 48S ke WGS84
+                $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
+                
+                // Store in cache
+                \Cache::put($cacheKey, $geojson, $cacheTTL);
+                \Log::info("Cached converted GeoJSON for 1 hour");
+            } else {
+                \Log::info("Cache hit for {$cacheKey}");
+            }
+            
             \Log::info("After conversion features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
             // Get filter parameters if provided
@@ -176,6 +193,21 @@ class WilayahController extends Controller
                             }
                             
                             $mergedCount++;
+                        } else {
+                            // Feature tidak ada di database - set kategori kosong (Tidak Ada Data)
+                            $feature['properties']['kategori'] = '';
+                            $feature['properties']['seksi'] = $feature['properties']['seksi'] ?? '';
+                            $feature['properties']['pg'] = '';
+                            $feature['properties']['fm'] = '';
+                            $feature['properties']['neto'] = '';
+                            $feature['properties']['hasil'] = '';
+                            $feature['properties']['umur_tanaman'] = '';
+                            $feature['properties']['penanggungjawab'] = '';
+                            $feature['properties']['kode_aktf'] = '';
+                            $feature['properties']['activitas'] = '';
+                            $feature['properties']['tk_ha'] = '';
+                            $feature['properties']['total_tk'] = '';
+                            $feature['properties']['tanggal'] = '';
                         }
                     }
                 }
@@ -185,7 +217,10 @@ class WilayahController extends Controller
             \Log::info("Merged {$mergedCount} features with database data");
             \Log::info("Final features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
-            return response()->json($geojson);
+            // Add HTTP cache headers - cache for 1 hour
+            return response()->json($geojson)
+                ->header('Cache-Control', 'public, max-age=3600')
+                ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
         } catch (\Exception $e) {
             \Log::error("Error in getGeojson: " . $e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -202,6 +237,18 @@ class WilayahController extends Controller
     public function getData(): JsonResponse
     {
         try {
+            // Cache wilayah summary untuk 1 jam
+            $cacheKey = 'wilayah_summary_all';
+            $cacheTTL = 3600;
+            
+            $cachedData = \Cache::get($cacheKey);
+            if ($cachedData) {
+                \Log::info("Cache hit for wilayah summary");
+                return response()->json($cachedData)
+                    ->header('Cache-Control', 'public, max-age=3600')
+                    ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
+            }
+            
             // Use base_path instead of storage_path for dataya folder
             $dataPath = base_path('dataya');
             $files = glob("{$dataPath}/Wil*.geojson");
@@ -209,10 +256,20 @@ class WilayahController extends Controller
             $wilayahSummary = [];
 
             foreach ($files as $file) {
-                $geojson = json_decode(file_get_contents($file), true);
+                // Use cached converted GeoJSON jika ada
+                $wilayahMatch = preg_match('/Wil(\d+)\.geojson/', basename($file), $matches);
+                if (!$wilayahMatch) continue;
                 
-                // Convert ke WGS84
-                $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
+                $wilayahNum = $matches[1];
+                $cacheKey = "geojson_wgs84_wil_{$wilayahNum}";
+                
+                $geojson = \Cache::get($cacheKey);
+                if (!$geojson) {
+                    $geojson = json_decode(file_get_contents($file), true);
+                    // Convert ke WGS84
+                    $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
+                    \Cache::put($cacheKey, $geojson, 3600);
+                }
                 
                 $filename = basename($file, '.geojson');
 
@@ -280,11 +337,18 @@ class WilayahController extends Controller
                 return (int)$a['wilayah'] - (int)$b['wilayah'];
             });
 
-            return response()->json([
+            $responseData = [
                 'data' => $wilayahSummary,
                 'total_wilayah' => count($wilayahSummary),
                 'crs' => 'EPSG:4326 (WGS84)'
-            ]);
+            ];
+            
+            // Cache the summary response
+            \Cache::put('wilayah_summary_all', $responseData, 3600);
+
+            return response()->json($responseData)
+                ->header('Cache-Control', 'public, max-age=3600')
+                ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Failed to load data: ' . $e->getMessage()

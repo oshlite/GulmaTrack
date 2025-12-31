@@ -19,7 +19,7 @@
     }
 
     body {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         padding-top: 0;
     }
 
@@ -125,7 +125,7 @@
     }
 
     .nav-link:hover {
-        color: var(--light-color);
+        color: #ffffff;
     }
 
     .nav-link.active {
@@ -160,7 +160,7 @@
         justify-content: center;
         color: var(--primary-color);
         font-weight: 700;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
@@ -174,7 +174,7 @@
         font-weight: 600;
         transition: all 0.3s ease;
         font-size: 13px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         letter-spacing: 0.3px;
         box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
     }
@@ -189,7 +189,7 @@
         max-width: 1400px;
         margin: 0 auto;
         padding: 100px 20px 30px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     :root {
@@ -207,7 +207,7 @@
         font-size: 42px;
         color: var(--title-color);
         margin-bottom: 10px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .page-header h1 i {
@@ -217,7 +217,7 @@
     .page-header p {
         font-size: 16px;
         color: #666;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         margin: 0;
     }
 
@@ -253,14 +253,7 @@
     }
 
     .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: white;
-        opacity: 0.3;
+        display: none;
     }
 
     .stat-card:hover {
@@ -280,14 +273,14 @@
         opacity: 0.95;
         margin-bottom: 8px;
         font-weight: 500;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .stat-value {
         font-size: 36px;
         font-weight: 700;
         color: white;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .content-grid {
@@ -325,19 +318,11 @@
     }
 
     .card { flex: 2; }     /* 25% */
-.card1 { flex: 3; }   /* 75% */
+    .card1 { flex: 3; }   /* 75% */
 
 
     .card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, transparent, rgba(18, 130, 65, 0.3), transparent);
-        background-size: 200% 100%;
-        animation: shimmer 3s ease-in-out infinite;
+        display: none;
     }
 
     @keyframes shimmer {
@@ -358,7 +343,7 @@
         align-items: center;
         gap: 10px;
         font-weight: 700;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .card h2 i {
@@ -444,13 +429,13 @@
         font-weight: 600;
         color: var(--text-color);
         margin-bottom: 5px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .upload-hint {
         font-size: 13px;
         color: #999;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .upload-input {
@@ -468,7 +453,7 @@
         font-weight: 600;
         font-size: 14px;
         transition: all 0.3s ease;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         letter-spacing: 0.6px;
         box-shadow: 0 4px 12px rgba(18, 130, 65, 0.2);
     }
@@ -493,7 +478,7 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 14px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     table thead {
@@ -533,7 +518,7 @@
         border-radius: 12px;
         font-weight: 600;
         font-size: 11px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .status-success {
@@ -558,7 +543,7 @@
         text-align: center;
         padding: 40px 20px;
         color: #999;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .empty-state i {
@@ -578,7 +563,7 @@
         border-radius: 10px;
         margin-bottom: 20px;
         border-left: 4px solid;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 14px;
         display: flex;
         align-items: center;
@@ -636,7 +621,7 @@
     }
 
     .map-legend h4 {
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
         font-size: 16px;
         font-weight: 600;
         color: #FBA919;
@@ -644,7 +629,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .legend-item {
@@ -652,12 +637,11 @@
         align-items: center;
         font-size: 13px;
         cursor: pointer;
-        padding: 8px;
-        border-radius: 6px;
+        padding: 3px 5px;
+        margin-bottom: 2px;
+        border-radius: 4px;
         transition: all 0.3s ease;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        margin-bottom: 4px;
+        font-family: 'Poppins';
     }
 
     .legend-item:hover {
@@ -666,13 +650,13 @@
     }
 
     .legend-item:last-child {
-        margin-bottom: 3px;
+        margin-bottom: 0px;
     }
 
     .legend-color {
         width: 20px;
         height: 20px;
-        margin-right: 10px;
+        margin-right: 8px;
         border-radius: 3px;
         border: 1px solid #ccc;
         flex-shrink: 0;
@@ -689,7 +673,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.3s ease;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border: 2px solid #e0e0e0;
     }
@@ -739,7 +723,7 @@
         border-radius: 10px;
         font-size: 13px;
         display: none;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-weight: 500;
     }
 
@@ -786,7 +770,7 @@
         border-radius: 8px;
         background: white;
         color: #2c3e50;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
@@ -1014,14 +998,14 @@
     <div class="content-grid">
         <!-- Upload CSV Card -->
         <div class="card1">
-            <h2><i class="fas fa-cloud-upload-alt"></i> Upload Data CSV</h2>
+            <h2 style="color: #FBA919;"><i class="fas fa-cloud-upload-alt" style="color: #FBA919;"></i> Upload Data CSV</h2>
             
             <form id="uploadForm" enctype="multipart/form-data">
                 @csrf
 
                 <!-- Periode Selection -->
-                <div class="form-group" style="margin-bottom: 20px; position: relative; z-index: 100;">
-                    <label for="tahun" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; font-family: 'Poppins', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
+                <div class="form-group" style="margin-top: 15px; margin-bottom: 20px; position: relative; z-index: 100;">
+                    <label for="tahun" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; font-family: 'Poppins'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
                         <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Pilih Tahun:
                     </label>
                     <input 
@@ -1032,15 +1016,15 @@
                         pattern="[0-9]{4}" 
                         min="1900" 
                         placeholder="Masukkan tahun (misal: 2025)"
-                        style="width: 100%; padding: 12px 14px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 14px; background-color: white; font-family: 'Poppins', sans-serif; font-weight: 500; color: #2c3e50; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);"
+                        style="width: 100%; padding: 12px 14px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 14px; background-color: white; font-family: 'Poppins'; font-weight: 500; color: #2c3e50; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);">
-                    <small style="display: block; margin-top: 6px; font-size: 11px; color: #7f8c8d; font-family: 'Poppins', sans-serif;">
+                    <small style="display: block; margin-top: 6px; font-size: 11px; color: #7f8c8d; font-family: 'Poppins';">
                         <i class="fas fa-info-circle"></i> Masukkan tahun 4 digit angka
                     </small>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #2c3e50; font-family: 'Poppins', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #2c3e50; font-family: 'Poppins'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
                         <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Pilih Bulan:
                     </label>
                     <input type="hidden" id="bulan" name="bulan" required>
@@ -1061,7 +1045,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #2c3e50; font-family: 'Poppins', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #2c3e50; font-family: 'Poppins'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
                         <i class="fas fa-calendar-week" style="color: var(--accent-color);"></i> Pilih Minggu:
                     </label>
                     <input type="hidden" id="minggu" name="minggu" required>
@@ -1091,10 +1075,10 @@
                 </div>
 
                 <!-- File Upload Status -->
-                <div id="fileStatus" style="display: none; margin-top: 15px; padding: 15px 18px; background: #e8f5e9; border-left: 4px solid #128241; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); font-family: 'Poppins', sans-serif;">
+                <div id="fileStatus" style="display: none; margin-top: 15px; padding: 15px 18px; background: #e8f5e9; border-left: 4px solid #128241; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); font-family: 'Poppins';">
                     <i class="fas fa-check-circle" style="color: #128241;"></i>
                     <span id="fileName" style="font-weight: 600; color: #128241; margin-left: 8px;"></span>
-                    <button type="button" onclick="removeFile()" style="float: right; background: linear-gradient(135deg, #ffebee, #ffcdd2); border: 1px solid #ef5350; padding: 4px 12px; border-radius: 8px; color: #d32f2f; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;">
+                    <button type="button" onclick="removeFile()" style="float: right; background: linear-gradient(135deg, #ffebee, #ffcdd2); border: 1px solid #ef5350; padding: 4px 12px; border-radius: 8px; color: #d32f2f; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease;">
                         <i class="fas fa-times"></i> Hapus
                     </button>
                 </div><br>
@@ -1117,7 +1101,7 @@
         <div class="card">
             <h2><i class="fas fa-info-circle"></i> Informasi</h2>
             
-            <div style="padding: 10px 0; color: #666; line-height: 1.8; font-family: 'Poppins', sans-serif;">
+            <div style="padding: 10px 0; color: #666; line-height: 1.8; font-family: 'Poppins';">
                 <p style="font-weight: 600; color: #2c3e50;"><strong>Selamat datang di Dashboard Admin!</strong></p>
                 <p style="margin-top: 15px; font-size: 14px;">
                     Gunakan form di sebelah kiri untuk:
@@ -1144,31 +1128,31 @@
             
             <!-- Publish Map Button -->
             <div>
-                <button type="button" id="publishMapBtn" onclick="publishMapToPublic()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 13px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(18, 130, 65, 0.2); transition: all 0.3s ease; font-family: 'Poppins', sans-serif; letter-spacing: 0.6px; font-size: 14px;">
+                <button type="button" id="publishMapBtn" onclick="publishMapToPublic()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 13px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(18, 130, 65, 0.2); transition: all 0.3s ease; font-family: 'Poppins'; letter-spacing: 0.6px; font-size: 14px;">
                     <i class="fas fa-globe"></i>
                     <span>Perbarui Peta Publik</span>
                 </button>
-                <div id="publishStatus" style="margin-top: 8px; font-size: 12px; color: #666; text-align: right; font-family: 'Poppins', sans-serif;"></div>
+                <div id="publishStatus" style="margin-top: 8px; font-size: 12px; color: #666; text-align: right; font-family: 'Poppins';"></div>
             </div>
         </div>
         
         <!-- Data Period Display -->
-        <div id="dataPeriodDisplay" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 12px 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #1976d2; display: none;">
-            <div style="display: flex; align-items: center; gap: 10px; font-family: 'Poppins', sans-serif;">
-                <i class="fas fa-calendar-check" style="color: #1976d2; font-size: 18px;"></i>
-                <span style="font-weight: 600; color: #1976d2; font-size: 14px;" id="periodText">Menampilkan Semua Data</span>
+        <div id="dataPeriodDisplay" style="background: #ecf0f1; padding: 12px 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #128241; display: none;">
+            <div style="display: flex; align-items: center; gap: 10px; font-family: 'Poppins';">
+                <i class="fas fa-calendar-check" style="color: #FBA919; font-size: 18px;"></i>
+                <span style="font-weight: 600; color: #FBA919; font-size: 14px;" id="periodText">Menampilkan Semua Data</span>
             </div>
         </div>
         
         <div class="map-container">
             <div id="map"></div>
-            <div id="mapLoadingIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins', sans-serif; text-align: center;">
+            <div id="mapLoadingIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins'; text-align: center;">
                 <div style="font-size: 16px; color: #128241; margin-bottom: 10px;">
                     <i class="fas fa-spinner fa-spin"></i> Memuat Peta...
                 </div>
                 <div style="font-size: 12px; color: #666;">Silakan tunggu sebentar</div>
             </div>
-            <div id="mapErrorIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins', sans-serif; text-align: center; max-width: 300px;">
+            <div id="mapErrorIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 999; font-family: 'Poppins'; text-align: center; max-width: 300px;">
                 <div style="font-size: 16px; color: #e74c3c; margin-bottom: 10px;">
                     <i class="fas fa-exclamation-circle"></i> Error
                 </div>
@@ -1183,7 +1167,7 @@
                     <span><strong>Bersih</strong></span>
                 </div>
                 <div class="legend-item" onclick="filterByStatus('ringan')" title="Klik untuk filter">
-                    <div class="legend-color" style="background: #128241;"></div>
+                    <div class="legend-color" style="background: #57ce39ff;"></div>
                     <span><strong>Ringan</strong></span>
                 </div>
                 <div class="legend-item" onclick="filterByStatus('sedang')" title="Klik untuk filter">
@@ -1195,13 +1179,13 @@
                     <span><strong>Berat</strong></span>
                 </div>
                 <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
-                    <div class="legend-color" style="background: #ecf0f1; border-color: #8b8b8b;"></div>
+                    <div class="legend-color" style="background: #ecf0f1; border-color: #c4c4c4;"></div>
                     <span><strong>Belum Dimonitoring</strong></span>
                 </div>
                 
                 <!-- Wilayah Filter -->
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e0e0e0;">
-                    <h4 onclick="filterByWilayah('all')" style="cursor:pointer; color: #FBA919; margin-bottom: 12px;">
+                <div style="margin-top: 8px; padding-top: 8px;">
+                    <h4 onclick="filterByWilayah('all')" style="cursor:pointer; color: #FBA919; margin-bottom: 8px;">
                         <i class="fas fa-map-marked-alt"></i> Wilayah
                     </h4>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
@@ -1246,7 +1230,7 @@
                 <!-- Display Selector & Search Controls -->
                 <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <select id="recordsPerPage" onchange="changeRecordsPerPage()" style="padding: 10px 14px; border: 2px solid #128241; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        <select id="recordsPerPage" onchange="changeRecordsPerPage()" style="padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 8px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                             <option value="10">10 baris</option>    
                             <option value="25">25 baris</option>
                             <option value="50">50 baris</option>
@@ -1255,9 +1239,10 @@
                         </select>
                     </div>
                     
-                    <div style="flex: 1; min-width: 250px;">
-                        <input type="text" id="tableSearchInput" placeholder="🔍 Cari berdasarkan ID (#5), Nama File, atau data lainnya..." 
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e3eae8; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s ease;">
+                    <div style="flex: 1; min-width: 250px; position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #FBA919; pointer-events: none;"></i>
+                        <input type="text" id="tableSearchInput" placeholder="Cari berdasarkan ID (#5), Nama File, atau data lainnya..." 
+                            style="width: 100%; padding: 12px 16px 12px 40px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; color: #2c3e50; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); transition: all 0.3s ease;">
                     </div>
                     
                     <!-- Search and Filters Form -->
@@ -1266,11 +1251,11 @@
                 
                 <!-- Filter Tahun -->
                 <div style="min-width: 140px; position: relative;">
-                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Tahun
                     </label>
                     <select name="tahun" id="filterTahun" onchange="document.getElementById('filterForm').submit()" 
-                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Tahun</option>
                         @php
                             $years = \App\Models\ImportLog::distinct()->pluck('tahun')->filter()->sort()->reverse();
@@ -1283,11 +1268,11 @@
                 
                 <!-- Filter Bulan -->
                 <div style="min-width: 140px; position: relative;">
-                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Bulan
                     </label>
                     <select name="bulan" id="filterBulan" onchange="document.getElementById('filterForm').submit()" 
-                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Bulan</option>
                         @for($i = 1; $i <= 12; $i++)
                             @php
@@ -1300,11 +1285,11 @@
                 
                 <!-- Filter Minggu -->
                 <div style="min-width: 140px; position: relative;">
-                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins', sans-serif; text-transform: uppercase;">
+                    <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar-week" style="color: var(--accent-color);"></i> Minggu
                     </label>
                     <select name="minggu" id="filterMinggu" onchange="document.getElementById('filterForm').submit()" 
-                        style="width: 100%; padding: 10px 14px; border: 2px solid #128241; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Minggu</option>
                         @for($i = 1; $i <= 4; $i++)
                             <option value="{{ $i }}" {{ request('minggu') == $i ? 'selected' : '' }}>Minggu {{ $i }}</option>
@@ -1314,7 +1299,7 @@
                 
                 <!-- Search Button -->
                 <button type="submit" 
-                    style="padding: 12px 20px; background: linear-gradient(135deg, #128241, #2ecc71); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3); margin-top: 18px;"
+                    style="padding: 12px 20px; background: linear-gradient(135deg, #128241, #2ecc71); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3); margin-top: 18px;"
                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.4)'"
                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(18, 130, 65, 0.3)'">
                     <i class="fas fa-search"></i> Cari
@@ -1322,7 +1307,7 @@
                 
                 <!-- Reset Button -->
                 <a href="{{ route('admin.dashboard') }}" 
-                    style="padding: 12px 20px; background: linear-gradient(135deg, #E74C3C, #c0392b); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3); margin-top: 18px; text-decoration: none; display: inline-block;"
+                    style="padding: 12px 20px; background: linear-gradient(135deg, #E74C3C, #c0392b); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3); margin-top: 18px; text-decoration: none; display: inline-block;"
                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.4)'"
                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(231, 76, 60, 0.3)'">
                     <i class="fas fa-undo"></i> Reset
@@ -1352,10 +1337,10 @@
 
                 <!-- Pagination Info & Controls -->
                 <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div style="font-size: 12px; color: #666; font-family: 'Poppins', sans-serif; font-weight: 500;">
+                    <div style="font-size: 12px; color: #666; font-family: 'Poppins'; font-weight: 500;">
                         Menampilkan <span id="recordsStart">1</span> hingga <span id="recordsEnd">25</span> dari <span id="recordsTotal">0</span> data
                     </div>
-                    <div id="paginationControls" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;">
+                    <div id="paginationControls" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins';">
                     </div>
                 </div>
 
@@ -1383,7 +1368,7 @@
 
                         pageData.forEach(log => {
                             const periodText = log.tahun && log.bulan && log.minggu 
-                                ? `<span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins', sans-serif; border: 1px solid #90caf9;"><i class="fas fa-calendar"></i> ${log.tahun} / ${monthNames[log.bulan]} - Minggu ${log.minggu}</span>`
+                                ? `<span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins'; border: 1px solid #90caf9;"><i class="fas fa-calendar"></i> ${log.tahun} / ${monthNames[log.bulan]} - Minggu ${log.minggu}</span>`
                                 : '<span style="color: #999;">-</span>';
                             
                             const statusBadge = log.status === 'success' 
@@ -1402,7 +1387,7 @@
                                 <td>${new Date(log.created_at).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</td>
                                 <td>
                                     <button onclick="loadImportDataOnMap(${log.id}, '${log.wilayah_id}', ${log.tahun || null}, ${log.bulan || null}, ${log.minggu || null})" 
-                                            style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
+                                            style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
                                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
                                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                         <i class="fas fa-map"></i> Peta
@@ -1495,7 +1480,7 @@
 <script>
     const statusColors = {
         'Bersih': '#3498db',
-        'Ringan': '#128241',
+        'Ringan': '#57ce39ff',
         'Sedang': '#f1c40f',
         'Berat': '#e74c3c'
     };
@@ -1506,7 +1491,7 @@
         
         const kat = kategori.toLowerCase().trim();
         if (kat === 'bersih') return '#3498db'; // Biru
-        if (kat === 'ringan') return '#128241'; // Hijau
+        if (kat === 'ringan') return '#57ce39ff'; // Hijau
         if (kat === 'sedang') return '#f1c40f'; // Kuning
         if (kat === 'berat') return '#e74c3c'; // Merah
         
@@ -2500,14 +2485,15 @@
                     // Belum dimonitoring = tidak punya kategori dan status_gulma
                     matches = !props.kategori && !props.status_gulma;
                 } else {
-                    // Check multiple possible status field names
+                    // Check multiple possible status field names (exact match, case-insensitive)
                     const kategori = (props.kategori || '').toLowerCase().trim();
                     const statusGulma = (props.status_gulma || '').toLowerCase().trim();
                     const activitas = (props.activitas || '').toLowerCase().trim();
+                    const filterLower = status.toLowerCase();
                     
-                    matches = kategori.includes(status) || 
-                             statusGulma.includes(status) ||
-                             activitas.includes(status);
+                    matches = kategori === filterLower || 
+                             statusGulma === filterLower ||
+                             activitas === filterLower;
                 }
                 
                 if (matches) {
@@ -2602,25 +2588,33 @@
                 // Apply status filter if active
                 let features = data.features;
                 if (currentStatusFilter) {
+                    console.log(`🔍 Filtering with status: "${currentStatusFilter}"`);
                     features = features.filter(feature => {
                         const props = feature.properties;
-                        // Check multiple possible status field names
-                        const status = (props.kategori || props.status_gulma || props.activitas || props.Kategori || props.KATEGORI || '').toLowerCase().trim();
                         
                         if (currentStatusFilter === 'belum_dimonitoring') {
                             // Belum dimonitoring = tidak punya kategori dan status_gulma
                             return !props.kategori && !props.status_gulma;
                         }
                         
-                        // For other statuses, check if any status field contains the filter value
+                        // For other statuses, check exact match (case-insensitive)
                         const kategori = (props.kategori || '').toLowerCase().trim();
                         const statusGulma = (props.status_gulma || '').toLowerCase().trim();
                         const activitas = (props.activitas || '').toLowerCase().trim();
+                        const filterLower = currentStatusFilter.toLowerCase();
                         
-                        return kategori.includes(currentStatusFilter) || 
-                               statusGulma.includes(currentStatusFilter) ||
-                               activitas.includes(currentStatusFilter);
+                        // Debug log
+                        const match = kategori === filterLower || 
+                                     statusGulma === filterLower ||
+                                     activitas === filterLower;
+                        
+                        if (match) {
+                            console.log(`✅ Match: seksi=${props.seksi}, kategori="${kategori}", statusGulma="${statusGulma}", activitas="${activitas}"`);
+                        }
+                        
+                        return match;
                     });
+                    console.log(`📊 After filter: ${features.length} features`);
                 }
                 
                 if (features.length === 0) {
@@ -2703,7 +2697,7 @@
             periodText.textContent = `Menampilkan Data Terbaru - Tahun ${tahun}, ${monthNames[bulan]}, Minggu ke-${minggu}${idText}`;
             display.style.display = 'block';
         } else {
-            periodText.textContent = 'Menampilkan Semua Data';
+            periodText.textContent = 'Menampilkan Data Publikasi Terakhir';
             display.style.display = 'block';
         }
     }

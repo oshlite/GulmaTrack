@@ -1201,7 +1201,7 @@ fetch(`/api/wilayah/geojson/${wilayahId}`)
                     popup += `Status: ${props.status_gulma}<br>`;
                     popup += `Tanggal: ${props.tanggal}`;
                 } else {
-                    popup += 'Belum ada data';
+                    popup += 'Belum Dimonitoring';
                 }
                 layer.bindPopup(popup);
             }

@@ -327,7 +327,6 @@
                     <th>Rata-rata Umur Tanaman</th>
                     <th>Total Tenaga Kerja</th>
                     <th>Tahun</th>
-                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="detailStatsTable">
@@ -513,14 +512,9 @@ function renderDetailStats(data) {
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
             <td class="stat-value">${parseFloat(item.avg_hasil || 0).toFixed(2)} T/Ha</td>
-            <td>${parseFloat(item.avg_umur || 0).toFixed(1)} tahun</td>
+            <td>${parseFloat(item.avg_umur || 0).toFixed(1)} bulan</td>
             <td>${parseInt(item.total_tenaga_kerja || 0).toLocaleString('id-ID')} Orang</td>
             <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
-            <td>
-                <button class="export-btn" onclick="viewDetail(${item.wilayah_id})">
-                    <i class="fas fa-eye"></i> Detail
-                </button>
-            </td>
         `;
     });
 }

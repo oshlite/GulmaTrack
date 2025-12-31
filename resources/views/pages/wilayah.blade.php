@@ -1223,30 +1223,65 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     let allLocationData = []; // Store all location data for table
 
     // Initialize map
-    function initMap() {
-        console.log('🗺️  [WILAYAH] Starting initMap...');
-        // Check if map already exists
-        if (map) {
-            console.log('🔄 [WILAYAH] Removing existing map...');
-            map.remove();
+    // Initialize map
+function initMap() {
+    console.log('🗺️  [WILAYAH] Starting initMap...');
+    // Check if map already exists
+    if (map) {
+        console.log('🔄 [WILAYAH] Removing existing map...');
+        map.remove();
+    }
+
+    // Create map centered on Lampung Tengah
+    map = L.map('map', {
+        center: [-4.85, 105.0],
+        zoom: 12,
+        zoomControl: true,
+        attributionControl: true
+    });
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // ===== PENTING: Event listener untuk load foto di popup =====
+    map.on('popupopen', function (e) {
+        console.log('🖼️  Popup opened, checking for image...');
+        const img = e.popup._contentNode.querySelector('img[data-kategori]');
+        if (!img) {
+            console.log('⚠️  No image with data-kategori found in popup');
+            return;
         }
 
-        // Create map centered on Lampung Tengah
-        map = L.map('map', {
-            center: [-4.85, 105.0],
-            zoom: 12,
-            zoomControl: true,
-            attributionControl: true
-        });
+        const kategori = img.dataset.kategori;
+        console.log('📸 Loading photos for kategori:', kategori);
 
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
+        fetch(`/api/gallery/category/${kategori}`)
+            .then(r => {
+                console.log('API response status:', r.status);
+                return r.json();
+            })
+            .then(r => {
+                console.log('API response data:', r);
+                if (!r.success || !r.data || r.data.length === 0) {
+                    console.log('❌ No photos found for kategori:', kategori);
+                    return;
+                }
 
-        console.log('✅ [WILAYAH] Map initialized successfully');
-    }
+                // Get primary photo or first photo
+                const primary = r.data.find(p => p.is_primary) || r.data[0];
+                console.log('✅ Setting image to:', primary.foto_url);
+                img.src = primary.foto_url;
+            })
+            .catch(err => {
+                console.error('❌ Gagal load foto:', err);
+            });
+    });
+
+    console.log('✅ [WILAYAH] Map initialized successfully with popup photo loader');
+}
 
     // Error handling functions
     function showMapError(message) {
@@ -1646,84 +1681,89 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         </div>`;
     }
 
-    // Create popup content
     function createPopupContent(props) {
-        let html = '<div style="width: 320px; padding: 0;">';
-        
-        // Foto
-        html += '<div style="width: 100%; height: 200px; border-radius: 8px 8px 0 0; overflow: hidden; margin-bottom: 10px;">';
-        html += '<img src="/image/roblox.png" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover;">';
-        html += '</div>';
-        
-        html += '<div style="padding: 10px;">';
-        
-        // Header dengan Lokasi
+        const kategoriRaw = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || '';
+        const kategori = normalizeKategori(kategoriRaw);
+
+        const popupId = Math.random().toString(36).substring(7);
+
+        let html = `<div style="width:320px;">`;
+
+        if (kategori) {
+            html += `
+                <div style="width:100%; height:200px; border-radius:8px 8px 0 0;
+                            overflow:hidden; margin-bottom:10px;">
+                    <img id="popup-img-${popupId}"
+                        data-kategori="${kategori}"
+                        style="width:100%; height:100%; object-fit:cover;"
+                        src="/image/roblox.png">
+                </div>
+            `;
+        }
+
+        html += `<div style="padding:10px;">`;
+
         if (props.Lokasi || props.LOKASI) {
-            html += `<h3 style="margin: 0 0 10px 0; color: #128241; font-size: 16px;">📍 ${props.Lokasi || props.LOKASI}</h3>`;
+            html += `<h3 style="margin:0 0 10px;color:#128241;font-size:16px;">
+                📍 ${props.Lokasi || props.LOKASI}
+            </h3>`;
         }
 
-        // Status Gulma dengan warna
-        const statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
         let statusColor = '#ecf0f1';
-        let textColor = '#333333';
-        
-        if (statusGulma.toLowerCase().includes('bersih')) {
-            statusColor = '#3498db';
-            textColor = 'white';
-        } else if (statusGulma.toLowerCase().includes('ringan')) {
-            statusColor = '#128241';
-            textColor = 'white';
-        } else if (statusGulma.toLowerCase().includes('sedang')) {
+        let textColor = '#333';
+
+        if (kategori === 'bersih') {
+            statusColor = '#3498db'; textColor = 'white';
+        } else if (kategori === 'ringan') {
+            statusColor = '#128241'; textColor = 'white';
+        } else if (kategori === 'sedang') {
             statusColor = '#f1c40f';
-            textColor = '#333333';
-        } else if (statusGulma.toLowerCase().includes('berat')) {
-            statusColor = '#e74c3c';
-            textColor = 'white';
+        } else if (kategori === 'berat') {
+            statusColor = '#e74c3c'; textColor = 'white';
         }
-        
-        html += `<div style="background: ${statusColor}; color: ${textColor}; padding: 8px; margin-bottom: 15px; border-radius: 4px; text-align: center; font-weight: bold;">
-            ${statusGulma}
-        </div>`;
 
-        // Area information
-        html += '<table style="width: 100%; font-size: 13px; margin-bottom: 10px;">';
-        
-        // Wilayah
+        html += `
+            <div style="background:${statusColor};color:${textColor};
+                padding:8px;margin-bottom:15px;border-radius:4px;
+                text-align:center;font-weight:bold;">
+                ${kategoriRaw || 'Tidak Ada Data'}
+            </div>
+        `;
+
+        html += `<table style="width:100%;font-size:13px;">`;
+
         if (props.Wilayah || props.gulma_Wilayah) {
-            html += `<tr><td style="padding: 5px 0;"><strong>Wilayah:</strong></td><td style="padding: 5px 0; text-align: right;">${props.Wilayah || props.gulma_Wilayah}</td></tr>`;
-        }
-        
-        // Luas Bruto
-        const bruto = props.Luas_Bruto || props.Bruto || props.bruto;
-        if (bruto) {
-            const brutoValue = typeof bruto === 'string' ? bruto.replace(',', '.') : bruto;
-            html += `<tr><td style="padding: 5px 0;"><strong>Luas Bruto:</strong></td><td style="padding: 5px 0; text-align: right;">${brutoValue} Ha</td></tr>`;
+            html += `<tr><td><strong>Wilayah</strong></td>
+                <td style="text-align:right;">${props.Wilayah || props.gulma_Wilayah}</td></tr>`;
         }
 
-        // Luas Netto
-        const netto = props.Luas_Netto || props.Netto || props.netto || props.gulma_Neto;
-        if (netto) {
-            const nettoValue = typeof netto === 'string' ? netto.replace(',', '.') : netto;
-            html += `<tr><td style="padding: 5px 0;"><strong>Luas Netto:</strong></td><td style="padding: 5px 0; text-align: right;">${nettoValue} Ha</td></tr>`;
+        if (props.Netto || props.netto) {
+            html += `<tr><td><strong>Luas Netto</strong></td>
+                <td style="text-align:right;">${props.Netto || props.netto} Ha</td></tr>`;
         }
 
-        // TK/HA
-        if (props.tk_ha || props['gulma_TK/HA']) {
-            html += `<tr><td style="padding: 5px 0;"><strong>TK/Ha:</strong></td><td style="padding: 5px 0; text-align: right;">${props.tk_ha || props['gulma_TK/HA']}</td></tr>`;
+        if (props.tk_ha) {
+            html += `<tr><td><strong>TK/Ha</strong></td>
+                <td style="text-align:right;">${props.tk_ha}</td></tr>`;
         }
 
-        html += '</table>';
-        
-        // Status/Komoditas
-        if (props.Status) {
-            html += `<div style="margin-top: 10px; padding: 8px; background: #ecf0f1; border-radius: 4px; font-size: 12px;">
-                <strong>🌾 Komoditas:</strong> ${props.Status}
-            </div>`;
-        }
+        html += `</table></div></div>`;
 
-        html += '</div></div>';
         return html;
     }
+
+    // ===== helper =====
+    function normalizeKategori(raw) {
+        if (!raw) return null;
+        raw = raw.toLowerCase();
+        if (raw.includes('bersih')) return 'bersih';
+        if (raw.includes('ringan')) return 'ringan';
+        if (raw.includes('sedang')) return 'sedang';
+        if (raw.includes('berat')) return 'berat';
+        return null;
+    }
+
+
 
     // Load wilayah data and populate select
     function loadWilayahDataAndStats() {
@@ -2101,7 +2141,6 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                     
                     currentPeriod = latestPeriod;
                     
-                    // Update period info display (fixed, won't change unless manually selected)
                     updatePeriodInfoDisplay(latestPeriod);
                     
                     console.log('Loading data for latest period:', latestPeriod);
@@ -2110,7 +2149,6 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                 // Load wilayah data and stats
                 loadWilayahDataAndStats();
                 
-                // Auto-load all wilayah map with latest data - LANGSUNG!
                 console.log('🗺️  Auto-loading map dengan data terbaru...');
                 if (map) {
                     loadAllWilayah();

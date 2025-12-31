@@ -16,7 +16,7 @@
     }
 
     body {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         padding-top: 0;
     }
 
@@ -113,6 +113,11 @@
         justify-content: center;
         color: var(--primary-color);
         font-weight: 700;
+<<<<<<< HEAD
+=======
+        font-family: 'Poppins';
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+>>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     }
 
     .logout-btn {
@@ -125,6 +130,12 @@
         font-weight: 600;
         transition: all 0.3s ease;
         font-size: 13px;
+<<<<<<< HEAD
+=======
+        font-family: 'Poppins';
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+>>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     }
 
     .logout-btn:hover {
@@ -136,7 +147,7 @@
         max-width: 1400px;
         margin: 0 auto;
         padding: 100px 20px 30px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
     }
 
     .page-header {
@@ -149,6 +160,10 @@
         font-size: 42px;
         color: #A6CE39;
         margin-bottom: 10px;
+<<<<<<< HEAD
+=======
+        font-family: 'Poppins';
+>>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
         display: flex;
         align-items: center;
         gap: 15px;
@@ -161,6 +176,10 @@
     .page-header p {
         font-size: 16px;
         color: #666;
+<<<<<<< HEAD
+=======
+        font-family: 'Poppins';
+>>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
         margin: 0;
     }
 
@@ -304,7 +323,7 @@
         padding: 12px;
         border: 2px solid var(--border-color);
         border-radius: 8px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 14px;
         transition: all 0.3s ease;
     }
@@ -419,7 +438,7 @@
         padding: 10px 12px;
         border: 2px solid var(--border-color);
         border-radius: 8px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 13px;
     }
 
@@ -517,7 +536,7 @@
         padding: 10px;
         border: none;
         border-radius: 8px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 12px;
         font-weight: 600;
         cursor: pointer;
@@ -563,7 +582,7 @@
         color: white;
         border: none;
         border-radius: 10px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Poppins';
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
@@ -674,6 +693,65 @@
         margin-bottom: 20px;
     }
 
+<<<<<<< HEAD
+=======
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .info-label {
+        font-size: 12px;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        font-size: 16px;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .alert {
+        padding: 15px 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid;
+        font-family: 'Poppins';
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert i {
+        font-size: 18px;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #128241;
+        border-left-color: #128241;
+    }
+
+    .alert-error {
+        background: #ffebee;
+        color: #c62828;
+        border-left-color: #c62828;
+    }
+
+>>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 24px;

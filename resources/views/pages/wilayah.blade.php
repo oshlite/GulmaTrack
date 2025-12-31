@@ -25,27 +25,9 @@
         </div>
         <div class="stat-box">
             <div class="stat-label">
-                <i class="fas fa-ruler-combined"></i> Total Area
+                <i class="fas fa-ruler-combined"></i> Total Luas Lokasi
             </div>
             <div class="stat-number" id="totalArea">-</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">
-                <i class="fas fa-th"></i> Total Plot
-            </div>
-            <div class="stat-number" id="totalPlot">-</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">
-                <i class="fas fa-leaf"></i> Plot Bersih
-            </div>
-            <div class="stat-number" id="totalBersih">-</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">
-                <i class="fas fa-flask"></i> Plot Berat Gulma
-            </div>
-            <div class="stat-number" id="totalBerat">-</div>
         </div>
     </div>
 
@@ -829,7 +811,7 @@
             font-size: 11px !important;
             padding: 4px 8px !important;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-            font-family: 'Poppins', sans-serif !important;
+            font-family: 'Poppins' !important;
         }
         .location-label:before {
             display: none !important;
@@ -889,7 +871,7 @@
         }
         
         .status-bersih { background: #3498db; color: white; }
-        .status-ringan { background: #128241; color: white; }
+        .status-ringan { background: #57ce39ff; color: white; }
         .status-sedang { background: #f1c40f; color: #333; }
         .status-berat { background: #e74c3c; color: white; }
         .status-unknown { background: #ecf0f1; color: #666; }
@@ -908,7 +890,7 @@
                 <span><strong>Bersih</strong></span>
             </div>
             <div class="legend-item" onclick="filterByStatus('ringan')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #128241;"></div>
+                <div class="legend-color" style="background: #57ce39ff;"></div>
                 <span><strong>Ringan</strong></span>
             </div>
             <div class="legend-item" onclick="filterByStatus('sedang')" title="Klik untuk filter">
@@ -919,10 +901,10 @@
                 <div class="legend-color" style="background: #e74c3c;"></div>
                 <span><strong>Berat</strong></span>
             </div>
-            <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
-                <div class="legend-color" style="background: #ecf0f1; border-color: #8b8b8b;"></div>
-                <span><strong>Belum Dimonitoring</strong></span>
-            </div>
+            <!-- <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
+                <div class="legend-color" style="background: #ecf0f1; border-color: #c4c4c4;"></div>
+                <span><strong>Tidak Ada Data</strong></span>
+            </div> -->
         </div>
     </div>
 
@@ -974,12 +956,14 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         <div style="overflow-x: auto;">
             <table class="location-table" id="locationTable">
                 <thead>
-                    <tr>
-                        <th><i class="fas fa-hashtag"></i> No</th>
-                        <th><i class="fas fa-map-marker-alt"></i> Wilayah</th>
-                        <th><i class="fas fa-map-pin"></i> Kode Lokasi</th>
-                        <th><i class="fas fa-seedling"></i> Status Gulma</th>
-                        <th><i class="fas fa-ruler-combined"></i> Luas (Ha)</th>
+                    <tr style="background-color: #128241;">
+                        <th onclick="sortTable('no')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-hashtag"></i> No <span id="sortIndicator_no" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('wilayah')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-map-marker-alt"></i> Wilayah <span id="sortIndicator_wilayah" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('lokasi')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-map-pin"></i> Kode Lokasi <span id="sortIndicator_lokasi" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('status')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-seedling"></i> Status Gulma <span id="sortIndicator_status" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tk')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-users"></i> Butuh TK <span id="sortIndicator_tk" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('aktivitas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-tasks"></i> Aktivitas <span id="sortIndicator_aktivitas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('luas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-ruler-combined"></i> Luas Netto <span id="sortIndicator_luas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
                     </tr>
                 </thead>
                 <tbody id="locationTableBody">
@@ -1017,8 +1001,8 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                     <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #3498db; background: #3498db; flex-shrink: 0;"></div>
                     <span>Bersih</span>
                 </button>
-                <button class="grid-btn" data-value="ringan" data-color="#128241" onclick="selectStatusGulma('ringan', 'Ringan', '#128241')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #128241; background: #128241; flex-shrink: 0;"></div>
+                <button class="grid-btn" data-value="ringan" data-color="#57ce39ff" onclick="selectStatusGulma('ringan', 'Ringan', '#57ce39ff')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #57ce39ff; background: #57ce39ff; flex-shrink: 0;"></div>
                     <span>Ringan</span>
                 </button>
                 <button class="grid-btn" data-value="sedang" data-color="#f1c40f" onclick="selectStatusGulma('sedang', 'Sedang', '#f1c40f')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
@@ -1029,9 +1013,9 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                     <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #e74c3c; background: #e74c3c; flex-shrink: 0;"></div>
                     <span>Berat</span>
                 </button>
-                <button class="grid-btn" data-value="belum_dimonitoring" data-color="#ecf0f1" onclick="selectStatusGulma('belum_dimonitoring', 'Belum Dimonitoring', '#ecf0f1')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #999; background: #ecf0f1; flex-shrink: 0;"></div>
-                    <span>Belum Dimonitoring</span>
+                <button class="grid-btn" data-value="belum_dimonitoring" data-color="#ecf0f1" onclick="selectStatusGulma('belum_dimonitoring', 'Tidak Ada Data', '#ecf0f1')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #c4c4c4; background: #ecf0f1; flex-shrink: 0;"></div>
+                    <span>Tidak Ada Data</span>
                 </button>
                 <!-- <button class="grid-btn selected" data-value="" data-color="linear-gradient(135deg, #3498db, #e74c3c)" onclick="selectStatusGulma('', 'Kategori Status Gulma', 'linear-gradient(135deg, #3498db, #e74c3c)')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center; grid-column: 1 / -1;">
                     <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #ddd; background: linear-gradient(135deg, #3498db, #e74c3c); flex-shrink: 0;"></div>
@@ -1044,7 +1028,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     <div class="wilayah-grid" id="wilayahGrid">
         <div style="text-align: center; width: 100%; padding: 40px;">
             <div class="loading" style="margin: 0 auto;"></div>
-            <p style="margin-top: 20px; color: #999;">Memuat data wilayah...</p>
+            <p style="margin-top: 20px; color: #c4c4c4ff;">Memuat data wilayah...</p>
         </div>
     </div>
 </div>
@@ -1178,6 +1162,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     
     // Filter by status (from legend click)
     function filterByStatus(status) {
+        console.log(`🔍 filterByStatus() called with status: '${status}'`);
         currentStatusFilter = status;
         
         // Set filter dropdown to match
@@ -1185,6 +1170,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         
         // Enable location labels when status filter is active
         if (status) {
+            console.log(`✓ Filter activated: ${status}`);
             showLocationLabels = true;
             // Open location details table
             document.getElementById('locationDetailsTable').classList.add('active');
@@ -1192,6 +1178,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
         } else {
             // Reset: no labels, no table, reload all
+            console.log('✓ Filter reset - showing all data');
             showLocationLabels = false;
             currentStatusFilter = '';
             // Hide table when clicking "Semua Data"
@@ -1201,7 +1188,12 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         }
         
         // Reload map with filter applied
+        console.log(`ℹ️ Current geoJsonLayers count: ${Object.keys(geoJsonLayers).length}`);
         if (Object.keys(geoJsonLayers).length > 0) {
+            console.log(`📍 Reloading map with filter...`);
+            loadAllWilayah();
+        } else {
+            console.log(`⚠️ No geoJsonLayers found, initializing...`);
             loadAllWilayah();
         }
         
@@ -1294,6 +1286,96 @@ function initMap() {
         }
     }
 
+    // Sort state tracking
+    let currentSortColumn = null;
+    let sortDirection = 'asc'; // 'asc' or 'desc'
+
+    function sortTable(column) {
+        const tbody = document.getElementById('locationTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Check if we're already sorting by this column
+        if (currentSortColumn === column) {
+            // Toggle direction
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // New column, start with asc
+            currentSortColumn = column;
+            sortDirection = 'asc';
+        }
+        
+        // Hide all sort icon indicators (reset to neutral)
+        document.getElementById('sortIndicator_no').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_wilayah').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_lokasi').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_status').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_tk').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_aktivitas').querySelector('i').className = 'fa-solid fa-sort';
+        document.getElementById('sortIndicator_luas').querySelector('i').className = 'fa-solid fa-sort';
+        
+        // Show sort indicator for current column
+        const indicatorId = `sortIndicator_${column}`;
+        const indicator = document.getElementById(indicatorId);
+        if (indicator) {
+            // Change arrow icon based on sort direction
+            const icon = indicator.querySelector('i');
+            if (sortDirection === 'asc') {
+                icon.className = 'fa-solid fa-sort-up';
+            } else {
+                icon.className = 'fa-solid fa-sort-down';
+            }
+        }
+        
+        // Sort the rows
+        rows.sort((a, b) => {
+            let aVal, bVal;
+            
+            if (column === 'no') {
+                aVal = parseInt(a.cells[0]?.textContent.trim()) || 0;
+                bVal = parseInt(b.cells[0]?.textContent.trim()) || 0;
+                return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+            } else if (column === 'wilayah') {
+                aVal = a.cells[1]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[1]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'lokasi') {
+                aVal = a.cells[2]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[2]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'status') {
+                aVal = a.cells[3]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[3]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'tk') {
+                aVal = a.cells[4]?.textContent.trim().toLowerCase() || 'null';
+                bVal = b.cells[4]?.textContent.trim().toLowerCase() || 'null';
+                // Handle numeric sorting for TK
+                const aNum = aVal === 'null' ? -1 : parseFloat(aVal);
+                const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
+                return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+            } else if (column === 'aktivitas') {
+                aVal = a.cells[5]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[5]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'luas') {
+                aVal = a.cells[6]?.textContent.trim().toLowerCase() || 'null';
+                bVal = b.cells[6]?.textContent.trim().toLowerCase() || 'null';
+                // Handle numeric sorting for Luas Netto
+                const aNum = aVal === 'null' ? -1 : parseFloat(aVal);
+                const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
+                return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+            }
+            
+            // String comparison
+            if (sortDirection === 'asc') {
+                return aVal.localeCompare(bVal);
+            } else {
+                return bVal.localeCompare(aVal);
+            }
+        });
+        
+        // Re-render rows with new order
+        rows.forEach(row => {
+            tbody.appendChild(row);
+        });
+    }
+
     function hideMapError() {
         const errorContainer = document.querySelector('.map-error-container');
         if (errorContainer) {
@@ -1325,8 +1407,10 @@ function initMap() {
         // Clear existing layers
         clearAllLayers();
 
-        // Show loading
+        // Show loading spinner
         console.log(`Loading Wilayah ${wilayahNumber}...`);
+        showMapLoading(true);
+        const startTime = performance.now();
 
         fetch(`/api/wilayah/geojson/${wilayahNumber}`)
             .then(response => {
@@ -1336,6 +1420,10 @@ function initMap() {
                 return response.json();
             })
             .then(data => {
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ Wilayah ${wilayahNumber} loaded in ${loadTime}ms`);
+                showMapLoading(false);
+                
                 if (data.error) {
                     // Check if error is about unpublished data
                     if (data.error.includes('belum dipublikasikan')) {
@@ -1415,9 +1503,41 @@ function initMap() {
                 populateLocationTable(data.features, wilayahNumber);
             })
             .catch(error => {
+                showMapLoading(false);
                 console.error('Error loading wilayah:', error);
                 alert('Gagal memuat data wilayah: ' + error.message);
             });
+    }
+
+    // Show/hide loading indicator
+    function showMapLoading(show) {
+        let loader = document.getElementById('mapLoader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'mapLoader';
+            loader.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+                z-index: 10000;
+                display: none;
+                text-align: center;
+                min-width: 200px;
+            `;
+            loader.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <div class="loading" style="margin: 0 auto;"></div>
+                </div>
+                <p style="margin: 0; color: #128241; font-weight: 600; font-size: 14px;">Memuat Peta...</p>
+            `;
+            document.body.appendChild(loader);
+        }
+        loader.style.display = show ? 'block' : 'none';
     }
 
     // Load all wilayah
@@ -1437,7 +1557,10 @@ function initMap() {
         // Clear existing layers
         clearAllLayers();
 
+        // Show loading spinner
         console.log('Loading all wilayah...');
+        showMapLoading(true);
+        const startTime = performance.now();
 
         try {
             // Get list of all wilayah from API
@@ -1463,6 +1586,7 @@ function initMap() {
             if (!summary.data || summary.data.length === 0) {
                 console.warn('⚠️  [wilayah.blade] No wilayah data available');
                 console.warn('⚠️  Response object:', summary);
+                showMapLoading(false);
                 showMapError('Tidak ada data wilayah yang tersedia. Periksa console untuk detail.');
                 return;
             }
@@ -1506,12 +1630,18 @@ function initMap() {
                     let features = data.features;
                     if (currentStatusFilter) {
                         features = features.filter(f => {
-                            const status = (f.properties.kategori || f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
+                            const kategori = f.properties.kategori || f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '';
+                            const status = kategori.toLowerCase();
+                            
                             if (currentStatusFilter === 'belum_dimonitoring') {
-                                // Filter untuk belum dimonitoring (status kosong atau tidak dikenali)
-                                return !status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'));
+                                // Filter untuk Tidak Ada Data
+                                // Return true jika status kosong ATAU tidak termasuk salah satu dari 4 kategori
+                                const hasValidStatus = status.includes('bersih') || status.includes('ringan') || status.includes('sedang') || status.includes('berat');
+                                return !hasValidStatus; // Show if NO valid status
                             }
-                            return status.includes(currentStatusFilter);
+                            
+                            // Untuk filter lainnya (bersih, ringan, sedang, berat)
+                            return status !== '' && status.includes(currentStatusFilter);
                         });
                     }
                     
@@ -1525,8 +1655,8 @@ function initMap() {
                         onEachFeature: function(feature, layer) {
                             if (feature.properties) {
                                 layer.bindPopup(createPopupContent(feature.properties), {
-                                    maxWidth: 350,
-                                    minWidth: 320,
+                                    maxWidth: 300,
+                                    minWidth: 150,
                                     maxHeight: 600,
                                     autoPan: true
                                 });
@@ -1584,28 +1714,38 @@ function initMap() {
                 }, L.latLngBounds(allBounds[0]));
                 
                 map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: 13 });
+            } else if (currentStatusFilter) {
+                // Filter active but no results found
+                console.warn(`⚠️ Filter '${currentStatusFilter}' returned no results`);
+                // Keep map at current view, let user see empty map clearly
+            } else {
+                // No filter, but somehow no bounds - fit to Indonesia view
+                console.warn('⚠️ No bounds found, fitting to default view');
+                map.fitBounds([[-10.3, 95.3], [5.9, 141.0]], { padding: [80, 80] });
             }
 
             console.log(`Loaded ${validResults.length} wilayah successfully`);
             
-            // Populate location table with all data (filtered if needed)
+            // Hide loading spinner
+            const loadTime = (performance.now() - startTime).toFixed(2);
+            console.log(`✅ All wilayah loaded in ${loadTime}ms`);
+            showMapLoading(false);
+            
+            // Populate location table with ALL data (unfiltered)
+            // This ensures allLocationData is always populated with complete dataset
             const allFeatures = validResults.flatMap(r => {
                 if (!r.data.features) return [];
-                if (currentStatusFilter) {
-                    return r.data.features.filter(f => {
-                        const status = (f.properties.Kelas_weed || f.properties.gulma_KATEGORI || f.properties.Status || '').toLowerCase();
-                        return status.includes(currentStatusFilter);
-                    });
-                }
                 return r.data.features;
             });
             populateLocationTable(allFeatures);
             
-            // Apply status filter to table if active
+            // Apply status filter to TABLE if active
+            // This filters the displayed rows in the table without affecting map layers
             if (currentStatusFilter) {
                 filterLocationsByStatus(currentStatusFilter);
             }
         } catch (error) {
+            showMapLoading(false);
             console.error('❌ Error loading all wilayah:', error);
             console.error('Error stack:', error.stack);
             const errorMsg = error.message || 'Gagal memuat data wilayah';
@@ -1627,7 +1767,7 @@ function initMap() {
     function getFeatureStyle(feature) {
         const props = feature.properties || {};
         let fillColor = '#ecf0f1'; // default putih/abu untuk tidak ada data
-        let borderColor = '#8b8b8b'; // default hitam untuk tidak ada data
+        let borderColor = '#c4c4c4'; // default hitam untuk tidak ada data
         let weight = 2;
         
         // Check multiple status fields: kategori (from API), Kelas_weed, gulma_KATEGORI, atau Status
@@ -1638,8 +1778,8 @@ function initMap() {
                 fillColor = '#3498db'; // Biru
                 borderColor = '#3498db';
             } else if (status.includes('ringan')) {
-                fillColor = '#128241'; // Hijau
-                borderColor = '#128241';
+                fillColor = '#57ce39ff'; // Hijau
+                borderColor = '#57ce39ff';
             } else if (status.includes('sedang')) {
                 fillColor = '#f1c40f'; // Kuning
                 borderColor = '#f1c40f';
@@ -1668,7 +1808,7 @@ function initMap() {
         if (statusGulma.toLowerCase().includes('bersih')) {
             statusColor = '#3498db';
         } else if (statusGulma.toLowerCase().includes('ringan')) {
-            statusColor = '#128241';
+            statusColor = '#57ce39ff';
         } else if (statusGulma.toLowerCase().includes('sedang')) {
             statusColor = '#f1c40f';
         } else if (statusGulma.toLowerCase().includes('berat')) {
@@ -1676,12 +1816,13 @@ function initMap() {
         }
         
         return `<div style="font-family: 'Poppins'; font-size: 13px; padding: 5px;">
-            <strong>📍 Kode Lokasi:</strong> ${lokasi}<br>
-            <strong>Status Gulma:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusGulma}</span>
+            📍 Kode Lokasi:<strong> ${lokasi} </strong><br>
+            Status Gulma: <span style="color: ${statusColor}; font-weight: bold;"> <strong> ${statusGulma}</strong></span>
         </div>`;
     }
 
     function createPopupContent(props) {
+<<<<<<< HEAD
         const kategoriRaw = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || '';
         const kategori = normalizeKategori(kategoriRaw);
 
@@ -1717,10 +1858,41 @@ function initMap() {
         } else if (kategori === 'ringan') {
             statusColor = '#128241'; textColor = 'white';
         } else if (kategori === 'sedang') {
+=======
+        let html = '<div style="width: 250px; padding: 0;">';
+        
+        // Foto
+        html += '<div style="width: 100%; height: 140px; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0;">';
+        html += '<img src="/image/roblox.png" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover;">';
+        html += '</div>';
+        
+        html += '<div style="padding: 10px;">';
+        
+        // Header dengan Lokasi dan Wilayah (dari CSV atau GeoJSON)
+        const lokasi = props.Lokasi || props.LOKASI || props.lokasi || 'N/A';
+        const wilayah = props.Wilayah || props.gulma_Wilayah || props.wilayah || 'N/A';
+        html += `<div style="margin-bottom: 8px;">`;
+        html += `<p style="margin: 0; color: #128241; font-size: 16px; font-weight: 700;">📍 wil. ${wilayah} - ${lokasi}</p>`;
+        html += `</div>`;
+
+        // Status Gulma dari CSV kategori
+        const statusGulma = props.kategori || 'Tidak Ada Data';
+        let statusColor = '#ecf0f1';
+        let textColor = '#333333';
+        
+        if (statusGulma.toLowerCase().includes('bersih')) {
+            statusColor = '#3498db';
+            textColor = 'white';
+        } else if (statusGulma.toLowerCase().includes('ringan')) {
+            statusColor = '#57ce39ff';
+            textColor = 'white';
+        } else if (statusGulma.toLowerCase().includes('sedang')) {
+>>>>>>> 5329295 (Tambah fitur sorting tabel dan perbaiki tampilan di halaman wilayah)
             statusColor = '#f1c40f';
         } else if (kategori === 'berat') {
             statusColor = '#e74c3c'; textColor = 'white';
         }
+<<<<<<< HEAD
 
         html += `
             <div style="background:${statusColor};color:${textColor};
@@ -1748,6 +1920,42 @@ function initMap() {
         }
 
         html += `</table></div></div>`;
+=======
+        
+        html += `<div style="background: ${statusColor}; color: ${textColor}; padding: 6px; margin-bottom: 8px; border-radius: 4px; text-align: center; font-weight: 600; font-size: 11px;">`;
+        html += `${statusGulma}`;
+        html += `</div>`;
+
+        // Data information - dari CSV dan GeoJSON
+        html += '<div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">';
+        html += '<div style="font-size: 10px; line-height: 1.6;">';
+        
+        // Butuh TK - dari CSV tk_ha atau tk/ha
+        const tkHa = props.tk_ha || props.tkha || props['tk/ha'] || null;
+        const tkValue = tkHa ? (typeof tkHa === 'string' ? tkHa.replace(/\.00$/, '').trim() : tkHa) : '<span style="color: #999; font-style: italic;">null</span>';
+        const tkDisplay = tkHa ? `${tkValue} TK/Ha` : `${tkValue}`;
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Butuh Tenaga Kerja:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
+
+        // Aktivitas - dari CSV activitas (note: column name is "activitas" with 'c', not 'k')
+        const aktivitas = props.activitas || props.Aktivitas || props.activity || props.Activity || props.aktivitas || null;
+        const aktivitasDisplay = aktivitas ? aktivitas : '<span style="color: #999; font-style: italic;">null</span>';
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Aktivitas:</strong></span><span style="color: #128241; font-weight: 600;">${aktivitasDisplay}</span></div>`;
+
+        // Luas Netto Gulma - dari CSV neto
+        const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || props.luas_netto || null;
+        const netoValue = neto ? (typeof neto === 'string' ? neto.replace(',', '.') : neto) : '<span style="color: #999; font-style: italic;">null</span>';
+        const netoDisplay = neto ? `${netoValue} Ha` : `${netoValue}`;
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Luas Netto:</strong></span><span style="color: #128241; font-weight: 600;">${netoDisplay}</span></div>`;
+
+        // Luas Bruto Lokasi - HANYA dari GeoJSON
+        const bruto = props.Luas_Bruto || props.luas_bruto || props.Bruto || props.bruto || null;
+        const brutoValue = bruto ? (typeof bruto === 'string' ? bruto.replace(',', '.') : bruto) : '<span style="color: #999; font-style: italic;">null</span>';
+        const brutoDisplay = bruto ? `${brutoValue} Ha` : `${brutoValue}`;
+        html += `<div style="display: flex; justify-content: space-between; padding: 4px 0;"><span style="color: #555;"><strong>Luas Bruto Lokasi:</strong></span><span style="color: #128241; font-weight: 600;">${brutoDisplay}</span></div>`;
+
+        html += '</div>';
+        html += '</div>';
+>>>>>>> 5329295 (Tambah fitur sorting tabel dan perbaiki tampilan di halaman wilayah)
 
         return html;
     }
@@ -1770,64 +1978,112 @@ function initMap() {
         fetch('/api/wilayah/data')
             .then(response => response.json())
             .then(data => {
-                allWilayahData = data.data;
-                wilayahData = data.data; // Store untuk filtering
+                // Enrich wilayah data with additional statistics
+                const enrichedData = data.data.map(wilayah => {
+                    return {
+                        ...wilayah,
+                        total_luas_netto: 0,
+                        total_tk: 0,
+                        status_counts: {
+                            bersih: 0,
+                            ringan: 0,
+                            sedang: 0,
+                            berat: 0,
+                            belum_dimonitoring: 0
+                        }
+                    };
+                });
+
+                // We need to fetch all data to calculate statistics
+                // For now, store the data and fetch details later
+                allWilayahData = enrichedData;
+                wilayahData = enrichedData;
 
                 // Populate wilayah button grid (for filter)
                 const wilayahButtonGrid = document.getElementById('wilayahButtonGrid');
                 wilayahButtonGrid.innerHTML = '';
                 
-                data.data.forEach(wilayah => {
+                enrichedData.forEach(wilayah => {
                     const btn = document.createElement('button');
                     btn.className = 'grid-btn';
                     btn.setAttribute('data-value', wilayah.wilayah);
                     btn.textContent = `Wil. ${wilayah.wilayah}`;
-                    btn.title = `Wilayah ${wilayah.wilayah} (${wilayah.feature_count} plot, ${wilayah.total_area} Ha)`;
+                    btn.title = `Wilayah ${wilayah.wilayah}`;
                     btn.onclick = () => selectGridOption('wilayah', wilayah.wilayah, `Wilayah ${wilayah.wilayah}`);
                     wilayahButtonGrid.appendChild(btn);
                 });
 
                 // Update statistics
-                document.getElementById('totalWilayah').textContent = data.total_wilayah;
+                document.getElementById('totalWilayah').textContent = data.total_wilayah + ' Wilayah';
                 let totalArea = 0;
-                let totalPlot = 0;
-                let totalBersih = 0;
-                let totalBerat = 0;
 
-                data.data.forEach(w => {
+                enrichedData.forEach(w => {
                     totalArea += w.total_area;
-                    totalPlot += w.feature_count;
                 });
 
-                document.getElementById('totalArea').textContent = totalArea.toFixed(2);
-                document.getElementById('totalPlot').textContent = totalPlot;
+                document.getElementById('totalArea').textContent = totalArea.toFixed(2) + ' Ha';
 
-                // Load all geojson to calculate gulma stats
-                const wilayahNumbers = data.data.map(w => w.wilayah);
-                const promises = wilayahNumbers.map(num => 
-                    fetch(`/api/wilayah/geojson/${num}`)
-                        .then(r => r.json())
-                        .then(geojson => ({ wilayah: num, geojson }))
-                );
+                // Fetch all wilayah data to calculate per-wilayah statistics
+                const promises = enrichedData.map(wilayah => {
+                    return fetch(`/api/wilayah/geojson/${wilayah.wilayah}`)
+                        .then(r => r.ok ? r.json() : null)
+                        .then(geojson => {
+                            if (!geojson || !geojson.features) return wilayah;
+                            
+                            // Calculate totals from features
+                            let totalLuasNetto = 0;
+                            let totalTk = 0;
+                            const statusCounts = {
+                                bersih: 0,
+                                ringan: 0,
+                                sedang: 0,
+                                berat: 0,
+                                belum_dimonitoring: 0
+                            };
 
-                return Promise.all(promises).then(results => {
-                    results.forEach(({ geojson }) => {
-                        if (geojson.features) {
                             geojson.features.forEach(feature => {
-                                const status = (feature.properties.Kelas_weed || feature.properties.gulma_KATEGORI || '').toLowerCase();
-                                if (status.includes('bersih')) totalBersih++;
-                                else if (status.includes('berat')) totalBerat++;
+                                const props = feature.properties;
+                                
+                                // Sum Luas Netto (from CSV neto field)
+                                const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
+                                totalLuasNetto += parseFloat(neto) || 0;
+
+                                // Sum TK (from CSV tk_ha field)
+                                const tkHa = props.tk_ha || props.tkha || props['tk/ha'] || 0;
+                                totalTk += parseFloat(tkHa) || 0;
+
+                                // Count status
+                                const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+                                if (!status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'))) {
+                                    statusCounts.belum_dimonitoring++;
+                                } else if (status.includes('bersih')) {
+                                    statusCounts.bersih++;
+                                } else if (status.includes('ringan')) {
+                                    statusCounts.ringan++;
+                                } else if (status.includes('sedang')) {
+                                    statusCounts.sedang++;
+                                } else if (status.includes('berat')) {
+                                    statusCounts.berat++;
+                                }
                             });
-                        }
-                    });
 
-                    document.getElementById('totalBersih').textContent = totalBersih;
-                    document.getElementById('totalBerat').textContent = totalBerat;
+                            return {
+                                ...wilayah,
+                                total_luas_netto: totalLuasNetto,
+                                total_tk: totalTk,
+                                status_counts: statusCounts
+                            };
+                        })
+                        .catch(err => {
+                            console.error(`Error fetching wilayah ${wilayah.wilayah}:`, err);
+                            return wilayah;
+                        });
+                });
 
-                    // Render wilayah grid
-                    renderWilayah(data.data);
-
-                    console.log('Wilayah data loaded:', data);
+                Promise.all(promises).then(enrichedWilayahData => {
+                    wilayahData = enrichedWilayahData;
+                    renderWilayah(enrichedWilayahData);
+                    console.log('Wilayah data loaded with stats:', enrichedWilayahData);
                 });
             })
             .catch(error => {
@@ -1856,6 +2112,54 @@ function initMap() {
                 document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
             };
 
+            // Create status grid HTML
+            const statusColors = {
+                bersih: '#3498db',
+                ringan: '#57ce39',
+                sedang: '#f1c40f',
+                berat: '#e74c3c',
+                belum_dimonitoring: '#ecf0f1'
+            };
+            
+            const statusNames = {
+                bersih: 'Bersih',
+                ringan: 'Ringan',
+                sedang: 'Sedang',
+                berat: 'Berat',
+                belum_dimonitoring: 'Tidak Ada Data'
+            };
+
+            const statusCounts = wilayah.status_counts || {
+                bersih: 0,
+                ringan: 0,
+                sedang: 0,
+                berat: 0,
+                belum_dimonitoring: 0
+            };
+
+            let statusGridHTML = '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">';
+            
+            // First 4 statuses (bersih, ringan, sedang, berat)
+            ['bersih', 'ringan', 'sedang', 'berat'].forEach(status => {
+                const count = statusCounts[status];
+                const color = statusColors[status];
+                statusGridHTML += `
+                    <div style="text-align: center; font-size: 11px; font-weight: 700;">
+                        <div style="font-size: 13px; font-weight: 700; color: ${color}; line-height: 1;">${count}</div>
+                        <div style="font-size: 10px; color: ${color}; line-height: 1;">${statusNames[status]}</div>
+                    </div>
+                `;
+            });
+            statusGridHTML += '</div>';
+            
+            // Tidak Ada Data on separate row
+            // const belumCount = statusCounts['belum_dimonitoring'];
+            // statusGridHTML += `<div style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px;">
+            //     <div style="padding: 8px; border-radius: 4px; text-align: center; font-size: 11px; font-weight: 600; color: #999;">
+            //         Tidak Ada Data : ${belumCount}
+            //     </div>
+            // </div>`;
+
             card.innerHTML = `
                 <div class="wilayah-card-header">
                     <h3>Wilayah ${wilayah.wilayah}</h3>
@@ -1867,31 +2171,26 @@ function initMap() {
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-ruler-combined"></i>
-                            <span>Luas</span>
+                            <span>Luas Netto Wilayah</span>
                         </span>
                         <span class="info-value">
-                            ${parseFloat(wilayah.total_area ?? 0).toFixed(2)} Ha
+                            ${parseFloat(wilayah.total_luas_netto ?? 0).toFixed(2)} Ha
                         </span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">
-                            <i class="fas fa-th-large"></i>
-                            <span>Plot</span>
+                            <i class="fas fa-users"></i>
+                            <span>Total Kebutuhan Tenaga Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${wilayah.feature_count ?? 0}
+                            ${Math.round(parseFloat(wilayah.total_tk ?? 0))} TK
                         </span>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">
-                            <i class="fas fa-seedling"></i>
-                            <span>Status</span>
-                        </span>
-                        <span class="info-value" style="background: #e8f5e9; color: #128241;">
-                            Aktif
-                        </span>
+                    <div>
+                        <span style="font-size: 11px; font-weight: 600; color: #555;">Status Gulma</span>
+                        ${statusGridHTML}
                     </div>
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #e0e0e0; text-align: center; display: flex; gap: 8px; justify-content: center;">
+                    <div style="margin-top: 10px; padding-top: 10px; text-align: center; display: flex; gap: 8px; justify-content: center;">
                         <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="flex: 1; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(18, 130, 65, 0.2)';">
                             <i class="fas fa-map"></i> Lihat Peta
                         </button>
@@ -1913,23 +2212,28 @@ function initMap() {
         tbody.innerHTML = '';
         
         if (!features || features.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
             return;
         }
         
         features.forEach((feature, index) => {
             const props = feature.properties;
             const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
-            const status = (props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
+            const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
             const wilayah = wilayahNumber || props.Wilayah || props.gulma_Wilayah || '-';
-            const luas = props.Luas_Bruto || props.Bruto || props.bruto || '-';
+            const luasNetto = props.neto || props.Netto || props.netto || props.Luas_Netto || '-';
+            const tkRaw = props.tk_ha || props.tkha || props['tk/ha'] || '-';
+            const tkHa = tkRaw === '-' ? '-' : (typeof tkRaw === 'string' ? tkRaw.replace(/\.00$/, '').trim() : tkRaw);
+            const aktivitas = props.activitas || props.Aktivitas || props.activity || props.Activity || '-';
             
             // Store for filtering
             allLocationData.push({
                 wilayah,
                 lokasi,
                 status,
-                luas,
+                luasNetto,
+                tkHa,
+                aktivitas,
                 feature
             });
             
@@ -1956,7 +2260,9 @@ function initMap() {
                 <td>${wilayah}</td>
                 <td><strong>${lokasi}</strong></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${luas}</td>
+                <td>${tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : tkHa + ' TK'}</td>
+                <td>${aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : aktivitas}</td>
+                <td>${luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : luasNetto + ' Ha'}</td>
             `;
             tbody.appendChild(row);
         });
@@ -1973,7 +2279,7 @@ function initMap() {
         if (currentStatusFilter) {
             let displayStatus = currentStatusFilter.charAt(0).toUpperCase() + currentStatusFilter.slice(1);
             if (currentStatusFilter === 'belum_dimonitoring') {
-                displayStatus = 'Belum Dimonitoring';
+                displayStatus = 'Tidak Ada Data';
             }
             infoText.textContent = `Menampilkan ${count} lokasi dengan status: ${displayStatus}`;
         } else {
@@ -1989,35 +2295,43 @@ function initMap() {
         let filteredData;
         if (statusFilter) {
             if (statusFilter === 'belum_dimonitoring') {
-                // Filter untuk belum dimonitoring
+                // Filter untuk Tidak Ada Data - yang tidak memiliki status valid
                 filteredData = allLocationData.filter(loc => {
-                    return !loc.status || (!loc.status.includes('bersih') && !loc.status.includes('ringan') && !loc.status.includes('sedang') && !loc.status.includes('berat'));
+                    const status = (loc.status || '').toLowerCase();
+                    const hasValidStatus = status.includes('bersih') || status.includes('ringan') || status.includes('sedang') || status.includes('berat');
+                    return !hasValidStatus;
                 });
             } else {
-                filteredData = allLocationData.filter(loc => loc.status.includes(statusFilter));
+                // Filter untuk status tertentu (bersih, ringan, sedang, berat)
+                filteredData = allLocationData.filter(loc => {
+                    const status = (loc.status || '').toLowerCase();
+                    return status !== '' && status.includes(statusFilter);
+                });
             }
         } else {
             filteredData = allLocationData;
         }
         
         if (filteredData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Tidak ada data dengan status ini</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">Tidak ada data dengan status ini</td></tr>';
             return;
         }
         
         filteredData.forEach((loc, index) => {
+            const status = (loc.status || '').toLowerCase();
             let statusClass = 'status-unknown';
             let statusText = 'Tidak Ada Data';
-            if (loc.status.includes('bersih')) {
+            
+            if (status.includes('bersih')) {
                 statusClass = 'status-bersih';
                 statusText = 'Bersih';
-            } else if (loc.status.includes('ringan')) {
+            } else if (status.includes('ringan')) {
                 statusClass = 'status-ringan';
                 statusText = 'Ringan';
-            } else if (loc.status.includes('sedang')) {
+            } else if (status.includes('sedang')) {
                 statusClass = 'status-sedang';
                 statusText = 'Sedang';
-            } else if (loc.status.includes('berat')) {
+            } else if (status.includes('berat')) {
                 statusClass = 'status-berat';
                 statusText = 'Berat';
             }
@@ -2028,7 +2342,9 @@ function initMap() {
                 <td>${loc.wilayah}</td>
                 <td><strong>${loc.lokasi}</strong></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${loc.luas}</td>
+                <td>${loc.tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.tkHa + ' TK'}</td>
+                <td>${loc.aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.aktivitas}</td>
+                <td>${loc.luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.luasNetto + ' Ha'}</td>
             `;
             tbody.appendChild(row);
         });

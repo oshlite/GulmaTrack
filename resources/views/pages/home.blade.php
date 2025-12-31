@@ -160,7 +160,7 @@
     }
 
     .stat-card.bersih {
-        border-left-color: #128241;
+        border-left-color: #57ce39ff;
         background: linear-gradient(135deg, rgba(18, 130, 65, 0.05), rgba(18, 130, 65, 0.02));
     }
 
@@ -185,7 +185,7 @@
     }
 
     .stat-icon.bersih {
-        color: #128241;
+        color: #57ce39ff;
     }
 
     .stat-icon.ringan {
@@ -356,7 +356,7 @@
     }
 
     .stat-icon.bersih {
-        color: #128241;
+        color: #57ce39ff;
     }
 
     .stat-icon.ringan {

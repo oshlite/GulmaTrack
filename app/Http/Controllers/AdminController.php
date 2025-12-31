@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DataGulma;
 use App\Models\ImportLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -485,4 +486,297 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+     /**
+     * API: Get summary statistics per wilayah
+     * Endpoint: /api/statistik/summary
+     */
+    public function getStatistikSummary(Request $request)
+    {
+        try {
+            $query = DataGulma::select(
+                'wilayah_id',
+                DB::raw('COUNT(DISTINCT id_feature) as total_features'),
+                DB::raw('SUM(neto) as total_neto'),
+                DB::raw('SUM(hasil) as total_hasil'), // Total Gulma
+                DB::raw('AVG(hasil) as avg_hasil'),
+                DB::raw('AVG(umur_tanaman) as avg_umur'),
+                DB::raw('SUM(total_tk) as total_tenaga_kerja')
+            )
+            ->groupBy('wilayah_id')
+            ->orderBy('wilayah_id');
+
+            // Apply filters if provided
+            if ($request->has('tahun') && $request->tahun) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('minggu', $request->minggu);
+                });
+            }
+
+            $data = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get ranking by total hasil (gulma)
+     * Endpoint: /api/statistik/ranking
+     */
+    public function getStatistikRanking(Request $request)
+    {
+        try {
+            $query = DataGulma::select(
+                'wilayah_id',
+                DB::raw('SUM(hasil) as total_hasil'),
+                DB::raw('AVG(hasil) as avg_hasil'),
+                DB::raw('COUNT(DISTINCT id_feature) as jumlah_features')
+            )
+            ->groupBy('wilayah_id')
+            ->orderByDesc('total_hasil')
+            ->limit(10);
+
+            // Apply filters
+            if ($request->has('tahun') && $request->tahun) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+
+            $data = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get productivity analysis
+     * Endpoint: /api/statistik/productivity
+     */
+    public function getStatistikProductivity(Request $request)
+    {
+        try {
+            // Group features by productivity level based on avg hasil per feature
+            $tinggi = DataGulma::select('wilayah_id', 'id_feature')
+                ->selectRaw('AVG(hasil) as avg_hasil')
+                ->groupBy('wilayah_id', 'id_feature')
+                ->havingRaw('AVG(hasil) > 9')
+                ->get();
+
+            $sedang = DataGulma::select('wilayah_id', 'id_feature')
+                ->selectRaw('AVG(hasil) as avg_hasil')
+                ->groupBy('wilayah_id', 'id_feature')
+                ->havingRaw('AVG(hasil) >= 8 AND AVG(hasil) <= 9')
+                ->get();
+
+            $rendah = DataGulma::select('wilayah_id', 'id_feature')
+                ->selectRaw('AVG(hasil) as avg_hasil')
+                ->groupBy('wilayah_id', 'id_feature')
+                ->havingRaw('AVG(hasil) < 8')
+                ->get();
+
+            $data = [
+                'tinggi' => [
+                    'count' => $tinggi->count(),
+                    'avg' => $tinggi->avg('avg_hasil') ? round($tinggi->avg('avg_hasil'), 2) : 0
+                ],
+                'sedang' => [
+                    'count' => $sedang->count(),
+                    'avg' => $sedang->avg('avg_hasil') ? round($sedang->avg('avg_hasil'), 2) : 0
+                ],
+                'rendah' => [
+                    'count' => $rendah->count(),
+                    'avg' => $rendah->avg('avg_hasil') ? round($rendah->avg('avg_hasil'), 2) : 0
+                ]
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get yearly comparison
+     * Endpoint: /api/statistik/yearly-comparison
+     */
+    public function getStatistikYearlyComparison(Request $request)
+    {
+        try {
+            $data = ImportLog::select('tahun')
+                ->selectRaw('SUM((SELECT SUM(hasil) FROM data_gulma WHERE import_log_id = import_logs.id)) as total_hasil')
+                ->where('status', 'success')
+                ->whereNotNull('tahun')
+                ->groupBy('tahun')
+                ->orderBy('tahun')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get wilayah detail for statistik
+     * Endpoint: /api/statistik/wilayah/{wilayah_id}
+     */
+    public function getStatistikWilayahDetail($wilayahId, Request $request)
+    {
+        try {
+            $query = DataGulma::where('wilayah_id', $wilayahId);
+
+            // Apply period filter if provided
+            if ($request->has('tahun') && $request->tahun) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('minggu', $request->minggu);
+                });
+            }
+
+            $summary = [
+                'wilayah_id' => $wilayahId,
+                'total_features' => $query->distinct('id_feature')->count('id_feature'),
+                'total_neto' => $query->sum('neto'),
+                'total_hasil' => $query->sum('hasil'),
+                'avg_hasil' => $query->avg('hasil'),
+                'avg_umur' => $query->avg('umur_tanaman'),
+                'total_tk' => $query->sum('total_tk'),
+                'kategori_distribution' => DataGulma::where('wilayah_id', $wilayahId)
+                    ->select('kategori', DB::raw('COUNT(*) as count'))
+                    ->groupBy('kategori')
+                    ->get()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get comparison data (for comparison feature)
+     * Endpoint: /api/statistik/comparison
+     */
+    public function getStatistikComparison(Request $request)
+    {
+        try {
+            // Get total production across all wilayah
+            $totalProduction = DataGulma::sum('hasil');
+            
+            // Get data per wilayah with percentage
+            $data = DataGulma::select(
+                'wilayah_id',
+                DB::raw('SUM(hasil) as total_hasil'),
+                DB::raw('SUM(neto) as total_neto'),
+                DB::raw('AVG(hasil) as avg_hasil'),
+                DB::raw('COUNT(DISTINCT id_feature) as total_features')
+            )
+            ->groupBy('wilayah_id')
+            ->orderBy('wilayah_id')
+            ->get()
+            ->map(function($item) use ($totalProduction) {
+                $item->percentage = $totalProduction > 0 
+                    ? round(($item->total_hasil / $totalProduction) * 100, 2) 
+                    : 0;
+                return $item;
+            });
+
+            return response()->json([
+                'success' => true,
+                'total_production' => $totalProduction,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getByPeriod(Request $request)
+    {
+        $request->validate([
+            'tahun' => 'required|integer',
+            'bulan' => 'required|integer',
+        ]);
+
+        $publication = \App\Models\MapPublication::where('tahun', $request->tahun)
+            ->where('bulan', $request->bulan)
+            ->where('status', 'published')
+            ->orderByDesc('minggu')
+            ->first();
+
+        if (!$publication) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $publication
+        ]);
+    }
+
 }

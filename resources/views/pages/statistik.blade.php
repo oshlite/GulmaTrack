@@ -263,120 +263,45 @@
     <!-- Filter & Kontrol -->
     <div class="stats-controls">
         <select id="filterTahun" style="min-width: 150px;">
-            <option value="2025">Minggu Pertama</option>
-            <option value="2024">Minggu Kedua</option>
-            <option value="2023">Minggu Ketiga</option>
-            <option value="2022">Minggu Keempat</option>
-        </select>
-         <select id="filterBulan" style="min-width: 150px;">
-            <option value="2025">Januari</option>
-            <option value="2024">Februari</option>
-            <option value="2023">Maret</option>
-            <option value="2022">April</option>
-            <option value="2025">Mei</option>
-            <option value="2024">Juni</option>
-            <option value="2023">Juli</option>
-            <option value="2022">Agustus</option>
-            <option value="2025">September</option>
-            <option value="2024">Oktober</option>
-            <option value="2023">November</option>
-            <option value="2022">Desember</option>
-
+            <option value="">Semua Tahun</option>
+            <option value="2024">2024</option>
+            <option value="2025" selected>2025</option>
         </select>
 
-        <button onclick="updateStats()"><i class="fas fa-search"></i> Update Statistik</button>
-    </div>
+        <select id="filterBulan" style="min-width: 150px;">
+            <option value="">Semua Bulan</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12" selected>Desember</option>
+        </select>
 
-    <!-- Perbandingan Produksi -->
-    <div class="stat-section">
-        <h3><i class="fas fa-chart-bar"></i> Perbandingan Produksi Komoditas</h3>
-        <div class="comparison-grid">
-            <div class="comparison-card">
-                <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Luas Perkebunan:</span>
-                    <span class="comparison-value">20,825 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Total Neto:</span>
-                    <span class="comparison-value">2,450 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Total Gulma:</span>
-                    <span class="comparison-value">8.5 T/Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Tenaga Kerja:</span>
-                    <span class="comparison-value">892 Orang</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Perubahan:</span>
-                    <span class="comparison-value"><span class="trend-indicator trend-up">↑ +2.3%</span></span>
-                </div>
-            </div>
-        </div>
+        <select id="filterMinggu" style="min-width: 150px;">
+            <option value="">Semua Minggu</option>
+            <option value="1" selected>Minggu 1</option>
+            <option value="2">Minggu 2</option>
+            <option value="3">Minggu 3</option>
+            <option value="4">Minggu 4</option>
+        </select>
+
+        <button onclick="updateStats()">
+            <i class="fas fa-search"></i> Update Statistik
+        </button>
     </div>
 
     <!-- Ranking Wilayah -->
     <div class="stat-section">
         <h3><i class="fas fa-trophy"></i> Ranking Wilayah Berdasarkan Gulma</h3>
         <div class="bar-chart">
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 23</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 100%;">3,780 Ton</div>
-                </div>
-                <div class="bar-value">3,780 T</div>
-            </div>
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 22</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 74%;">2,800 Ton</div>
-                </div>
-                <div class="bar-value">2,800 T</div>
-            </div>
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 21</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 63%;">2,380 Ton</div>
-                </div>
-                <div class="bar-value">2,380 T</div>
-            </div>
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 20</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 56%;">2,125 Ton</div>
-                </div>
-                <div class="bar-value">2,125 T</div>
-            </div>
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 19</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 46%;">1,700 Ton</div>
-                </div>
-                <div class="bar-value">1,700 T</div>
-            </div>
-            <div class="bar-item">
-                <div class="bar-label">Wilayah 18</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
-                </div>
-                <div class="bar-value">1,440 T</div>
-            </div>
-             <div class="bar-item">
-                <div class="bar-label">Wilayah 17</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
-                </div>
-                <div class="bar-value">1,440 T</div>
-            </div>
-             <div class="bar-item">
-                <div class="bar-label">Wilayah 16</div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: 38%;">1,440 Ton</div>
-                </div>
-                <div class="bar-value">1,440 T</div>
-            </div>
+            <!-- Will be populated by JavaScript -->
         </div>
     </div>
 
@@ -384,26 +309,7 @@
     <div class="stat-section">
         <h3><i class="fas fa-calendar"></i> Perbandingan Produksi Tahunan</h3>
         <div class="year-comparison">
-            <div class="year-item">
-                <div class="year">2022</div>
-                <div class="value">28,450</div>
-                <div class="label">Ton</div>
-            </div>
-            <div class="year-item">
-                <div class="year">2023</div>
-                <div class="value">29,380</div>
-                <div class="label">Ton</div>
-            </div>
-            <div class="year-item">
-                <div class="year">2024</div>
-                <div class="value">30,380</div>
-                <div class="label">Ton</div>
-            </div>
-            <div class="year-item" style="border-left-color: var(--secondary-color);">
-                <div class="year">2025</div>
-                <div class="value" style="color: var(--secondary-color);">30,745</div>
-                <div class="label">Ton (Current)</div>
-            </div>
+            <!-- Will be populated by JavaScript -->
         </div>
     </div>
 
@@ -413,19 +319,19 @@
         <table class="stat-table">
             <thead>
                 <tr>
-                     <th>No.</th>
+                    <th>No.</th>
                     <th>Wilayah</th>
                     <th>Luas Wilayah (Ha)</th>
                     <th>Total Neto</th>
                     <th>Total Gulma (T/Ha)</th>
-                    <th>Rata Rata Umur Tanaman</th>
+                    <th>Rata-rata Umur Tanaman</th>
                     <th>Total Tenaga Kerja</th>
                     <th>Tahun</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="detailStatsTable">
-                <!-- Data akan dimuat -->
+                <!-- Will be populated by JavaScript -->
             </tbody>
         </table>
     </div>
@@ -437,167 +343,179 @@
             <thead>
                 <tr>
                     <th>Kategori</th>
-                    <th>Jumlah Wilayah</th>
+                    <th>Jumlah Features</th>
                     <th>Rata-rata Produktivitas</th>
                     <th>Potensi Peningkatan</th>
                     <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Produktivitas Tinggi (>9 T/Ha)</strong></td>
-                    <td>8</td>
-                    <td class="stat-value">9.2 T/Ha</td>
-                    <td>0.8 T/Ha</td>
-                    <td><span class="trend-indicator trend-up">✓ Optimal</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Produktivitas Sedang (8-9 T/Ha)</strong></td>
-                    <td>18</td>
-                    <td class="stat-value">8.4 T/Ha</td>
-                    <td>1.6 T/Ha</td>
-                    <td><span class="trend-indicator trend-up">⚠ Dapat Ditingkatkan</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Produktivitas Rendah (<8 T/Ha)</strong></td>
-                    <td>6</td>
-                    <td class="stat-value">7.5 T/Ha</td>
-                    <td>2.5 T/Ha</td>
-                    <td><span class="trend-indicator trend-down">✕ Perlu Intervensi</span></td>
-                </tr>
+            <tbody id="productivityTable">
+                <!-- Will be populated by JavaScript -->
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- <script>
-    const wilayahStatsData = [
-        { id: 1, wilayah: 'Wilayah 16', luas: 320, neto: 2800, gulma: 8.75, umur: '3.5 tahun', tenagaKerja: 125, tahun: 2025 },
-        { id: 2, wilayah: 'Wilayah 17', luas: 250, neto: 2125, gulma: 8.5, umur: '3.2 tahun', tenagaKerja: 95, tahun: 2025 },
-        { id: 3, wilayah: 'Wilayah 18', luas: 220, neto: 1980, gulma: 9.0, umur: '4.1 tahun', tenagaKerja: 88, tahun: 2025 },
-        { id: 4, wilayah: 'Wilayah 19', luas: 280, neto: 2380, gulma: 8.5, umur: '3.8 tahun', tenagaKerja: 102, tahun: 2025 },
-        { id: 5, wilayah: 'Wilayah 20', luas: 200, neto: 1700, gulma: 8.5, umur: '3.0 tahun', tenagaKerja: 78, tahun: 2025 },
-        { id: 6, wilayah: 'Wilayah 21', luas: 180, neto: 1530, gulma: 8.5, umur: '2.8 tahun', tenagaKerja: 68, tahun: 2025 },
-        { id: 7, wilayah: 'Wilayah 22', luas: 200, neto: 1700, gulma: 8.5, umur: '3.3 tahun', tenagaKerja: 78, tahun: 2025 },
-        { id: 8, wilayah: 'Wilayah 23', luas: 190, neto: 1615, gulma: 8.5, umur: '3.1 tahun', tenagaKerja: 72, tahun: 2025 },
-    ];
-
-    function renderDetailStats() {
-        const tbody = document.getElementById('detailStatsTable');
-        tbody.innerHTML = '';
-
-        wilayahStatsData.forEach((item, index) => {
-            const row = tbody.insertRow();
-            row.innerHTML = `
-                <td><strong>${index + 1}</strong></td>
-                <td><strong>${item.wilayah}</strong></td>
-                <td class="stat-value">${item.luas.toLocaleString('id-ID')} Ha</td>
-                <td class="stat-value">${item.neto.toLocaleString('id-ID')} Ha</td>
-                <td class="stat-value">${item.gulma} T/Ha</td>
-                <td>${item.umur}</td>
-                <td>${item.tenagaKerja} Orang</td>
-                <td><strong>${item.tahun}</strong></td>
-                <td>
-                    <button class="export-btn" onclick="viewDetail(${item.id})">
-                        <i class="fas fa-eye"></i> Detail
-                    </button>
-                </td>
-            `;
-        });
-    }
-
-    function viewDetail(id) {
-        const item = wilayahStatsData.find(w => w.id === id);
-        alert(`Detail ${item.wilayah}:\n\nLuas: ${item.luas} Ha\nTotal Neto: ${item.neto} Ha\nGulma: ${item.gulma} T/Ha\nUmur Tanaman: ${item.umur}\nTenaga Kerja: ${item.tenagaKerja} Orang`);
-    }
-
-    function updateStats() {
-        const tahun = document.getElementById('filterTahun').value;
-        const bulan = document.getElementById('filterBulan').value;
-        alert(`Update statistik untuk filter yang dipilih`);
-        renderDetailStats();
-    }
-
-    function printStats() {
-        window.print();
-    }
-
-    // Initial render ketika halaman dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        renderDetailStats();
-    });
-
-    // Atau langsung render jika DOM sudah siap
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderDetailStats);
-    } else {
-        renderDetailStats();
-    }
-</script> -->
-
 <script>
-// Variables
+/* ===============================
+   STATISTIK PAGE - FIXED VERSION
+================================ */
+
 let currentPeriod = {
     tahun: null,
     bulan: null,
     minggu: null
 };
 
-// Load statistik data on page load
-async function loadStatistikData() {
+/* ===============================
+   INIT - Load data saat halaman dimuat
+================================ */
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📊 Statistik page loaded');
+    await loadAllStatistics();
+});
+
+/* ===============================
+   LOAD ALL STATISTICS
+================================ */
+async function loadAllStatistics() {
+    showLoading();
+
     try {
-        // Show loading
-        showLoading();
+        console.log('🚀 Loading statistics...');
         
-        // Load all data in parallel
+        // Build query string dari filter
+        const tahun = document.getElementById('filterTahun')?.value;
+        const bulan = document.getElementById('filterBulan')?.value;
+        const minggu = document.getElementById('filterMinggu')?.value;
+        
+        let queryParams = new URLSearchParams();
+        if (tahun) queryParams.append('tahun', tahun);
+        if (bulan) queryParams.append('bulan', bulan);
+        if (minggu) queryParams.append('minggu', minggu);
+        
+        const queryString = queryParams.toString() ? '?' + queryParams.toString() : '';
+        
+        console.log('📡 Query:', queryString);
+        
+        // Load all endpoints
         const [summaryRes, rankingRes, productivityRes, yearlyRes] = await Promise.all([
-            fetch('/api/statistik/summary'),
-            fetch('/api/statistik/ranking'),
-            fetch('/api/statistik/productivity'),
-            fetch('/api/statistik/yearly-comparison')
+            fetch(`/api/statistik/summary${queryString}`),
+            fetch(`/api/statistik/ranking${queryString}`),
+            fetch(`/api/statistik/productivity${queryString}`),
+            fetch(`/api/statistik/yearly-comparison`)
         ]);
+
+        // Check responses
+        if (!summaryRes.ok) {
+            throw new Error(`Summary API: ${summaryRes.status} ${summaryRes.statusText}`);
+        }
+        if (!rankingRes.ok) {
+            throw new Error(`Ranking API: ${rankingRes.status} ${rankingRes.statusText}`);
+        }
+        if (!productivityRes.ok) {
+            throw new Error(`Productivity API: ${productivityRes.status} ${productivityRes.statusText}`);
+        }
+        if (!yearlyRes.ok) {
+            throw new Error(`Yearly API: ${yearlyRes.status} ${yearlyRes.statusText}`);
+        }
+
+        const summary = await summaryRes.json();
+        const ranking = await rankingRes.json();
+        const productivity = await productivityRes.json();
+        const yearly = await yearlyRes.json();
+
+        console.log('📊 Summary:', summary);
+        console.log('🏆 Ranking:', ranking);
+        console.log('📈 Productivity:', productivity);
+        console.log('📅 Yearly:', yearly);
+
+        // Render sections
+        if (summary.success) {
+            renderDetailStats(summary.data);
+        } else {
+            console.error('Summary error:', summary.message);
+            showError('Summary', summary.message);
+        }
         
-        const summaryData = await summaryRes.json();
-        const rankingData = await rankingRes.json();
-        const productivityData = await productivityRes.json();
-        const yearlyData = await yearlyRes.json();
+        if (ranking.success) {
+            renderRanking(ranking.data);
+        } else {
+            console.error('Ranking error:', ranking.message);
+            showError('Ranking', ranking.message);
+        }
         
-        // Check if data loaded successfully
-        if (summaryData.success) renderDetailStats(summaryData.data);
-        if (rankingData.success) renderRanking(rankingData.data);
-        if (productivityData.success) renderProductivity(productivityData.data);
-        if (yearlyData.success) renderYearlyComparison(yearlyData.data);
+        if (productivity.success) {
+            renderProductivity(productivity.data);
+        } else {
+            console.error('Productivity error:', productivity.message);
+            showError('Productivity', productivity.message);
+        }
         
+        if (yearly.success) {
+            renderYearlyComparison(yearly.data);
+        } else {
+            console.error('Yearly error:', yearly.message);
+            showError('Yearly', yearly.message);
+        }
+
         hideLoading();
-        
-    } catch (error) {
-        console.error('Error loading statistik:', error);
-        alert('Gagal memuat data statistik: ' + error.message);
+        console.log('✅ Statistics loaded!');
+
+    } catch (err) {
+        console.error('❌ Error:', err);
+        alert('Gagal memuat statistik: ' + err.message);
         hideLoading();
     }
 }
 
-// Render detail stats table
+/* ===============================
+   UPDATE STATS WITH FILTER
+================================ */
+async function updateStats() {
+    const tahun = document.getElementById('filterTahun')?.value;
+    const bulan = document.getElementById('filterBulan')?.value;
+    const minggu = document.getElementById('filterMinggu')?.value;
+
+    console.log('🔍 Filter:', { tahun, bulan, minggu });
+    currentPeriod = { tahun, bulan, minggu };
+    
+    await loadAllStatistics();
+}
+
+/* ===============================
+   RENDER DETAIL STATS TABLE
+================================ */
 function renderDetailStats(data) {
     const tbody = document.getElementById('detailStatsTable');
-    tbody.innerHTML = '';
+    if (!tbody) return;
     
+    tbody.innerHTML = '';
+
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: #999;"><i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data tersedia</td></tr>';
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align:center; padding: 40px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3;"></i><br>
+                    <strong>Tidak ada data</strong><br>
+                    <small>Upload CSV di halaman Admin</small>
+                </td>
+            </tr>
+        `;
         return;
     }
-    
-    data.forEach((item, index) => {
+
+    data.forEach((item, i) => {
         const row = tbody.insertRow();
         row.innerHTML = `
-            <td><strong>${index + 1}</strong></td>
+            <td><strong>${i + 1}</strong></td>
             <td><strong>Wilayah ${item.wilayah_id}</strong></td>
-            <td class="stat-value">${parseFloat(item.total_luas || 0).toFixed(2)} Ha</td>
-            <td class="stat-value">${parseFloat(item.total_luas || 0).toFixed(2)} Ha</td>
+            <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
+            <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
             <td class="stat-value">${parseFloat(item.avg_hasil || 0).toFixed(2)} T/Ha</td>
             <td>${parseFloat(item.avg_umur || 0).toFixed(1)} tahun</td>
-            <td>${parseInt(item.total_tenaga_kerja || 0)} Orang</td>
-            <td><strong>2025</strong></td>
+            <td>${parseInt(item.total_tenaga_kerja || 0).toLocaleString('id-ID')} Orang</td>
+            <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
             <td>
                 <button class="export-btn" onclick="viewDetail(${item.wilayah_id})">
                     <i class="fas fa-eye"></i> Detail
@@ -607,144 +525,134 @@ function renderDetailStats(data) {
     });
 }
 
-// Render ranking bar chart
+/* ===============================
+   RENDER RANKING
+================================ */
 function renderRanking(data) {
     const container = document.querySelector('.bar-chart');
-    container.innerHTML = '';
+    if (!container) return;
     
+    container.innerHTML = '';
+
     if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;"><i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data ranking</p>';
+        container.innerHTML = '<p style="text-align:center; padding: 40px;"><i class="fas fa-chart-bar" style="font-size: 48px; opacity: 0.3;"></i><br><strong>Tidak ada data ranking</strong></p>';
         return;
     }
-    
-    // Find max value for percentage calculation
-    const maxValue = Math.max(...data.map(d => parseFloat(d.total_hasil) || 0));
-    
+
+    const max = Math.max(...data.map(d => parseFloat(d.total_hasil) || 0));
+
     data.forEach(item => {
-        const hasilValue = parseFloat(item.total_hasil) || 0;
-        const percentage = maxValue > 0 ? (hasilValue / maxValue) * 100 : 0;
-        
+        const hasil = parseFloat(item.total_hasil) || 0;
+        const percent = max > 0 ? (hasil / max) * 100 : 0;
+
         const barItem = document.createElement('div');
         barItem.className = 'bar-item';
         barItem.innerHTML = `
             <div class="bar-label">Wilayah ${item.wilayah_id}</div>
             <div class="bar-container">
-                <div class="bar-fill" style="width: ${percentage}%;">${hasilValue.toFixed(2)} Ton</div>
+                <div class="bar-fill" style="width:${percent}%">${hasil.toFixed(2)} Ton</div>
             </div>
-            <div class="bar-value">${hasilValue.toFixed(2)} T</div>
+            <div class="bar-value">${hasil.toFixed(2)} T</div>
         `;
         container.appendChild(barItem);
     });
 }
 
-// Render productivity analysis
+/* ===============================
+   RENDER PRODUCTIVITY
+================================ */
 function renderProductivity(data) {
-    const tbody = document.querySelector('.stat-section:nth-last-of-type(1) tbody');
-    
-    if (!tbody) {
-        console.error('Productivity table body not found');
-        return;
-    }
-    
+    const tbody = document.getElementById('productivityTable');
+    if (!tbody) return;
+
+    const tinggi = data.tinggi || { count: 0, avg: 0 };
+    const sedang = data.sedang || { count: 0, avg: 0 };
+    const rendah = data.rendah || { count: 0, avg: 0 };
+
     tbody.innerHTML = `
         <tr>
             <td><strong>Produktivitas Tinggi (>9 T/Ha)</strong></td>
-            <td>${data.tinggi?.count || 0}</td>
-            <td class="stat-value">${data.tinggi?.avg || 0} T/Ha</td>
-            <td>${Math.max(0, (10 - (data.tinggi?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td>${tinggi.count}</td>
+            <td class="stat-value">${parseFloat(tinggi.avg).toFixed(2)} T/Ha</td>
+            <td>${Math.max(0, 10 - tinggi.avg).toFixed(1)} T/Ha</td>
             <td><span class="trend-indicator trend-up">✓ Optimal</span></td>
         </tr>
         <tr>
             <td><strong>Produktivitas Sedang (8-9 T/Ha)</strong></td>
-            <td>${data.sedang?.count || 0}</td>
-            <td class="stat-value">${data.sedang?.avg || 0} T/Ha</td>
-            <td>${Math.max(0, (9 - (data.sedang?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td>${sedang.count}</td>
+            <td class="stat-value">${parseFloat(sedang.avg).toFixed(2)} T/Ha</td>
+            <td>${Math.max(0, 9 - sedang.avg).toFixed(1)} T/Ha</td>
             <td><span class="trend-indicator trend-up">⚠ Dapat Ditingkatkan</span></td>
         </tr>
         <tr>
             <td><strong>Produktivitas Rendah (<8 T/Ha)</strong></td>
-            <td>${data.rendah?.count || 0}</td>
-            <td class="stat-value">${data.rendah?.avg || 0} T/Ha</td>
-            <td>${Math.max(0, (8 - (data.rendah?.avg || 0))).toFixed(1)} T/Ha</td>
+            <td>${rendah.count}</td>
+            <td class="stat-value">${parseFloat(rendah.avg).toFixed(2)} T/Ha</td>
+            <td>${Math.max(0, 8 - rendah.avg).toFixed(1)} T/Ha</td>
             <td><span class="trend-indicator trend-down">✕ Perlu Intervensi</span></td>
         </tr>
     `;
 }
 
-// Render yearly comparison
+/* ===============================
+   RENDER YEARLY COMPARISON
+================================ */
 function renderYearlyComparison(data) {
     const container = document.querySelector('.year-comparison');
-    container.innerHTML = '';
+    if (!container) return;
     
+    container.innerHTML = '';
+
     if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;"><i class="fas fa-calendar" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i><br>Tidak ada data tahunan</p>';
+        container.innerHTML = '<p style="text-align:center; padding: 40px; grid-column: 1/-1;"><i class="fas fa-calendar" style="font-size: 48px; opacity: 0.3;"></i><br><strong>Tidak ada data tahunan</strong></p>';
         return;
     }
-    
-    data.forEach((item, index) => {
-        const isLatest = index === data.length - 1;
+
+    data.forEach((item, i) => {
+        const isLast = i === data.length - 1;
         const yearItem = document.createElement('div');
         yearItem.className = 'year-item';
-        if (isLatest) {
+        
+        if (isLast) {
             yearItem.style.borderLeftColor = 'var(--secondary-color)';
         }
         
+        const hasil = parseFloat(item.total_hasil || 0);
+        
         yearItem.innerHTML = `
             <div class="year">${item.tahun}</div>
-            <div class="value" ${isLatest ? 'style="color: var(--secondary-color);"' : ''}>${parseFloat(item.total_hasil || 0).toLocaleString('id-ID', {maximumFractionDigits: 2})}</div>
-            <div class="label">Ton ${isLatest ? '(Current)' : ''}</div>
+            <div class="value" ${isLast ? 'style="color: var(--secondary-color);"' : ''}>
+                ${hasil.toLocaleString('id-ID')}
+            </div>
+            <div class="label">Ton ${isLast ? '(Current)' : ''}</div>
         `;
         container.appendChild(yearItem);
     });
 }
 
-// View detail (redirect to wilayah page)
+/* ===============================
+   HELPERS
+================================ */
 function viewDetail(wilayahId) {
     window.location.href = `/wilayah?wilayah=${wilayahId}`;
 }
 
-// Update stats with filter
-async function updateStats() {
-    const tahun = document.getElementById('filterTahun').value;
-    const bulan = document.getElementById('filterBulan').value;
-    
-    if (!tahun || !bulan) {
-        alert('Pilih tahun dan bulan terlebih dahulu');
-        return;
-    }
-    
-    try {
-        showLoading();
-        
-        // Load with filters (minggu default = 1)
-        const [summaryRes, rankingRes] = await Promise.all([
-            fetch(`/api/statistik/summary?tahun=${tahun}&bulan=${bulan}&minggu=1`),
-            fetch(`/api/statistik/ranking?tahun=${tahun}&bulan=${bulan}&minggu=1`)
-        ]);
-        
-        const summaryData = await summaryRes.json();
-        const rankingData = await rankingRes.json();
-        
-        if (summaryData.success) renderDetailStats(summaryData.data);
-        if (rankingData.success) renderRanking(rankingData.data);
-        
-        hideLoading();
-    } catch (error) {
-        console.error('Error updating stats:', error);
-        alert('Gagal memuat data: ' + error.message);
-        hideLoading();
-    }
-}
-
-// Loading helpers
 function showLoading() {
     document.body.style.cursor = 'wait';
-    // Optional: show loading overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'loadingOverlay';
-    overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;';
-    overlay.innerHTML = '<div style="text-align: center;"><div class="loading" style="margin: 0 auto 20px;"></div><p style="color: var(--primary-color); font-weight: 600;">Memuat data...</p></div>';
-    document.body.appendChild(overlay);
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.remove();
+    
+    const div = document.createElement('div');
+    div.id = 'loadingOverlay';
+    div.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center;';
+    div.innerHTML = `
+        <div style="text-align: center;">
+            <div style="border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="color: var(--primary-color); font-weight: 600;">Memuat statistik...</p>
+        </div>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    `;
+    document.body.appendChild(div);
 }
 
 function hideLoading() {
@@ -753,16 +661,9 @@ function hideLoading() {
     if (overlay) overlay.remove();
 }
 
-// Load on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Loading statistik data...');
-    loadStatistikData();
-});
-
-// Backup: load if DOM already ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadStatistikData);
-} else {
-    loadStatistikData();
+function showError(section, message) {
+    console.error(`${section} error:`, message);
 }
 </script>
+
+@endsection

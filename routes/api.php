@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\ExcelDataController;
+use App\Http\Controllers\ImportLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,3 +57,7 @@ Route::get('/map-publications/latest-published', [\App\Http\Controllers\AdminCon
 Route::get('/data-gulma/by-import/{importId}', [\App\Http\Controllers\AdminController::class, 'getDataByImport'])
     ->name('api.data-gulma.by-import')
     ->withoutMiddleware('api');
+
+
+
+

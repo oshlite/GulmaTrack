@@ -29,7 +29,7 @@ Route::get('/data/excel', [ExcelDataController::class, 'getExcelData'])
 
 /*
 |--------------------------------------------------------------------------
-| API - WILAYAH (PUBLIC)
+| API - WILAYAH 
 |--------------------------------------------------------------------------
 */
 Route::prefix('api/wilayah')
@@ -43,7 +43,7 @@ Route::prefix('api/wilayah')
 
 /*
 |--------------------------------------------------------------------------
-| API - STATISTIK (PUBLIC)
+| API - STATISTIK 
 |--------------------------------------------------------------------------
 */
 Route::prefix('api/statistik')
@@ -53,6 +53,30 @@ Route::prefix('api/statistik')
         Route::get('/ranking', [GulmaController::class, 'getStatistikRanking'])->name('ranking');
         Route::get('/productivity', [GulmaController::class, 'getStatistikProductivity'])->name('productivity');
         Route::get('/yearly-comparison', [GulmaController::class, 'getYearlyComparison'])->name('yearly');
+        Route::get('/wilayah/{wilayah_id}', [GulmaController::class, 'getStatistikWilayahDetail'])->name('wilayah');
+        Route::get('/comparison', [GulmaController::class, 'getStatistikComparison'])->name('comparison');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| API - MAP PUBLICATIONS (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/map-publications')
+    ->name('api.map-publications.')
+    ->group(function () {
+        Route::get('/latest-published', [AdminController::class, 'getLatestPublished'])->name('latest-published');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| API - DATA GULMA (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/data-gulma')
+    ->name('api.data-gulma.')
+    ->group(function () {
+        Route::get('/by-import/{importId}', [AdminController::class, 'getDataByImport'])->name('by-import');
     });
 
 /*

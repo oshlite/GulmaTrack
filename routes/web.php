@@ -59,6 +59,17 @@ Route::prefix('api/statistik')
 
 /*
 |--------------------------------------------------------------------------
+| API - GALLERY (PUBLIC) - untuk popup peta
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/gallery')
+    ->name('api.gallery.')
+    ->group(function () {
+        Route::get('/category/{kategori}', [GalleryController::class, 'getByCategory'])->name('by-category');
+    });
+
+/*
+|--------------------------------------------------------------------------
 | API - MAP PUBLICATIONS (PUBLIC)
 |--------------------------------------------------------------------------
 */
@@ -120,6 +131,7 @@ Route::prefix('admin')
             Route::post('/upload', [GalleryController::class, 'upload'])->name('upload');
             Route::get('/photos', [GalleryController::class, 'getPhotos'])->name('photos');
             Route::get('/stats', [GalleryController::class, 'getStats'])->name('stats');
+            Route::post('/{id}/set-primary', [GalleryController::class, 'setPrimary'])->name('set-primary');
             Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
             Route::put('/{id}', [GalleryController::class, 'update'])->name('update');
             Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('destroy');
@@ -137,13 +149,5 @@ Route::prefix('admin')
             Route::get('/data-gulma', [GulmaController::class, 'getDataGulma'])->name('data-gulma');
             Route::get('/statistics', [GulmaController::class, 'getStatistics'])->name('statistics');
             Route::get('/kategori-colors', [AdminController::class, 'getKategoriColors'])->name('kategori-colors');
-
-            /* Gallery API */
-            Route::prefix('gallery')->name('gallery.')->group(function () {
-                Route::get('/location/{wilayah}/{lokasi}', [GalleryController::class, 'getByLocation'])
-                    ->name('by-location');
-                Route::get('/photos', [GalleryController::class, 'getPhotos'])
-                    ->name('photos');
-            });
         });
     });

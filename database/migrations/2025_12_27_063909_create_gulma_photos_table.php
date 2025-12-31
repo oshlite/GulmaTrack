@@ -9,37 +9,28 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('gulma_photos', function (Blueprint $table) {
             $table->id();
-            $table->string('wilayah_id', 10); // Wilayah 16-23
-            $table->string('lokasi'); // Kode lokasi/seksi (A1, B2, C3, dst)
-            $table->string('foto_path'); // Path file foto
-            $table->enum('status_gulma', ['bersih', 'ringan', 'sedang', 'berat']);
-            $table->date('tanggal_foto'); // Tanggal pengambilan foto
-            $table->text('deskripsi')->nullable(); // Catatan/deskripsi kondisi
-            $table->unsignedBigInteger('uploaded_by'); // User ID yang upload
-            $table->string('file_size')->nullable(); // Ukuran file
-            $table->string('mime_type')->nullable(); // image/jpeg, image/png
+            $table->enum('kategori', ['bersih', 'ringan', 'sedang', 'berat'])->index();
+            $table->string('foto_path');
+            $table->text('deskripsi')->nullable();
+            $table->unsignedBigInteger('uploaded_by');
+            $table->bigInteger('file_size')->nullable();
+            $table->string('mime_type', 100)->nullable();
+            $table->boolean('is_primary')->default(false);
             $table->timestamps();
-            $table->softDeletes(); // Soft delete untuk recovery
+            $table->softDeletes();
 
-            // Foreign key
             $table->foreign('uploaded_by')->references('id')->on('users')->onDelete('cascade');
-            
-            // Indexes untuk optimasi query
-            $table->index('wilayah_id');
-            $table->index('lokasi');
-            $table->index('status_gulma');
-            $table->index('tanggal_foto');
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('gulma_photos');
     }

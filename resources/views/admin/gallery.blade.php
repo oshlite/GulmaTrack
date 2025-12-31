@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Galeri Foto Gulma')
+@section('title', 'Galeri Foto Gulma (Berdasarkan Kategori)')
 
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
         padding-top: 0;
     }
 
-    /* Navbar Styling - Same as main navbar */
+    /* Navbar & Container - SAMA seperti sebelumnya */
     nav.admin-navbar {
         background: #128241;
         backdrop-filter: blur(100px);
@@ -55,40 +55,19 @@
         align-items: center;
         gap: 10px;
         transition: all 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .navbar-brand:hover {
-        transform: scale(1.05);
-        color: #FBA919;
     }
 
     .navbar-brand img {
         width: 85px;
         height: 60px;
         object-fit: contain;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand:hover img {
-        transform: rotate(1deg) scale(1);
-    }
-
-    .navbar-brand span {
-        color: #FBA919 !important;
     }
 
     .nav-menu {
         display: flex;
         list-style: none;
         gap: 2px;
-        flex-wrap: nowrap;
         margin: 0;
-    }
-
-    .nav-item {
-        position: relative;
-        white-space: nowrap;
     }
 
     .nav-link {
@@ -100,29 +79,6 @@
         border-radius: 6px;
         font-size: 14px;
         font-weight: 600;
-        letter-spacing: 0.3px;
-        position: relative;
-    }
-
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background-color: var(--secondary-color);
-        transition: all 0.3s ease;
-        transform: translateX(-50%);
-    }
-
-    .nav-link:hover::after,
-    .nav-link.active::after {
-        width: 80%;
-    }
-
-    .nav-link:hover {
-        color: var(--light-color);
     }
 
     .nav-link.active {
@@ -157,8 +113,6 @@
         justify-content: center;
         color: var(--primary-color);
         font-weight: 700;
-        font-family: 'Poppins', sans-serif;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .logout-btn {
@@ -171,15 +125,11 @@
         font-weight: 600;
         transition: all 0.3s ease;
         font-size: 13px;
-        font-family: 'Poppins', sans-serif;
-        letter-spacing: 0.3px;
-        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
     }
 
     .logout-btn:hover {
         background: #c0392b;
         transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
     }
 
     .admin-container {
@@ -189,19 +139,16 @@
         font-family: 'Poppins', sans-serif;
     }
 
-    /* Page Header - sama seperti dashboard */
     .page-header {
         margin-bottom: 40px;
         padding: 40px 20px 30px;
         border-bottom: 3px solid var(--primary-color);
-        animation: slideInDown 0.5s ease;
     }
 
     .page-header h1 {
         font-size: 42px;
         color: #A6CE39;
         margin-bottom: 10px;
-        font-family: 'Poppins', sans-serif;
         display: flex;
         align-items: center;
         gap: 15px;
@@ -214,14 +161,13 @@
     .page-header p {
         font-size: 16px;
         color: #666;
-        font-family: 'Poppins', sans-serif;
         margin: 0;
     }
 
     /* Stats Row */
     .stats-row {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 20px;
         margin-bottom: 30px;
     }
@@ -376,6 +322,22 @@
         min-height: 100px;
     }
 
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
     /* Preview Grid */
     .preview-grid {
         display: grid;
@@ -452,8 +414,7 @@
         letter-spacing: 0.5px;
     }
 
-    .filter-item select,
-    .filter-item input {
+    .filter-item select {
         width: 100%;
         padding: 10px 12px;
         border: 2px solid var(--border-color);
@@ -488,27 +449,47 @@
         width: 100%;
         height: 250px;
         object-fit: cover;
-        transition: transform 0.3s ease;
-        overflow: hidden;
+        position: relative;
     }
 
-    .gallery-card:hover .gallery-image {
-        transform: scale(1.1);
+    .primary-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--accent-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        z-index: 1;
     }
 
     .gallery-info {
         padding: 20px;
     }
 
-    .gallery-location {
+    .gallery-kategori {
         font-size: 18px;
         font-weight: 700;
-        color: var(--primary-color);
         margin-bottom: 8px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
+
+    .kategori-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .kategori-bersih { background: #3498db; color: white; }
+    .kategori-ringan { background: #128241; color: white; }
+    .kategori-sedang { background: #f1c40f; color: #333; }
+    .kategori-berat { background: #e74c3c; color: white; }
 
     .gallery-details {
         font-size: 13px;
@@ -523,20 +504,6 @@
         color: var(--accent-color);
         width: 16px;
     }
-
-    .status-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 10px;
-    }
-
-    .status-bersih { background: #3498db; color: white; }
-    .status-ringan { background: #128241; color: white; }
-    .status-sedang { background: #f1c40f; color: #333; }
-    .status-berat { background: #e74c3c; color: white; }
 
     /* Action Buttons */
     .action-buttons {
@@ -569,6 +536,15 @@
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
+    }
+
+    .btn-warning {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #e67e22;
     }
 
     .btn-danger {
@@ -607,6 +583,35 @@
     .btn-upload:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+    }
+
+    .alert {
+        padding: 15px 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert i {
+        font-size: 18px;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #128241;
+        border-left-color: #128241;
+    }
+
+    .alert-error {
+        background: #ffebee;
+        color: #c62828;
+        border-left-color: #c62828;
     }
 
     /* Modal */
@@ -669,62 +674,6 @@
         margin-bottom: 20px;
     }
 
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-
-    .info-item {
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    .info-label {
-        font-size: 12px;
-        color: #666;
-        font-weight: 600;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-
-    .info-value {
-        font-size: 16px;
-        color: var(--text-color);
-        font-weight: 600;
-    }
-
-    .alert {
-        padding: 15px 18px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border-left: 4px solid;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .alert i {
-        font-size: 18px;
-    }
-
-    .alert-success {
-        background: #e8f5e9;
-        color: #128241;
-        border-left-color: #128241;
-    }
-
-    .alert-error {
-        background: #ffebee;
-        color: #c62828;
-        border-left-color: #c62828;
-    }
-
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 24px;
@@ -745,10 +694,6 @@
         .filter-item {
             width: 100%;
         }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
     }
 </style>
 
@@ -756,7 +701,7 @@
 <nav class="admin-navbar">
     <div class="navbar-container">
         <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
-            <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo" class="logo-img">
+            <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo">
             <span>GulmaTrack</span>
         </a>
 
@@ -796,8 +741,8 @@
 <div class="admin-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1><i class="fas fa-images"></i> Galeri Foto Gulma</h1>
-        <p>Kelola dan dokumentasikan kondisi gulma di setiap lokasi dengan foto visual</p>
+        <h1><i class="fas fa-images"></i> Galeri Foto Gulma (Berdasarkan Kategori)</h1>
+        <p>Kelola foto visual untuk setiap kategori status gulma (Bersih, Ringan, Sedang, Berat)</p>
     </div>
 
     <!-- Success/Error Messages -->
@@ -821,25 +766,30 @@
             <div class="stat-label">Total Foto</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
-            <div class="stat-value">{{ $stats['locations_documented'] ?? 0 }}</div>
-            <div class="stat-label">Lokasi Terdokumentasi</div>
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-value">{{ $stats['bersih_count'] ?? 0 }}</div>
+            <div class="stat-label">Kategori Bersih</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
-            <div class="stat-value">{{ $stats['this_month'] ?? 0 }}</div>
-            <div class="stat-label">Upload Bulan Ini</div>
+            <div class="stat-icon"><i class="fas fa-leaf"></i></div>
+            <div class="stat-value">{{ $stats['ringan_count'] ?? 0 }}</div>
+            <div class="stat-label">Kategori Ringan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="stat-value">{{ $stats['sedang_count'] ?? 0 }}</div>
+            <div class="stat-label">Kategori Sedang</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
             <div class="stat-value">{{ $stats['berat_count'] ?? 0 }}</div>
-            <div class="stat-label">Kondisi Berat</div>
+            <div class="stat-label">Kategori Berat</div>
         </div>
     </div>
 
     <!-- Upload Section -->
     <div class="upload-section">
-        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Foto Baru</h2>
+        <h2><i class="fas fa-cloud-upload-alt"></i> Upload Foto Berdasarkan Kategori</h2>
         
         <form id="uploadForm" enctype="multipart/form-data">
             @csrf
@@ -858,37 +808,28 @@
             <div class="photo-metadata" id="metadataForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fas fa-map-pin"></i> Wilayah</label>
-                        <select name="wilayah" id="wilayah" required>
-                            <option value="">Pilih Wilayah...</option>
-                            @for($i = 16; $i <= 23; $i++)
-                                <option value="{{ $i }}">Wilayah {{ $i }}</option>
-                            @endfor
+                        <label><i class="fas fa-flag"></i> Kategori Gulma</label>
+                        <select name="kategori" id="kategori" required>
+                            <option value="">Pilih Kategori...</option>
+                            <option value="bersih">🟦 Bersih</option>
+                            <option value="ringan">🟩 Ringan</option>
+                            <option value="sedang">🟨 Sedang</option>
+                            <option value="berat">🟥 Berat</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-map-marker-alt"></i> Kode Lokasi / Seksi</label>
-                        <input type="text" name="lokasi" id="lokasi" placeholder="Contoh: A1, B2, C3..." required>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-flag"></i> Status Gulma</label>
-                        <select name="status" id="status" required>
-                            <option value="">Pilih Status...</option>
-                            <option value="bersih">Bersih</option>
-                            <option value="ringan">Ringan</option>
-                            <option value="sedang">Sedang</option>
-                            <option value="berat">Berat</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-calendar"></i> Tanggal Pengambilan</label>
-                        <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
+                        <div class="checkbox-group">
+                            <input type="checkbox" name="set_as_primary" id="setPrimary" value="1">
+                            <label for="setPrimary" style="margin: 0; cursor: pointer;">
+                                <i class="fas fa-star"></i> Jadikan Foto Utama (akan ditampilkan pertama di popup)
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fas fa-comment"></i> Deskripsi / Catatan</label>
-                        <textarea name="deskripsi" id="deskripsi" placeholder="Tambahkan catatan kondisi gulma..."></textarea>
+                        <label><i class="fas fa-comment"></i> Deskripsi / Catatan (Opsional)</label>
+                        <textarea name="deskripsi" id="deskripsi" placeholder="Tambahkan catatan kondisi gulma kategori ini..."></textarea>
                     </div>
                 </div>
                 <button type="submit" class="btn-upload">
@@ -902,54 +843,52 @@
     <!-- Filter Section -->
     <div class="filter-section">
         <div class="filter-item">
-            <label>Wilayah</label>
-            <select id="filterWilayah" onchange="filterGallery()">
-                <option value="">Semua Wilayah</option>
-                @for($i = 16; $i <= 23; $i++)
-                    <option value="{{ $i }}">Wilayah {{ $i }}</option>
-                @endfor
+            <label>Filter Kategori</label>
+            <select id="filterKategori" onchange="filterGallery()">
+                <option value="">Semua Kategori</option>
+                <option value="bersih">🟦 Bersih</option>
+                <option value="ringan">🟩 Ringan</option>
+                <option value="sedang">🟨 Sedang</option>
+                <option value="berat">🟥 Berat</option>
             </select>
-        </div>
-        <div class="filter-item">
-            <label>Status</label>
-            <select id="filterStatus" onchange="filterGallery()">
-                <option value="">Semua Status</option>
-                <option value="bersih">Bersih</option>
-                <option value="ringan">Ringan</option>
-                <option value="sedang">Sedang</option>
-                <option value="berat">Berat</option>
-            </select>
-        </div>
-        <div class="filter-item">
-            <label>Cari Lokasi</label>
-            <input type="text" id="filterSearch" placeholder="Cari kode lokasi..." oninput="filterGallery()">
         </div>
     </div>
 
     <!-- Gallery Grid -->
     <div class="gallery-grid" id="galleryGrid">
         @forelse($photos as $photo)
-            <div class="gallery-card" data-wilayah="{{ $photo->wilayah_id }}" data-status="{{ $photo->status_gulma }}" data-lokasi="{{ $photo->lokasi }}" onclick="openModal({{ $photo->id }})">
-                <div style="overflow: hidden; border-radius: 16px 16px 0 0;">
+            <div class="gallery-card" data-kategori="{{ $photo->kategori }}" onclick="openModal({{ $photo->id }})">
+                <div style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                    @if($photo->is_primary)
+                        <span class="primary-badge">⭐ FOTO UTAMA</span>
+                    @endif
                     <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image">
                 </div>
                 <div class="gallery-info">
-                    <div class="gallery-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        Wilayah {{ $photo->wilayah_id }} - {{ $photo->lokasi }}
+                    <div class="gallery-kategori">
+                        <span class="kategori-badge kategori-{{ $photo->kategori }}">
+                            {{ strtoupper($photo->kategori) }}
+                        </span>
                     </div>
                     <div class="gallery-details">
                         <i class="fas fa-calendar"></i>
-                        {{ $photo->tanggal_foto->format('d M Y') }}
+                        {{ $photo->created_at->format('d M Y') }}
                     </div>
                     <div class="gallery-details">
                         <i class="fas fa-user"></i>
                         {{ $photo->uploader->name }}
                     </div>
-                    <span class="status-badge status-{{ $photo->status_gulma }}">
-                        {{ ucfirst($photo->status_gulma) }}
-                    </span>
+                    @if($photo->deskripsi)
+                        <div class="gallery-details" style="margin-top: 10px; font-size: 12px; font-style: italic;">
+                            {{ Str::limit($photo->deskripsi, 60) }}
+                        </div>
+                    @endif
                     <div class="action-buttons">
+                        @if(!$photo->is_primary)
+                            <button class="btn btn-warning" onclick="event.stopPropagation(); setPrimary({{ $photo->id }})">
+                                <i class="fas fa-star"></i> Set Utama
+                            </button>
+                        @endif
                         <button class="btn btn-danger" onclick="event.stopPropagation(); confirmDelete({{ $photo->id }})">
                             <i class="fas fa-trash"></i> Hapus
                         </button>
@@ -960,7 +899,7 @@
             <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #999;">
                 <i class="fas fa-images" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3; color: var(--primary-color);"></i>
                 <p style="font-size: 18px; font-weight: 600;">Belum ada foto yang diupload</p>
-                <p style="font-size: 14px;">Upload foto pertama untuk mulai mendokumentasikan kondisi gulma</p>
+                <p style="font-size: 14px;">Upload foto pertama untuk setiap kategori gulma</p>
             </div>
         @endforelse
     </div>
@@ -981,28 +920,24 @@
         </button>
         <img src="" alt="Detail Foto" class="modal-image" id="modalImage">
         <div class="modal-info">
-            <h2 id="modalLocation"></h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Status Gulma</div>
-                    <div class="info-value" id="modalStatus"></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Tanggal</div>
-                    <div class="info-value" id="modalDate"></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Diupload Oleh</div>
-                    <div class="info-value" id="modalUploader"></div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Ukuran File</div>
-                    <div class="info-value" id="modalSize"></div>
-                </div>
+            <h2 id="modalKategori"></h2>
+            <div style="margin: 20px 0;">
+                <div style="font-size: 14px; color: #666; margin-bottom: 5px;"><strong>Deskripsi:</strong></div>
+                <div id="modalDesc" style="font-size: 14px;"></div>
             </div>
-            <div class="info-item" style="width: 100%; margin-top: 20px;">
-                <div class="info-label">Catatan</div>
-                <div class="info-value" id="modalDesc"></div>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <div style="flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Diupload Oleh</div>
+                    <div id="modalUploader" style="font-size: 14px; font-weight: 600;"></div>
+                </div>
+                <div style="flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Tanggal Upload</div>
+                    <div id="modalDate" style="font-size: 14px; font-weight: 600;"></div>
+                </div>
+                <div style="flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Ukuran File</div>
+                    <div id="modalSize" style="font-size: 14px; font-weight: 600;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1074,7 +1009,8 @@ function removeFile(index) {
         metadataForm.classList.remove('active');
     }
 }
-// AJAX Upload Function (Real Implementation)
+
+// AJAX Upload Function
 document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -1098,7 +1034,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
         if (data.success) {
             alert(data.message);
-            window.location.reload(); // Reload to show new photos
+            window.location.reload();
         } else {
             alert('Error: ' + (data.message || 'Upload gagal'));
         }
@@ -1109,6 +1045,34 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         uploadBtn.disabled = false;
     }
 });
+
+// Set as Primary
+async function setPrimary(id) {
+    if (!confirm('Jadikan foto ini sebagai foto utama untuk kategori ini?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/admin/gallery/${id}/set-primary`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Terjadi kesalahan: ' + error.message);
+    }
+}
 
 // AJAX Delete Function
 async function confirmDelete(id) {
@@ -1138,7 +1102,21 @@ async function confirmDelete(id) {
     }
 }
 
-// Open Modal with AJAX
+// Filter Gallery
+function filterGallery() {
+    const kategori = document.getElementById('filterKategori').value;
+    const cards = document.querySelectorAll('.gallery-card');
+    
+    cards.forEach(card => {
+        if (!kategori || card.dataset.kategori === kategori) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Open Modal
 async function openModal(id) {
     try {
         const response = await fetch(`/admin/gallery/${id}`);
@@ -1147,12 +1125,11 @@ async function openModal(id) {
         if (result.success) {
             const data = result.data;
             document.getElementById('modalImage').src = data.foto_url;
-            document.getElementById('modalLocation').textContent = `Wilayah ${data.wilayah_id} - ${data.lokasi}`;
-            document.getElementById('modalStatus').textContent = data.status_gulma.charAt(0).toUpperCase() + data.status_gulma.slice(1);
-            document.getElementById('modalDate').textContent = data.tanggal_foto;
+            document.getElementById('modalKategori').textContent = 'Kategori: ' + data.kategori.toUpperCase();
+            document.getElementById('modalDesc').textContent = data.deskripsi || 'Tidak ada deskripsi';
             document.getElementById('modalUploader').textContent = data.uploader;
+            document.getElementById('modalDate').textContent = data.uploaded_at;
             document.getElementById('modalSize').textContent = data.file_size;
-            document.getElementById('modalDesc').textContent = data.deskripsi || 'Tidak ada catatan';
 
             document.getElementById('photoModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1161,6 +1138,19 @@ async function openModal(id) {
         alert('Error loading photo: ' + error.message);
     }
 }
+
+// Close Modal
+function closeModal() {
+    document.getElementById('photoModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal on background click
+document.getElementById('photoModal').addEventListener('click', (e) => {
+    if (e.target.id === 'photoModal') {
+        closeModal();
+    }
+});
 </script>
 
 @endsection

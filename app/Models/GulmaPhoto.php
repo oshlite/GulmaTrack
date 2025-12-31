@@ -10,142 +10,88 @@ class GulmaPhoto extends Model
 {
     use SoftDeletes;
 
-    /**
-     * Table name
-     */
-    protected $table = 'gulma_photos';
-
-    /**
-     * Mass assignable fields
-     */
     protected $fillable = [
-        'wilayah_id',
-        'lokasi',
+        'kategori',
         'foto_path',
-        'status_gulma',
-        'tanggal_foto',
         'deskripsi',
         'uploaded_by',
         'file_size',
         'mime_type',
+        'is_primary'
     ];
 
-    /**
-     * Casts
-     */
     protected $casts = [
-        'tanggal_foto' => 'date',
+        'is_primary' => 'boolean',
     ];
 
-    /**
-     * ======================
-     * RELATIONSHIPS
-     * ======================
-     */
-
-    /**
-     * User who uploaded the photo
-     */
+    // Relationship
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    /**
-     * ======================
-     * ACCESSORS
-     * ======================
-     */
-
-    /**
-     * Get full photo URL
-     */
+    // Accessor untuk URL foto
     public function getFotoUrlAttribute()
     {
-        return Storage::disk('public')->url($this->foto_path);
+        return Storage::url($this->foto_path);
     }
 
-    /**
-     * Get formatted file size
-     */
+    // Accessor untuk ukuran file yang readable
     public function getFileSizeFormattedAttribute()
     {
-        if (!$this->file_size) {
-            return null;
-        }
-
-        $bytes = (int) $this->file_size;
+        if (!$this->file_size) return 'N/A';
+        
+        $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB'];
-
-        for ($i = 0; $bytes >= 1024 && $i < count($units) - 1; $i++) {
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-
+        
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
-    /**
-     * ======================
-     * QUERY SCOPES
-     * ======================
-     */
-
-    /**
-     * Filter by wilayah
-     */
-    public function scopeWilayah($query, $wilayah)
+    // Get photos by category
+    public static function getByKategori($kategori, $limit = null)
     {
-        return $query->where('wilayah_id', $wilayah);
+        $query = self::where('kategori', $kategori)
+            ->with('uploader')
+            ->orderBy('is_primary', 'desc')
+            ->orderBy('created_at', 'desc');
+        
+        if ($limit) {
+            return $query->limit($limit)->get();
+        }
+        
+        return $query->get();
     }
 
-    /**
-     * Filter by status gulma
-     */
-    public function scopeStatus($query, $status)
+    // Get primary photo for category
+    public static function getPrimaryPhoto($kategori)
     {
-        return $query->where('status_gulma', $status);
+        return self::where('kategori', $kategori)
+            ->where('is_primary', true)
+            ->first();
     }
 
-    /**
-     * Search by lokasi or deskripsi
-     */
-    public function scopeSearch($query, $keyword)
-    {
-        return $query->where(function ($q) use ($keyword) {
-            $q->where('lokasi', 'like', "%{$keyword}%")
-              ->orWhere('deskripsi', 'like', "%{$keyword}%");
-        });
-    }
-
-    /**
-     * ======================
-     * STATIC HELPERS
-     * ======================
-     */
-
-    /**
-     * Get photos by wilayah & lokasi
-     */
-    public static function getByLokasi($wilayah, $lokasi)
-    {
-        return self::where('wilayah_id', $wilayah)
-            ->where('lokasi', $lokasi)
-            ->orderBy('tanggal_foto', 'desc')
-            ->get();
-    }
-
-    /**
-     * Gallery statistics
-     */
+    // Get stats
     public static function getStats()
     {
         return [
-            'total' => self::count(),
-            'bersih' => self::where('status_gulma', 'bersih')->count(),
-            'ringan' => self::where('status_gulma', 'ringan')->count(),
-            'sedang' => self::where('status_gulma', 'sedang')->count(),
-            'berat' => self::where('status_gulma', 'berat')->count(),
-            'latest_upload' => self::latest()->first()?->created_at,
+            'total_photos' => self::count(),
+            'bersih_count' => self::where('kategori', 'bersih')->count(),
+            'ringan_count' => self::where('kategori', 'ringan')->count(),
+            'sedang_count' => self::where('kategori', 'sedang')->count(),
+            'berat_count' => self::where('kategori', 'berat')->count(),
+            'this_month' => self::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
         ];
+    }
+
+    // Scope untuk filter
+    public function scopeKategori($query, $kategori)
+    {
+        return $query->where('kategori', $kategori);
     }
 }

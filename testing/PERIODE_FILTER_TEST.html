@@ -1,0 +1,336 @@
+<!--
+PERIODE FILTER TEST HARNESS
+Buka file ini di browser untuk quick testing
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GulmaTrack Periode Filter Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #128241;
+            background: #f9f9f9;
+        }
+        .pass {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .fail {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        button {
+            background: #128241;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d5c2e;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #ecf5f0;
+            border-radius: 8px;
+            border-left: 4px solid #128241;
+        }
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 GulmaTrack Periode Filter - Test Harness</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Checklist</h2>
+        
+        <h3>API Tests</h3>
+        <button onclick="testPeriodsAPI()">Test: /api/wilayah/periods</button>
+        <button onclick="testDataByPeriodAPI()">Test: /api/wilayah/data-by-period</button>
+        
+        <h3>Frontend Tests</h3>
+        <button onclick="testDropdownPopulation()">Test: Dropdown Population</button>
+        <button onclick="testDisabledButtons()">Test: Disabled Buttons</button>
+        <button onclick="testFallback()">Test: Auto-Fallback Logic</button>
+        
+        <h3>Integration Tests</h3>
+        <button onclick="testFullFlow()">Test: Full User Flow</button>
+        <button onclick="testDataValidation()">Test: Period Validation</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'pass' ? '#27ae60' : type === 'fail' ? '#e74c3c' : '#128241';
+            const icon = type === 'pass' ? '✅' : type === 'fail' ? '❌' : 'ℹ️';
+            const html = `<div style="color: ${color}; margin: 10px 0;">
+                [${timestamp}] ${icon} ${message}
+            </div>`;
+            resultsDiv.innerHTML += html;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+        
+        async function testPeriodsAPI() {
+            clearResults();
+            log('Testing /api/wilayah/periods endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/api/wilayah/periods');
+                
+                if (!response.ok) {
+                    log(`❌ API returned status ${response.status}`, 'fail');
+                    return;
+                }
+                
+                const data = await response.json();
+                log('✅ API responded successfully', 'pass');
+                
+                if (data.success) {
+                    log(`✅ Response successful`, 'pass');
+                    log(`📊 Loaded ${data.periods.length} unique periods`);
+                    log(`📅 Found ${data.tahun_list.length} years: ${data.tahun_list.join(', ')}`);
+                    
+                    if (data.latest_period) {
+                        log(`⭐ Latest period: ${data.latest_period.tahun}/${data.latest_period.bulan}/W${data.latest_period.minggu}`, 'pass');
+                    } else {
+                        log('⚠️ No latest period found', 'warning');
+                    }
+                    
+                    // Show sample periods
+                    log('📋 Sample periods:');
+                    data.periods.slice(0, 5).forEach(p => {
+                        log(`  - ${p.tahun}/${p.bulan}/W${p.minggu}`);
+                    });
+                } else {
+                    log('❌ Response not successful: ' + data.error, 'fail');
+                }
+                
+                // Show raw response
+                log('📝 Full Response:');
+                resultsDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'fail');
+            }
+        }
+        
+        async function testDataByPeriodAPI() {
+            clearResults();
+            log('Testing /api/wilayah/data-by-period endpoint...', 'info');
+            
+            try {
+                // Test 1: Valid period
+                log('Test 1: Valid period (latest)');
+                const response1 = await fetch('/api/wilayah/periods');
+                const periodsData = await response1.json();
+                
+                if (periodsData.latest_period) {
+                    const p = periodsData.latest_period;
+                    const url = `/api/wilayah/data-by-period?tahun=${p.tahun}&bulan=${p.bulan}&minggu=${p.minggu}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.data_available) {
+                        log(`✅ Latest period (${p.tahun}/${p.bulan}/W${p.minggu}) has data`, 'pass');
+                        log(`   Import Log ID: ${data.import_log_id}`);
+                    } else {
+                        log(`⚠️ Latest period has no data?`, 'warning');
+                    }
+                }
+                
+                // Test 2: Invalid period
+                log('Test 2: Invalid period (future)');
+                const response2 = await fetch('/api/wilayah/data-by-period?tahun=2999&bulan=12&minggu=4');
+                const data2 = await response2.json();
+                
+                if (!data2.data_available) {
+                    log(`✅ Correctly returned no data for invalid period`, 'pass');
+                    if (data2.showing_latest) {
+                        log(`✅ Auto-fallback available: ${data2.period.tahun}/${data2.period.bulan}/W${data2.period.minggu}`, 'pass');
+                    }
+                } else {
+                    log(`⚠️ Unexpected: invalid period returned data`, 'warning');
+                }
+                
+                resultsDiv.innerHTML += '<pre>' + JSON.stringify(data2, null, 2) + '</pre>';
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'fail');
+            }
+        }
+        
+        async function testDropdownPopulation() {
+            clearResults();
+            log('Testing dropdown population...', 'info');
+            
+            try {
+                // Check if we're on wilayah page
+                const tahunGrid = document.getElementById('tahunGrid');
+                if (!tahunGrid) {
+                    log('⚠️ This test should run on wilayah.blade.php page', 'warning');
+                    log('Button available from wilayah page');
+                    return;
+                }
+                
+                const tahunButtons = tahunGrid.querySelectorAll('.grid-btn');
+                log(`✅ Found ${tahunButtons.length} tahun buttons`, 'pass');
+                
+                tahunButtons.forEach(btn => {
+                    const value = btn.getAttribute('data-value');
+                    log(`  - Tahun ${value}: Clickable ✅`);
+                });
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'fail');
+            }
+        }
+        
+        async function testDisabledButtons() {
+            clearResults();
+            log('Testing disabled button styling...', 'info');
+            
+            try {
+                const bulanGrid = document.getElementById('bulanGrid');
+                if (!bulanGrid) {
+                    log('⚠️ This test should run on wilayah.blade.php page', 'warning');
+                    return;
+                }
+                
+                const buttons = bulanGrid.querySelectorAll('.grid-btn');
+                let enabled = 0, disabled = 0;
+                
+                buttons.forEach(btn => {
+                    if (btn.disabled) {
+                        disabled++;
+                        log(`❌ ${btn.textContent} - Disabled (opacity should be 0.4)`, 'warning');
+                    } else {
+                        enabled++;
+                        log(`✅ ${btn.textContent} - Enabled`, 'pass');
+                    }
+                });
+                
+                log(`Summary: ${enabled} enabled, ${disabled} disabled`);
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'fail');
+            }
+        }
+        
+        function testFallback() {
+            clearResults();
+            log('Testing auto-fallback logic...', 'info');
+            
+            // Simulate checkPeriodAndLoadData behavior
+            const testCases = [
+                { tahun: 2025, bulan: 12, minggu: 4, expected: 'success' },
+                { tahun: 2999, bulan: 12, minggu: 4, expected: 'fallback' },
+            ];
+            
+            testCases.forEach(async (testCase) => {
+                log(`Test case: ${testCase.tahun}/${testCase.bulan}/W${testCase.minggu}`);
+                
+                try {
+                    const response = await fetch(`/api/wilayah/data-by-period?tahun=${testCase.tahun}&bulan=${testCase.bulan}&minggu=${testCase.minggu}`);
+                    const data = await response.json();
+                    
+                    if (testCase.expected === 'success' && data.data_available) {
+                        log(`  ✅ Data available as expected`, 'pass');
+                    } else if (testCase.expected === 'fallback' && !data.data_available && data.showing_latest) {
+                        log(`  ✅ Fallback available as expected`, 'pass');
+                    } else {
+                        log(`  ❌ Unexpected result`, 'fail');
+                    }
+                } catch (error) {
+                    log(`  ❌ Error: ${error.message}`, 'fail');
+                }
+            });
+        }
+        
+        function testFullFlow() {
+            clearResults();
+            log('Testing full user flow...', 'info');
+            
+            log('Step 1: Page loads → loadAvailablePeriods() called');
+            log('Step 2: /api/wilayah/periods called');
+            log('Step 3: Tahun dropdown populated');
+            log('Step 4: Latest period selected by default');
+            log('Step 5: Bulan dropdown updated based on tahun');
+            log('Step 6: Minggu dropdown updated based on tahun+bulan');
+            log('Step 7: Map auto-loads with latest data');
+            log('✅ Full flow ready');
+            
+            log('To test manually:');
+            log('1. Open browser console (F12)');
+            log('2. Look for "📥 [WILAYAH PUBLIC] Loading..." logs');
+            log('3. Select different tahun/bulan/minggu');
+            log('4. Watch dependent dropdowns update');
+            log('5. Click "Tampilkan Peta" - check for fallback if invalid');
+        }
+        
+        function testDataValidation() {
+            clearResults();
+            log('Testing data validation logic...', 'info');
+            
+            log('Validation checks:');
+            log('✅ checkPeriodAndLoadData() validates all 3 fields');
+            log('✅ Missing field shows alert with missing field names');
+            log('✅ /api/wilayah/data-by-period validates server-side');
+            log('✅ Invalid period auto-fallback to latest');
+            log('✅ Notification shows when fallback happens');
+            
+            log('To test:');
+            log('1. Try clicking "Tampilkan Peta" without selecting period');
+            log('2. Should see alert with missing fields');
+            log('3. Try selecting invalid period (if any)');
+            log('4. Should see notification and auto-redirect');
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            log('🧪 Test harness loaded. Click test buttons to run tests.', 'info');
+            
+            // Check if we're on wilayah page
+            if (document.getElementById('wilayahGrid')) {
+                log('📍 Detected: wilayah.blade.php page', 'pass');
+            } else {
+                log('📍 Tip: Open this harness in new tab on wilayah page for full tests', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

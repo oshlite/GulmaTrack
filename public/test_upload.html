@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload CSV</title>
+    <meta name="csrf-token" content="test_token">
+</head>
+<body>
+    <h1>Test Upload CSV</h1>
+    <form id="testForm">
+        <input type="file" id="csvFile" name="file" accept=".csv">
+        <button type="submit">Upload</button>
+    </form>
+    <pre id="response"></pre>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('csvFile').files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tahun', '2025');
+            formData.append('bulan', '1');
+            formData.append('minggu', '1');
+
+            try {
+                const res = await fetch('/admin/upload-csv', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                console.log('Status:', res.status);
+                console.log('Headers:', res.headers);
+                const text = await res.text();
+                console.log('Response text:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    document.getElementById('response').textContent = 'ERROR Parsing JSON:\n' + text;
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

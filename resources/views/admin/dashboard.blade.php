@@ -894,6 +894,98 @@
             width: 16px;
             height: 16px;
         }
+
+        /* Publication Management Styles */
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-small:active {
+            transform: translateY(0);
+        }
+
+        .file-option {
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .file-option:hover {
+            border-color: #128241;
+            background: #f0f8f5;
+        }
+
+        .file-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        #publicationModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #publicationModal > div {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #publicationModal h3 {
+            margin-top: 0;
+            color: #128241;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        #filesList {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #filesList label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
     }
 </style>
 
@@ -1219,8 +1311,124 @@
         </div>
     </div><br><br>
 
+    <!-- Tabel Manajemen Publikasi Peta -->
+    <div class="card full-width" id="publikasiTableSection">
+        <h2><i class="fas fa-globe"></i> Tampilkan Tabel Peta Publikasi</h2>
+        <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
+            📋 Kelola file CSV mana yang dipublikasi untuk setiap periode. Setiap periode hanya bisa memiliki 1 file yang dipublikasi.
+        </p>
+        
+        @php
+            // Get all import logs with their publication status
+            $publications = \App\Models\MapPublication::where('status', 'published')
+                ->with('importLog')
+                ->get()
+                ->groupBy(function($pub) {
+                    return $pub->importLog->tahun . '-' . $pub->importLog->bulan . '-' . $pub->importLog->minggu;
+                });
+            
+            $allImports = \App\Models\ImportLog::where('status', 'success')
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->orderBy('minggu', 'desc')
+                ->get()
+                ->groupBy(function($import) {
+                    return $import->tahun . '-' . $import->bulan . '-' . $import->minggu;
+                });
+        @endphp
+        
+        @if($allImports->count() > 0)
+            <div class="table-wrapper">
+                <table id="publikasiTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;"><i class="fas fa-calendar"></i> Periode</th>
+                            <th><i class="fas fa-file"></i> File Yang Dipublikasi</th>
+                            <th style="width: 100px;"><i class="fas fa-database"></i> Records</th>
+                            <th style="width: 150px;"><i class="fas fa-clock"></i> Upload</th>
+                            <th style="width: 150px;"><i class="fas fa-check-circle"></i> Publikasi</th>
+                            <th style="width: 100px;"><i class="fas fa-cog"></i> Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($allImports as $periodKey => $imports)
+                            @php
+                                [$tahun, $bulan, $minggu] = explode('-', $periodKey);
+                                $published = $publications->get($periodKey)?->first();
+                                $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                            @endphp
+                            <tr>
+                                <td style="font-weight: 600;">
+                                    {{ $tahun }}<br>
+                                    <small style="color: #666;">{{ $monthNames[$bulan] }} W{{ $minggu }}</small>
+                                </td>
+                                <td>
+                                    @if($published)
+                                        <div style="background: #e8f5e9; padding: 10px; border-radius: 6px; border-left: 4px solid #128241;">
+                                            <strong style="color: #128241;">{{ $published->importLog->nama_file }}</strong>
+                                            <br>
+                                            <small style="color: #666;">ID #{{ $published->importLog->id }}</small>
+                                        </div>
+                                    @else
+                                        <div style="background: #fff8e1; padding: 10px; border-radius: 6px; border-left: 4px solid #FBA919;">
+                                            <strong style="color: #FBA919;">⚠️ Belum ada publikasi</strong>
+                                            <br>
+                                            <small style="color: #666;">Pilih salah satu file di bawah</small>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td style="text-align: center;">
+                                    {{ $published?->importLog->jumlah_berhasil ?? '-' }}
+                                </td>
+                                <td style="font-size: 12px;">
+                                    {{ $published?->importLog->created_at?->format('d M Y H:i') ?? '-' }}
+                                </td>
+                                <td style="font-size: 12px;">
+                                    {{ $published?->published_at?->format('d M Y H:i') ?? '-' }}
+                                </td>
+                                <td style="text-align: center;">
+                                    <button onclick="openPublicationModal('{{ $periodKey }}', '{{ $tahun }}', '{{ $bulan }}', '{{ $minggu }}')" 
+                                        class="btn-small" style="padding: 6px 12px; font-size: 11px; background: #128241; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        <i class="fas fa-pencil"></i> Kelola
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>Belum ada data yang berhasil di-upload</p>
+            </div>
+        @endif
+    </div><br><br>
+
+    <!-- Modal untuk Kelola Publikasi -->
+    <div id="publicationModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <h3 id="modalTitle">Kelola Publikasi</h3>
+            <p id="modalPeriod" style="color: #666; margin-bottom: 20px;"></p>
+            
+            <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+                <label style="font-weight: 600; margin-bottom: 10px; display: block;">Pilih File untuk Dipublikasi:</label>
+                <div id="filesList"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closePublicationModal()" style="padding: 10px 20px; background: #E74C3C; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Batal
+                </button>
+                <button onclick="updatePublication()" style="padding: 10px 20px; background: #128241; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Uploads -->
-    <div class="card full-width">
+    <div class="card full-width" id="riwayatUploadSection">
         <h2><i class="fas fa-history"></i> Riwayat Upload</h2>
         
         
@@ -1254,7 +1462,7 @@
                     <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Tahun
                     </label>
-                    <select name="tahun" id="filterTahun" onchange="document.getElementById('filterForm').submit()" 
+                    <select name="tahun" id="filterTahun" 
                         style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Tahun</option>
                         @php
@@ -1271,7 +1479,7 @@
                     <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Bulan
                     </label>
-                    <select name="bulan" id="filterBulan" onchange="document.getElementById('filterForm').submit()" 
+                    <select name="bulan" id="filterBulan" 
                         style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Bulan</option>
                         @for($i = 1; $i <= 12; $i++)
@@ -1288,7 +1496,7 @@
                     <label style="display: block; font-size: 10px; font-weight: 600; color: #666; margin-bottom: 4px; font-family: 'Poppins'; text-transform: uppercase;">
                         <i class="fas fa-calendar-week" style="color: var(--accent-color);"></i> Minggu
                     </label>
-                    <select name="minggu" id="filterMinggu" onchange="document.getElementById('filterForm').submit()" 
+                    <select name="minggu" id="filterMinggu" 
                         style="width: 100%; padding: 10px 14px; border: 2px solid #ecf0f1; border-radius: 10px; font-size: 13px; font-family: 'Poppins'; font-weight: 600; background: white; cursor: pointer; color: #128241; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.1); transition: all 0.3s ease;">
                         <option value="">Semua Minggu</option>
                         @for($i = 1; $i <= 4; $i++)
@@ -1298,7 +1506,7 @@
                 </div>
                 
                 <!-- Search Button -->
-                <button type="submit" 
+                <button type="submit" id="searchFilterBtn"
                     style="padding: 12px 20px; background: linear-gradient(135deg, #128241, #2ecc71); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'Poppins'; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(18, 130, 65, 0.3); margin-top: 18px;"
                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.4)'"
                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(18, 130, 65, 0.3)'">
@@ -1390,7 +1598,7 @@
                                             style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
                                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
                                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                        <i class="fas fa-map"></i> Peta
+                                        <i class="fas fa-map"></i> Lihat Peta
                                     </button>
                                 </td>
                             `;
@@ -1450,19 +1658,58 @@
                         }
                     }
 
-                    // Search functionality
-                    document.getElementById('tableSearchInput').addEventListener('keyup', function() {
-                        const searchTerm = this.value.toLowerCase();
-                        filteredData = allTableData.filter(item => {
-                            const searchStr = `${item.id} ${item.nama_file} ${item.tahun} ${monthNames[item.bulan]} ${item.minggu} ${item.jumlah_records} ${item.status} ${item.created_at}`.toLowerCase();
-                            return searchStr.includes(searchTerm);
-                        });
-                        currentPage = 1;
-                        renderTable();
-                    });
+                    // COMMENTED OUT: Real-time search functionality
+                    // Now search only works when clicking the "Cari" button via form submission
+                    // document.getElementById('tableSearchInput').addEventListener('keyup', function() {
+                    //     const searchTerm = this.value.toLowerCase();
+                    //     filteredData = allTableData.filter(item => {
+                    //         const searchStr = `${item.id} ${item.nama_file} ${item.tahun} ${monthNames[item.bulan]} ${item.minggu} ${item.jumlah_records} ${item.status} ${item.created_at}`.toLowerCase();
+                    //         return searchStr.includes(searchTerm);
+                    //     });
+                    //     currentPage = 1;
+                    //     renderTable();
+                    // });
 
                     // Initial render
                     renderTable();
+                    
+                    // Function to apply client-side search filter
+                    function applySearchFilter() {
+                        const searchTerm = document.getElementById('tableSearchInput')?.value?.toLowerCase() || '';
+                        
+                        if (!searchTerm) {
+                            // If no search term, use all data
+                            filteredData = allTableData;
+                        } else {
+                            // Filter data based on search term
+                            filteredData = allTableData.filter(item => {
+                                const searchStr = `${item.id} ${item.nama_file} ${item.tahun} ${monthNames[item.bulan]} ${item.minggu} ${item.jumlah_records} ${item.status} ${item.created_at}`.toLowerCase();
+                                return searchStr.includes(searchTerm);
+                            });
+                        }
+                        
+                        currentPage = 1;
+                        renderTable();
+                    }
+                    
+                    // Handle filter form submission - Apply search and scroll to riwayat section
+                    const filterForm = document.getElementById('filterForm');
+                    if (filterForm) {
+                        filterForm.addEventListener('submit', function(e) {
+                            // e.preventDefault(); // Don't prevent default - let form submit for server-side filtering
+                            
+                            // Apply client-side search BEFORE form submission
+                            applySearchFilter();
+                            
+                            // Schedule scroll after form reload
+                            setTimeout(() => {
+                                const riwayatSection = document.getElementById('riwayatUploadSection');
+                                if (riwayatSection) {
+                                    riwayatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            }, 100);
+                        });
+                    }
                 </script>
             </div>
         @else
@@ -1553,21 +1800,53 @@
                 loadingDiv.style.display = 'block';
             }
             
-            // LANGSUNG LOAD SEMUA WILAYAH (admin always sees latest data)
-            console.log('📥 [DASHBOARD] LANGSUNG MEMUAT SEMUA DATA GULMA...');
-            loadAllWilayah();
+            // PENTING: LOAD DATA DARI PUBLISHED MAP TERLEBIH DAHULU
+            // Jika ada published map, tampilkan itu. Jika tidak, tampilkan latest upload
+            console.log('📥 [DASHBOARD] MEMUAT DATA DARI PUBLISHED MAP...');
+            loadPublishedMapOrLatestUpload();
         } catch (error) {
             console.error('❌ [DASHBOARD] Error initializing map:', error);
         }
     }
 
-    // Load latest published data on map
-    async function loadLatestPublishedData() {
-        console.log('🗺️  === [DASHBOARD] Loading latest published data ===');
+    // Load published map or fallback to latest uploaded data
+    async function loadPublishedMapOrLatestUpload() {
+        console.log('🗺️  === [DASHBOARD] Loading published map or latest upload ===');
 
         try {
-            // Get latest published import log
-            const response = await fetch('/api/map-publications/latest-published');
+            // Check apakah ada published map
+            const pubResponse = await fetch('/api/publication-status');
+            if (pubResponse.ok) {
+                const pubData = await pubResponse.json();
+                if (pubData.is_published && pubData.import_log && pubData.import_log.id) {
+                    console.log('✅ [DASHBOARD] Found published map with import_id:', pubData.import_log.id);
+                    await loadDataForImport(
+                        pubData.import_log.id,
+                        pubData.import_log.tahun,
+                        pubData.import_log.bulan,
+                        pubData.import_log.minggu
+                    );
+                    return;
+                }
+            }
+            
+            // Fallback: load latest uploaded
+            console.log('⚠️  [DASHBOARD] No published map found, loading latest upload...');
+            loadLatestUploadedData();
+        } catch (error) {
+            console.error('❌ [DASHBOARD] Error loading published map:', error);
+            console.log('🔄 [DASHBOARD] Fallback: loading latest upload...');
+            loadLatestUploadedData();
+        }
+    }
+
+    // Load latest uploaded data on map (CSV terakhir diupload, BUKAN publikasi)
+    async function loadLatestUploadedData() {
+        console.log('🗺️  === [DASHBOARD] Loading latest uploaded data ===');
+
+        try {
+            // Get latest import log - coba endpoint yang berbeda
+            let response = await fetch('/api/import-logs');
             console.log('📡 [DASHBOARD] API response status:', response.status);
             
             if (!response.ok) {
@@ -1576,36 +1855,59 @@
                 return;
             }
 
-            const publication = await response.json();
-            console.log('📊 [DASHBOARD] Latest publication:', publication);
-
-            if (publication.success === false) {
-                console.log('⚠️  [DASHBOARD] No published data (API returned success: false), loading all wilayah');
+            // Check if response is actually JSON (not HTML error page)
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('⚠️  [DASHBOARD] API returned non-JSON response:', contentType);
+                console.log('🔄 [DASHBOARD] Fallback: loading all wilayah...');
                 loadAllWilayah();
                 return;
             }
 
-            if (publication.import_id) {
-                // Load data from specific import
-                console.log('✅ [DASHBOARD] Loading published data with import_id:', publication.import_id);
-                await loadDataFromImport(publication.import_id, publication.tahun, publication.bulan, publication.minggu);
+            const data = await response.json();
+            console.log('📊 [DASHBOARD] Latest import log response:', data);
+
+            // Handle both array and paginated response
+            let latestImport = null;
+            if (Array.isArray(data)) {
+                latestImport = data[0]; // First element if array
+            } else if (data.data && Array.isArray(data.data)) {
+                latestImport = data.data[0]; // First element of data property
             } else {
-                // Fallback to load all wilayah
-                console.log('⚠️  [DASHBOARD] No import_id in publication, loading all wilayah');
+                console.warn('⚠️  [DASHBOARD] Unexpected response format:', typeof data);
                 loadAllWilayah();
+                return;
             }
+
+            if (!latestImport || !latestImport.id) {
+                console.log('⚠️  [DASHBOARD] No uploaded data found, loading all wilayah');
+                loadAllWilayah();
+                return;
+            }
+
+            // Load data from latest uploaded import
+            console.log('✅ [DASHBOARD] Loading latest uploaded data with import_id:', latestImport.id);
+            await loadDataFromImportForDashboard(latestImport);
         } catch (error) {
-            console.error('❌ [DASHBOARD] Error loading latest published data:', error);
-            showMapError('Gagal memuat data publikasi. Error: ' + error.message);
+            console.error('❌ [DASHBOARD] Error loading latest uploaded data:', error);
+            console.error('Error details:', error.message);
+            showMapError('Gagal memuat data terakhir. Loading all wilayah instead...');
             // Fallback to load all wilayah
             console.log('🔄 [DASHBOARD] Fallback: loading all wilayah...');
             setTimeout(() => loadAllWilayah(), 1000);
         }
     }
 
-    // Load data from specific import
-    async function loadDataFromImport(importId, tahun, bulan, minggu) {
-        console.log(`🚀 [DASHBOARD] Loading data from import ${importId}: ${tahun}/${bulan}/w${minggu}`);
+    // Load data from specific import for dashboard
+    async function loadDataFromImportForDashboard(importLog) {
+        await loadDataForImport(importLog.id, importLog.tahun, importLog.bulan, importLog.minggu);
+    }
+
+    // Generic function to load data for any import ID
+    async function loadDataForImport(importId, tahun, bulan, minggu) {
+        const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        
+        console.log(`🚀 Loading data for import ${importId}: ${tahun}/${bulan}/w${minggu}`);
         
         try {
             const response = await fetch(`/api/data-gulma/by-import/${importId}`);
@@ -1614,45 +1916,44 @@
             }
             const data = await response.json();
             
-            console.log('📦 [DASHBOARD] Raw API response data count:', Array.isArray(data) ? data.length : 'Not array');
-            
             // Handle array or object response
-            const dataArray = Array.isArray(data) ? data : (data.data || data);
-            console.log(`📊 [DASHBOARD] Loaded ${dataArray.length} records from import ${importId}`);
+            const dataArray = Array.isArray(data) ? data : (data.data || []);
+            console.log(`📊 Loaded ${dataArray.length} records from import ${importId}`);
             
             if (dataArray.length === 0) {
-                console.log('⚠️  [DASHBOARD] No data found, loading all wilayah');
-                showMapError('Data publikasi kosong, menampilkan semua wilayah');
-                setTimeout(() => loadAllWilayah(), 500);
+                console.log('⚠️  No data found in import');
+                loadAllWilayah();
                 return;
             }
 
-            // Group by wilayah
+            // Get unique wilayah from data
+            const wilayahSet = new Set(dataArray.map(r => r.wilayah_id || r.wilayah));
+            const wilayahNumbers = Array.from(wilayahSet);
+
+            // Group data by wilayah
             const byWilayah = {};
             dataArray.forEach(record => {
                 const wilayahId = record.wilayah_id || record.wilayah;
-                if (!byWilayah[wilayahId]) {
-                    byWilayah[wilayahId] = [];
-                }
+                if (!byWilayah[wilayahId]) byWilayah[wilayahId] = [];
                 byWilayah[wilayahId].push(record);
             });
 
+            // Clear existing layers
+            Object.keys(geoJsonLayers).forEach(key => {
+                if (geoJsonLayers[key]) {
+                    map.removeLayer(geoJsonLayers[key]);
+                }
+            });
+            geoJsonLayers = {};
+
             // Load each wilayah's geojson and merge with data
-            const wilayahNumbers = Object.keys(byWilayah);
             const allBounds = [];
             let featuresAdded = 0;
 
             for (const wilayahNum of wilayahNumbers) {
                 try {
-                    const geoResponse = await fetch(`/api/wilayah/geojson/${wilayahNum}?admin=1`, {
-                        headers: {
-                            'X-Admin-Request': '1'
-                        }
-                    });
-                    if (!geoResponse.ok) {
-                        console.error(`Failed to fetch wilayah ${wilayahNum}: status ${geoResponse.status}`);
-                        continue;
-                    }
+                    const geoResponse = await fetch(`/api/wilayah/geojson/${wilayahNum}?admin=1`);
+                    if (!geoResponse.ok) continue;
                     const geojson = await geoResponse.json();
                     
                     // Merge data dengan geojson
@@ -1660,9 +1961,7 @@
                     geojson.features.forEach(feature => {
                         const seksi = feature.properties.seksi || feature.properties.Seksi || feature.properties.SEKSI;
                         const matchingRecord = dataRecords.find(r => r.seksi === seksi);
-                        
                         if (matchingRecord) {
-                            // Merge data from CSV
                             feature.properties = {
                                 ...feature.properties,
                                 ...matchingRecord,
@@ -1714,25 +2013,31 @@
                 map.fitBounds(combinedBounds, { padding: [50, 50] });
             }
 
-            console.log(`✓ Loaded published data: ${featuresAdded} features from ${wilayahNumbers.length} wilayah`);
+            // Update period display
+            const display = document.getElementById('dataPeriodDisplay');
+            const periodText = document.getElementById('periodText');
+            if (tahun && bulan && minggu) {
+                periodText.textContent = `Menampilkan Data - Tahun ${tahun}, ${monthNames[bulan]}, Minggu ke-${minggu} [#${importId}]`;
+            } else {
+                periodText.textContent = `Data [Import #${importId}]`;
+            }
+            display.style.display = 'block';
             
-            // Hide loading indicator and error
+            console.log(`✓ Loaded ${featuresAdded} features from ${wilayahNumbers.length} wilayah`);
+            
+            // Hide loading indicator
+            const loadingDiv = document.getElementById('mapLoadingIndicator');
+            if (loadingDiv) loadingDiv.style.display = 'none';
             hideMapError();
-            const loadingDiv = document.getElementById('mapLoadingIndicator');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
         } catch (error) {
-            console.error('Error loading data from import:', error);
+            console.error('Error loading data:', error);
             showMapError('Error: ' + error.message);
-            // Hide loading indicator on error
             const loadingDiv = document.getElementById('mapLoadingIndicator');
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
+            if (loadingDiv) loadingDiv.style.display = 'none';
             loadAllWilayah();
         }
     }
+
 
     // Load all wilayah with data from database
     function loadAllWilayah() {
@@ -2004,44 +2309,50 @@
     function fetchImportHistory() {
         console.log('Fetching latest import history...');
         
-        // Create a simple request to get fresh HTML and update table
-        const filters = new URLSearchParams();
+        // Get filter values
         const tahun = document.getElementById('filterTahun')?.value;
         const bulan = document.getElementById('filterBulan')?.value;
         const minggu = document.getElementById('filterMinggu')?.value;
         
-        if (tahun) filters.append('tahun', tahun);
-        if (bulan) filters.append('bulan', bulan);
-        if (minggu) filters.append('minggu', minggu);
+        // Build API URL with filters
+        let apiUrl = '/api/import-logs';
+        const params = new URLSearchParams();
+        if (tahun) params.append('tahun', tahun);
+        if (bulan) params.append('bulan', bulan);
+        if (minggu) params.append('minggu', minggu);
         
-        fetch('{{ route("admin.dashboard") }}?' + filters.toString())
-            .then(response => response.text())
-            .then(html => {
-                // Parse table data from response - look for JavaScript variable
-                const match = html.match(/let allTableData = (\[[\s\S]*?\]);/);
-                if (match && match[1]) {
-                    try {
-                        const newData = JSON.parse(match[1]);
-                        allTableData = newData;
-                        console.log('✓ Updated import history with', allTableData.length, 'records');
-                        
-                        // Re-render table
-                        currentPage = 1;
-                        renderTable();
-                        
-                        // Update stats
-                        document.getElementById('statUploadTerbaru').textContent = allTableData.length;
-                    } catch (e) {
-                        console.error('Failed to parse table data:', e);
-                        // Fallback: just reload the page
-                        window.location.reload();
-                    }
+        if (params.toString()) {
+            apiUrl += '?' + params.toString();
+        }
+        
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log('✓ Fetched import history from API:', data);
+                
+                // Update allTableData dengan response
+                if (Array.isArray(data)) {
+                    allTableData = data;
+                } else if (data.data && Array.isArray(data.data)) {
+                    allTableData = data.data;
+                } else {
+                    console.warn('Unexpected data format from API');
+                    return;
                 }
+                
+                console.log('✓ Updated import history with', allTableData.length, 'records');
+                
+                // Re-render table
+                currentPage = 1;
+                renderTable();
+                
+                // Update stats
+                document.getElementById('statUploadTerbaru').textContent = allTableData.length;
             })
             .catch(error => {
                 console.error('Error fetching import history:', error);
-                // Fallback: reload page if network error
-                window.location.reload();
+                // Don't reload page, just show warning in console
+                console.warn('⚠️ Failed to update table automatically, you may need to refresh');
             });
     }
 
@@ -2090,17 +2401,19 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
                 }
             });
 
             if (res.ok) {
                 const data = await res.json();
                 const fileName = file.name;
-                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}<br><small style="font-size: 12px; opacity: 0.9;">File: ${fileName}</small>`;
+                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
                 messageDiv.className = 'message show success';
                 
-                console.log('✓ Upload berhasil, mulai reload peta...');
+                console.log('✓ Upload berhasil');
+                console.log('📊 Import Log ID:', data.import_log_id);
                 
                 // Clear form
                 document.getElementById('csvFile').value = '';
@@ -2110,13 +2423,13 @@
                 document.getElementById('uploadBtn').style.opacity = '0.5';
                 document.getElementById('uploadBtn').style.cursor = 'not-allowed';
                 
-                // Update statistics
-                console.log('✓ Update statistics...');
-                updateStatistics();
+                // PENTING: Update statistics LANGSUNG dari data upload (temporary)
+                console.log('✓ Update statistics dari upload baru...');
+                document.getElementById('statTotalData').textContent = data.berhasil;
                 
-                // Reload map with new data IMMEDIATELY
-                if (map) {
-                    console.log('✓ Clear existing layers...');
+                // PENTING: Load peta dengan data dari import_log_id baru
+                console.log('✓ Load peta dengan data dari upload baru...');
+                if (map && data.import_log_id) {
                     // Clear existing layers
                     Object.keys(geoJsonLayers).forEach(key => {
                         if (geoJsonLayers[key]) {
@@ -2131,16 +2444,26 @@
                         loadingDiv.style.display = 'block';
                     }
                     
-                    // Reload all wilayah with new data immediately
-                    console.log('✓ Reload all wilayah with NEW data...');
-                    loadAllWilayah();
+                    // Load data dari import_log_id baru (TEMP DATA)
+                    console.log('✓ Loading temp data dari import_log_id:', data.import_log_id);
+                    await loadImportDataOnMap(data.import_log_id, data.wilayah_id, tahun, bulan, minggu);
+                    
+                    // Hide loading indicator
+                    if (loadingDiv) {
+                        loadingDiv.style.display = 'none';
+                    }
                 } else {
-                    console.error('❌ Map tidak ditemukan!');
+                    console.error('❌ Map tidak ditemukan atau import_log_id tidak ada!');
                 }
                 
-                // Refresh table data immediately
-                console.log('✓ Refreshing import history table...');
+                // Refresh table history
+                console.log('✓ Refresh import history table...');
                 fetchImportHistory();
+                
+                // Scroll to map untuk lihat hasil
+                setTimeout(() => {
+                    document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
                 
             } else {
                 const errorData = await res.json();
@@ -2324,9 +2647,9 @@
         // Step 2: Load publication status
         loadPublicationStatus();
         
-        // Step 3: PENTING - Load peta gulma LANGSUNG setelah map initialized
-        // Data akan dimuat otomatis oleh loadLatestPublishedData() yang dipanggil di dalam initMap()
-        console.log('✅ Map initialization complete - data will load automatically');
+        // Step 3: Map data loading langsung dari initMap()
+        // loadLatestUploadedData() dipanggil dari dalam initMap() dan menampilkan CSV terbaru
+        console.log('✅ Map initialization complete - data will load automatically from latest upload');
     }, 200);
 
     // Update statistics
@@ -2378,20 +2701,40 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
         try {
+            console.log('📤 Publishing map to public...');
+
             const res = await fetch('{{ route("admin.publish-map") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
-                }
+                },
+                body: JSON.stringify({})
             });
 
             const data = await res.json();
 
             if (data.success) {
-                // Show success message
+                console.log('✅ Map published successfully');
+                console.log('   File:', data.nama_file);
+                console.log('   Period:', data.tahun + '/' + data.bulan + '/W' + data.minggu);
+                console.log('   Import ID:', data.import_id);
+                
+                // PENTING: Clear all existing layers sebelum load data baru
+                Object.keys(geoJsonLayers).forEach(key => {
+                    if (geoJsonLayers[key]) {
+                        map.removeLayer(geoJsonLayers[key]);
+                    }
+                });
+                geoJsonLayers = {};
+                
+                // Reload all wilayah dengan import_id yang baru dipublish
+                loadAllWilayahWithImportId(data.import_id);
+                
+                // Show success message dengan detail file
                 const statusDiv = document.getElementById('publishStatus');
-                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ${data.message}`;
+                const detailText = `${data.nama_file} (${data.tahun}/${data.bulan}/W${data.minggu})`;
+                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ✅ ${data.message} | ${detailText}`;
                 statusDiv.style.color = '#128241';
                 
                 // Update button
@@ -2404,13 +2747,138 @@
                     loadPublicationStatus();
                 }, 3000);
             } else {
-                alert('Error: ' + data.message);
+                console.error('❌ Publish failed:', data.message);
+                alert('❌ ' + data.message + '\n\n💡 Pastikan Anda sudah upload CSV dan status menjadi "SUCCESS" terlebih dahulu.');
+                btn.innerHTML = originalHtml;
+                btn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                btn.disabled = false;
             }
         } catch (error) {
-            alert('Terjadi kesalahan: ' + error.message);
-        } finally {
+            console.error('❌ Network error:', error);
+            alert('⚠️  Terjadi kesalahan: ' + error.message + '\n\n💡 Periksa console (F12) untuk detail error.');
+            btn.innerHTML = originalHtml;
+            btn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
             btn.disabled = false;
         }
+    }
+
+    // Load all wilayah with specific import_id
+    function loadAllWilayahWithImportId(importId) {
+        console.log('🌍 === [DASHBOARD] Loading all wilayah with import_id:', importId);
+        hideMapError();
+
+        // Load semua wilayah 16-23 dengan import_id spesifik
+        const wilayahNumbers = [16, 17, 18, 19, 20, 21, 22, 23];
+        console.log('✅ [DASHBOARD] Loading wilayah:', wilayahNumbers);
+        
+        // Load each wilayah dengan import_id
+        const promises = wilayahNumbers.map(num => {
+            // Add cache-busting parameter to ensure fresh data
+            const timestamp = new Date().getTime();
+            const url = `/api/wilayah/geojson/${num}?admin=1&import_id=${importId}&_t=${timestamp}`;
+            console.log(`📡 Fetching wilayah ${num} with import_id ${importId} (cache-bust: ${timestamp})`);
+            return fetch(url, {
+                headers: {
+                    'X-Admin-Request': '1',
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            })
+                .then(r => {
+                    console.log(`📥 Response for wilayah ${num}: status ${r.status}`);
+                    if (!r.ok) {
+                        console.warn(`HTTP ${r.status} for wilayah ${num}`);
+                        return { wilayah: num, data: { type: 'FeatureCollection', features: [] } };
+                    }
+                    return r.json().then(data => {
+                        console.log(`✅ Wilayah ${num} received ${data.features?.length || 0} features`);
+                        return { wilayah: num, data };
+                    });
+                })
+                .catch(err => {
+                    console.error(`Error loading wilayah ${num}:`, err);
+                    return { wilayah: num, data: { type: 'FeatureCollection', features: [] } };
+                });
+        });
+
+        Promise.all(promises)
+            .then(results => {
+                console.log(`Processing ${results.length} wilayah results...`);
+                const allBounds = [];
+                let featuresAdded = 0;
+                let wilayahWithData = 0;
+
+                results.forEach(result => {
+                    if (!result || !result.data || !result.data.features) {
+                        console.warn(`Wilayah ${result?.wilayah}: no features`);
+                        return;
+                    }
+                    
+                    const { wilayah, data } = result;
+                    const featureCount = data.features.length;
+                    
+                    if (featureCount === 0) {
+                        console.log(`Wilayah ${wilayah}: 0 features (empty GeoJSON)`);
+                        return;
+                    }
+
+                    console.log(`🗺️ Adding wilayah ${wilayah} to map with ${featureCount} features`);
+                    
+                    // Count how many features have kategori data
+                    let withKategori = 0;
+                    data.features.forEach(f => {
+                        if (f.properties && f.properties.kategori) withKategori++;
+                    });
+                    console.log(`  - ${withKategori} features have kategori data`);
+
+                    const layer = L.geoJSON(data, {
+                        style: function(feature) {
+                            return getFeatureStyle(feature);
+                        },
+                        onEachFeature: function(feature, layer) {
+                            if (feature.properties) {
+                                layer.bindPopup(createPopupContent(feature.properties), {
+                                    maxWidth: 300
+                                });
+                                
+                                layer.on('mouseover', function() {
+                                    this.setStyle({ weight: 3, opacity: 1 });
+                                });
+                                
+                                layer.on('mouseout', function() {
+                                    this.setStyle({ weight: 2, opacity: 0.9 });
+                                });
+                            }
+                        }
+                    }).addTo(map);
+
+                    geoJsonLayers[wilayah] = layer;
+                    featuresAdded += featureCount;
+                    wilayahWithData++;
+
+                    // Get bounds from layer
+                    if (layer.getBounds) {
+                        allBounds.push(layer.getBounds());
+                    }
+                });
+
+                console.log(`✅ Total features added: ${featuresAdded} from ${wilayahWithData} wilayah`);
+                
+                // Fit bounds if we have data
+                if (allBounds.length > 0) {
+                    const allBoundsTogether = allBounds.reduce((acc, bounds) => {
+                        return acc.extend(bounds);
+                    });
+                    map.fitBounds(allBoundsTogether, { padding: [50, 50] });
+                    console.log('✅ Map fitted to bounds');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading wilayah:', error);
+                showMapError('Gagal memuat data wilayah: ' + error.message);
+            });
     }
 
     // Filter by status - Consistent with wilayah.blade (reload with filter)
@@ -2450,6 +2918,10 @@
                 const bulan = row.getAttribute('data-bulan');
                 const minggu = row.getAttribute('data-minggu');
                 loadImportDataOnMap(currentLoadedImportId, wilayahIds, tahun, bulan, minggu);
+            } else {
+                // Row not found, just filter current layers
+                console.log('⚠️ [FILTER] Row not found for import', currentLoadedImportId, 'filtering current layers instead');
+                filterCurrentMapLayers(status);
             }
         } else {
             // If no specific import loaded, filter the current map layers
@@ -2544,14 +3016,66 @@
         geoJsonLayers = {};
         
         try {
-            // Parse wilayah IDs
-            const wilayahArray = wilayahIds.split(',').map(id => id.trim());
+            // Fetch data from import to get actual wilayah IDs
+            console.log(`📥 Fetching data from import ${importId}...`);
+            const dataResponse = await fetch(`/api/data-gulma/by-import/${importId}`);
+            
+            if (!dataResponse.ok) {
+                throw new Error(`Failed to fetch data from import: ${dataResponse.status}`);
+            }
+            
+            const responseData = await dataResponse.json();
+            console.log('📥 API Response full:', responseData);
+            console.log('📥 Response type:', typeof responseData);
+            console.log('📥 Is array:', Array.isArray(responseData));
+            console.log('📥 Has data key:', responseData.data ? 'YES' : 'NO');
+            
+            // Handle both array response and object response with 'data' key
+            let dataList = [];
+            if (Array.isArray(responseData)) {
+                console.log('✅ Response is array directly');
+                dataList = responseData;
+            } else if (responseData && responseData.data) {
+                if (Array.isArray(responseData.data)) {
+                    console.log('✅ Response has .data array');
+                    dataList = responseData.data;
+                } else {
+                    console.warn('⚠️ Response.data exists but not an array:', typeof responseData.data);
+                    dataList = [];
+                }
+            } else if (responseData && typeof responseData === 'object') {
+                console.warn('⚠️ Response is object but no .data key. Keys:', Object.keys(responseData));
+                dataList = [];
+            }
+            
+            console.log(`📊 Got ${dataList.length} records from import`);
+            
+            if (dataList.length === 0) {
+                showMapError('Data import kosong, tidak ada yang ditampilkan');
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                return;
+            }
+            
+            // Get unique wilayah IDs dari data
+            const wilayahSet = new Set(dataList.map(r => r.wilayah_id || r.wilayah));
+            const wilayahArray = Array.from(wilayahSet).sort();
+            
             console.log('📦 Loading wilayah:', wilayahArray);
             
-            // Load each wilayah - NO PERIOD FILTER, just admin flag
-            // The API will automatically use latest data for admin
+            // Group data by wilayah untuk merge nanti
+            const dataByWilayah = {};
+            dataList.forEach(record => {
+                const wId = record.wilayah_id || record.wilayah;
+                if (!dataByWilayah[wId]) {
+                    dataByWilayah[wId] = [];
+                }
+                dataByWilayah[wId].push(record);
+            });
+            
+            // Load each wilayah - Pass importId to API
             const promises = wilayahArray.map(wilayahNum => {
-                const url = `/api/wilayah/geojson/${wilayahNum}?admin=1`;
+                const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}`;
+                console.log(`🌐 Fetching: ${url}`);
                 
                 return fetch(url, {
                     headers: {
@@ -2564,7 +3088,23 @@
                         }
                         return r.json();
                     })
-                    .then(data => ({ wilayah: wilayahNum, data }))
+                    .then(geojson => {
+                        // Merge data dengan geojson
+                        const records = dataByWilayah[wilayahNum] || [];
+                        geojson.features.forEach(feature => {
+                            const seksi = feature.properties.seksi || feature.properties.Seksi || feature.properties.SEKSI;
+                            const matchingRecord = records.find(r => r.seksi === seksi);
+                            if (matchingRecord) {
+                                feature.properties = {
+                                    ...feature.properties,
+                                    ...matchingRecord,
+                                    kategori: matchingRecord.kategori,
+                                    status_gulma: matchingRecord.status_gulma
+                                };
+                            }
+                        });
+                        return { wilayah: wilayahNum, data: geojson };
+                    })
                     .catch(err => {
                         console.error(`Error loading wilayah ${wilayahNum}:`, err);
                         return null;
@@ -2678,8 +3218,10 @@
             // Scroll to map
             document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
         } catch (error) {
-            console.error('Error in loadImportDataOnMap:', error);
-            showMapError('Error: ' + error.message);
+            console.error('❌ Error in loadImportDataOnMap:', error);
+            console.error('Error details:', error.message);
+            console.error('Stack:', error.stack);
+            showMapError('Error: ' + error.message + '. Check browser console (F12) for details.');
             if (loadingDiv) {
                 loadingDiv.style.display = 'none';
             }
@@ -2766,23 +3308,39 @@
         // Show all data by default
         updatePeriodDisplay(null, null, null);
         
-        // Setup client-side search
-        const searchInput = document.getElementById('searchInput');
+        // Check if filters were applied (URL has query parameters)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasTahun = urlParams.has('tahun') && urlParams.get('tahun') !== '';
+        const hasBulan = urlParams.has('bulan') && urlParams.get('bulan') !== '';
+        const hasMinggu = urlParams.has('minggu') && urlParams.get('minggu') !== '';
+        
+        if (hasTahun || hasBulan || hasMinggu) {
+            // If filters were applied, scroll to riwayat section
+            setTimeout(() => {
+                const riwayatSection = document.getElementById('riwayatUploadSection');
+                if (riwayatSection) {
+                    console.log('📍 Scrolling to riwayat section after filter...');
+                    riwayatSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+        
+        // Setup table search - Only when user types and clicks search or presses Enter
+        const searchInput = document.getElementById('tableSearchInput');
         if (searchInput) {
-            searchInput.addEventListener('keyup', function() {
-                const searchValue = this.value.toLowerCase().replace(/^#/, ''); // Remove # prefix
-                const rows = document.querySelectorAll('table tbody tr[data-search]');
-                
-                rows.forEach(row => {
-                    const searchData = row.getAttribute('data-search');
-                    if (searchData.includes(searchValue)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+            // Remove keyup listener - now only searches when button clicked
+            // Instead, add keypress to support Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Trigger form submission
+                    document.getElementById('filterForm').submit();
+                }
             });
         }
+        
+        // REMOVED: Real-time search on keyup
+        // Search now only happens when "Cari" button is clicked via form submission
     });
 </script>
 
@@ -2832,9 +3390,170 @@
                 }
             });
         }
+
+        // ===== PUBLICATION MANAGEMENT =====
+        window.currentPeriod = null;
+        window.selectedPublicationId = null;
+
+        // Fetch all available files for a period
+        async function fetchFilesForPeriod(tahun, bulan, minggu) {
+            try {
+                const response = await fetch(`/api/admin/files-by-period?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`);
+                const data = await response.json();
+                return data.files || [];
+            } catch (error) {
+                console.error('Error fetching files:', error);
+                return [];
+            }
+        }
+
+        window.openPublicationModal = async function(periodKey, tahun, bulan, minggu) {
+            window.currentPeriod = { key: periodKey, tahun, bulan, minggu };
+            
+            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            document.getElementById('modalTitle').textContent = 'Kelola Publikasi Periode';
+            document.getElementById('modalPeriod').textContent = `Tahun ${tahun} • ${monthNames[parseInt(bulan)]} • Minggu ${minggu}`;
+            
+            // Fetch files for this period
+            const files = await fetchFilesForPeriod(tahun, bulan, minggu);
+            
+            let filesList = document.getElementById('filesList');
+            filesList.innerHTML = '';
+            
+            if (files.length === 0) {
+                filesList.innerHTML = '<p style="color: #E74C3C; text-align: center;">❌ Belum ada file yang berhasil untuk periode ini</p>';
+                document.getElementById('publicationModal').style.display = 'flex';
+                return;
+            }
+            
+            files.forEach(file => {
+                const isCurrentlyPublished = file.is_published;
+                const fileOption = document.createElement('div');
+                fileOption.style.cssText = `
+                    padding: 12px;
+                    margin-bottom: 8px;
+                    border: 2px solid ${isCurrentlyPublished ? '#128241' : '#ddd'};
+                    border-radius: 6px;
+                    cursor: pointer;
+                    background: ${isCurrentlyPublished ? '#e8f5e9' : '#fff'};
+                    transition: all 0.2s;
+                `;
+                fileOption.className = 'file-option';
+                
+                fileOption.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="publication_file" value="${file.id}" 
+                            ${isCurrentlyPublished ? 'checked' : ''} 
+                            style="width: 18px; height: 18px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: ${isCurrentlyPublished ? '#128241' : '#333'};">
+                                ${file.name} 
+                                ${isCurrentlyPublished ? '<span style="background: #128241; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold;">● AKTIF</span>' : ''}
+                            </div>
+                            <small style="color: #666;">
+                                📊 ${file.records} records • 📅 ${file.uploaded_at}
+                            </small>
+                        </div>
+                    </div>
+                `;
+                
+                fileOption.addEventListener('click', function() {
+                    document.querySelectorAll('.file-option').forEach(opt => {
+                        opt.style.borderColor = '#ddd';
+                        opt.style.background = '#fff';
+                    });
+                    fileOption.style.borderColor = '#128241';
+                    fileOption.style.background = '#e8f5e9';
+                    document.querySelector(`input[value="${file.id}"]`).checked = true;
+                    window.selectedPublicationId = file.id;
+                });
+                
+                if (isCurrentlyPublished) {
+                    window.selectedPublicationId = file.id;
+                }
+                
+                filesList.appendChild(fileOption);
+            });
+            
+            document.getElementById('publicationModal').style.display = 'flex';
+        };
+
+        window.closePublicationModal = function() {
+            document.getElementById('publicationModal').style.display = 'none';
+            window.currentPeriod = null;
+            window.selectedPublicationId = null;
+        };
+
+        window.updatePublication = async function() {
+            if (!window.selectedPublicationId) {
+                alert('❌ Silakan pilih file untuk dipublikasi');
+                return;
+            }
+            
+            if (!window.currentPeriod) {
+                alert('❌ Periode tidak valid');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/set-publication', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
+                    },
+                    body: JSON.stringify({
+                        import_log_id: window.selectedPublicationId,
+                        tahun: window.currentPeriod.tahun,
+                        bulan: window.currentPeriod.bulan,
+                        minggu: window.currentPeriod.minggu
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('✅ Publikasi berhasil diperbarui');
+                    console.log('   File:', result.nama_file);
+                    console.log('   Period:', result.tahun + '/' + result.bulan + '/W' + result.minggu);
+                    console.log('   Import ID:', result.import_id);
+                    
+                    alert('✅ Publikasi berhasil diperbarui untuk ' + result.nama_file);
+                    window.closePublicationModal();
+                    
+                    // Reload map dengan data yang baru dipublikasi (tanpa reload halaman)
+                    console.log('🔄 Reloading map with new publication data...');
+                    
+                    // Clear all existing layers
+                    Object.keys(geoJsonLayers).forEach(key => {
+                        if (geoJsonLayers[key]) {
+                            map.removeLayer(geoJsonLayers[key]);
+                        }
+                    });
+                    geoJsonLayers = {};
+                    
+                    // Load dengan import_id yang baru dipublikasi
+                    loadAllWilayahWithImportId(result.import_id);
+                    
+                    // Update publikasi table jika terlihat
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + (result.message || 'Gagal memperbarui publikasi'));
+                }
+            } catch (error) {
+                console.error('Error updating publication:', error);
+                alert('❌ Terjadi kesalahan: ' + error.message);
+            }
+        };
+
+        // Close modal saat klik di luar modal
+        document.getElementById('publicationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                window.closePublicationModal();
+            }
+        });
     });
 </script>
-
-@include('footer')
 
 @endsection

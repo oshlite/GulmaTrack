@@ -11,6 +11,9 @@ class MapPublication extends Model
 
     protected $fillable = [
         'import_log_id',
+        'tahun',
+        'bulan',
+        'minggu',
         'status',
         'published_at',
         'published_by',
@@ -31,16 +34,38 @@ class MapPublication extends Model
         return $this->belongsTo(ImportLog::class, 'import_log_id');
     }
 
-    public static function getLatestPublished()
+    public static function getLatestPublished($tahun = null, $bulan = null, $minggu = null)
     {
-        return static::where('status', 'published')
-            ->latest('published_at')
-            ->first();
+        $query = static::where('status', 'published');
+        
+        // Jika periode spesifik, gunakan itu
+        if ($tahun && $bulan && $minggu) {
+            $query->where('tahun', $tahun)
+                  ->where('bulan', $bulan)
+                  ->where('minggu', $minggu);
+        } else {
+            // Jika tidak spesifik, ambil yang paling baru
+            $query->orderBy('published_at', 'desc');
+        }
+        
+        return $query->first();
     }
 
-    public static function isDataPublished()
+    public static function isDataPublished($tahun = null, $bulan = null, $minggu = null)
     {
-        $latest = static::getLatestPublished();
+        $latest = static::getLatestPublished($tahun, $bulan, $minggu);
         return $latest !== null;
+    }
+    
+    /**
+     * Get published publication for specific period
+     */
+    public static function getPublishedForPeriod($tahun, $bulan, $minggu)
+    {
+        return static::where('tahun', $tahun)
+            ->where('bulan', $bulan)
+            ->where('minggu', $minggu)
+            ->where('status', 'published')
+            ->first();
     }
 }

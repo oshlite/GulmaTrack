@@ -65,7 +65,7 @@ Route::prefix('api/statistik')
 Route::prefix('api/gallery')
     ->name('api.gallery.')
     ->group(function () {
-        Route::get('/category/{kategori}', [GalleryController::class, 'getByCategory'])->name('by-category');
+        Route::get('/kategori/{kategori}', [GalleryController::class, 'getByCategory'])->name('by-category');
     });
 
 /*
@@ -78,6 +78,13 @@ Route::prefix('api/map-publications')
     ->group(function () {
         Route::get('/latest-published', [AdminController::class, 'getLatestPublished'])->name('latest-published');
     });
+
+/*
+|--------------------------------------------------------------------------
+| API - PUBLICATION STATUS (ADMIN)
+|--------------------------------------------------------------------------
+*/
+Route::get('/api/publication-status', [AdminController::class, 'getPublicationStatus'])->middleware(['auth', 'admin']);
 
 /*
 |--------------------------------------------------------------------------
@@ -131,7 +138,6 @@ Route::prefix('admin')
             Route::post('/upload', [GalleryController::class, 'upload'])->name('upload');
             Route::get('/photos', [GalleryController::class, 'getPhotos'])->name('photos');
             Route::get('/stats', [GalleryController::class, 'getStats'])->name('stats');
-            Route::post('/{id}/set-primary', [GalleryController::class, 'setPrimary'])->name('set-primary');
             Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
             Route::put('/{id}', [GalleryController::class, 'update'])->name('update');
             Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('destroy');
@@ -151,3 +157,6 @@ Route::prefix('admin')
             Route::get('/kategori-colors', [AdminController::class, 'getKategoriColors'])->name('kategori-colors');
         });
     });
+
+// Debug routes
+require __DIR__ . '/debug.php';

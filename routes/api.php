@@ -58,6 +58,31 @@ Route::get('/data-gulma/by-import/{importId}', [\App\Http\Controllers\AdminContr
     ->name('api.data-gulma.by-import')
     ->withoutMiddleware('api');
 
+// Import logs - get list with filters
+Route::get('/import-logs', [\App\Http\Controllers\AdminController::class, 'getImportLogs'])
+    ->name('api.import-logs')
+    ->withoutMiddleware('api');
+
+// Debug endpoint - check data in database
+Route::get('/debug/import/{importId}', [\App\Http\Controllers\AdminController::class, 'debugImport'])
+    ->name('api.debug.import')
+    ->withoutMiddleware('api');
+
+// Maintenance endpoint - fix missing import_log_id
+Route::post('/maintenance/fix-import-log-ids', [\App\Http\Controllers\AdminController::class, 'fixMissingImportLogIds'])
+    ->name('api.maintenance.fix-import-log-ids')
+    ->middleware('auth')
+    ->middleware('admin');
+
+// Admin - Publication Management API
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/files-by-period', [\App\Http\Controllers\AdminController::class, 'getFilesForPeriod'])
+        ->name('api.admin.files-by-period');
+    
+    Route::post('/admin/set-publication', [\App\Http\Controllers\AdminController::class, 'setPublication'])
+        ->name('api.admin.set-publication');
+});
+
 
 
 

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Galeri Foto Gulma (Berdasarkan Kategori)')
+@section('title', 'Galeri Foto Gulma')
 
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -113,11 +113,8 @@
         justify-content: center;
         color: var(--primary-color);
         font-weight: 700;
-<<<<<<< HEAD
-=======
         font-family: 'Poppins';
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
->>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     }
 
     .logout-btn {
@@ -130,12 +127,9 @@
         font-weight: 600;
         transition: all 0.3s ease;
         font-size: 13px;
-<<<<<<< HEAD
-=======
         font-family: 'Poppins';
         letter-spacing: 0.3px;
         box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
->>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     }
 
     .logout-btn:hover {
@@ -160,10 +154,7 @@
         font-size: 42px;
         color: #A6CE39;
         margin-bottom: 10px;
-<<<<<<< HEAD
-=======
         font-family: 'Poppins';
->>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
         display: flex;
         align-items: center;
         gap: 15px;
@@ -176,10 +167,7 @@
     .page-header p {
         font-size: 16px;
         color: #666;
-<<<<<<< HEAD
-=======
         font-family: 'Poppins';
->>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
         margin: 0;
     }
 
@@ -693,8 +681,6 @@
         margin-bottom: 20px;
     }
 
-<<<<<<< HEAD
-=======
     .info-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -751,7 +737,6 @@
         border-left-color: #c62828;
     }
 
->>>>>>> 6cc99ba (Konsistensi font family di halaman gallery)
     @media (max-width: 768px) {
         .page-header h1 {
             font-size: 24px;
@@ -819,7 +804,7 @@
 <div class="admin-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1><i class="fas fa-images"></i> Galeri Foto Gulma (Berdasarkan Kategori)</h1>
+        <h1><i class="fas fa-images"></i> Galeri Foto Gulma</h1>
         <p>Kelola foto visual untuk setiap kategori status gulma (Bersih, Ringan, Sedang, Berat)</p>
     </div>
 
@@ -875,7 +860,7 @@
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <div class="upload-text">Klik atau Drag & Drop Foto di Sini</div>
-                <div class="upload-hint">Format: JPG, PNG | Maksimal 5MB per foto | Bisa upload multiple</div>
+                <div class="upload-hint">Format: JPG, PNG | Maksimal 5MB per foto | Bisa upload lebih dari 1 foto</div>
                 <input type="file" id="fileInput" name="photos[]" accept="image/*" multiple hidden>
             </div>
 
@@ -895,13 +880,11 @@
                             <option value="berat">🟥 Berat</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" name="set_as_primary" id="setPrimary" value="1">
-                            <label for="setPrimary" style="margin: 0; cursor: pointer;">
-                                <i class="fas fa-star"></i> Jadikan Foto Utama (akan ditampilkan pertama di popup)
-                            </label>
-                        </div>
+                </div>
+                <div class="form-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="set_as_primary" name="set_as_primary">
+                        <label for="set_as_primary">Jadikan Foto Utama (akan ditampilkan di pop-up peta wilayah)</label>
                     </div>
                 </div>
                 <div class="form-row">
@@ -940,7 +923,7 @@
                     @if($photo->is_primary)
                         <span class="primary-badge">⭐ FOTO UTAMA</span>
                     @endif
-                    <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image">
+                    <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image" onerror="console.error('Image load failed:', this.src); this.style.display='none';">
                 </div>
                 <div class="gallery-info">
                     <div class="gallery-kategori">
@@ -1093,6 +1076,11 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(e.target);
+    
+    // Convert checkbox to proper boolean value
+    const setAsPrimary = document.getElementById('set_as_primary').checked;
+    formData.set('set_as_primary', setAsPrimary ? '1' : '0');
+    
     const uploadBtn = document.querySelector('.btn-upload');
     const originalText = uploadBtn.innerHTML;
     
@@ -1114,9 +1102,19 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             alert(data.message);
             window.location.reload();
         } else {
-            alert('Error: ' + (data.message || 'Upload gagal'));
+            // Show detailed error messages
+            let errorMsg = data.message || 'Upload gagal';
+            if (data.errors) {
+                console.error('Validation errors:', data.errors);
+                errorMsg += '\n\nDetail:\n';
+                Object.keys(data.errors).forEach(field => {
+                    errorMsg += `- ${field}: ${data.errors[field].join(', ')}\n`;
+                });
+            }
+            alert('Error:\n' + errorMsg);
         }
     } catch (error) {
+        console.error('Upload error:', error);
         alert('Terjadi kesalahan: ' + error.message);
     } finally {
         uploadBtn.innerHTML = originalText;
@@ -1124,33 +1122,6 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     }
 });
 
-// Set as Primary
-async function setPrimary(id) {
-    if (!confirm('Jadikan foto ini sebagai foto utama untuk kategori ini?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/admin/gallery/${id}/set-primary`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert(data.message);
-            window.location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        alert('Terjadi kesalahan: ' + error.message);
-    }
-}
 
 // AJAX Delete Function
 async function confirmDelete(id) {

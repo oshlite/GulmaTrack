@@ -21,7 +21,6 @@ class GalleryController extends Controller
     {
         $photos = GulmaPhoto::with('uploader')
             ->orderBy('kategori')
-            ->orderBy('is_primary', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
@@ -48,7 +47,7 @@ class GalleryController extends Controller
                 'photos.*.image' => 'File harus berupa gambar',
                 'photos.*.mimes' => 'Format foto harus JPG, JPEG, atau PNG',
                 'photos.*.max' => 'Ukuran foto maksimal 5MB',
-                'kategori.required' => 'Kategori harus dipilih',
+                'kategori.required' => 'Kategori gulma harus dipilih',
             ]);
 
             if ($validator->fails()) {
@@ -61,18 +60,12 @@ class GalleryController extends Controller
 
             $uploadedPhotos = [];
             $kategori = $request->kategori;
-            $setAsPrimary = $request->set_as_primary ?? false;
+            $setAsPrimary = $request->has('set_as_primary') && $request->set_as_primary;
             
-            // If setting as primary, unset other primary photos for this category
-            if ($setAsPrimary) {
-                GulmaPhoto::where('kategori', $kategori)
-                    ->update(['is_primary' => false]);
-            }
-
             foreach ($request->file('photos') as $index => $photo) {
                 try {
-                    $filename = 'kategori_' . $kategori . '_' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('gulma_category_photos', $filename, 'public');
+                    $filename = 'gulma_' . $kategori . '_' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+                    $path = $photo->storeAs('gulma_photos', $filename, 'public');
 
                     $gulmaPhoto = GulmaPhoto::create([
                         'kategori' => $kategori,
@@ -81,7 +74,7 @@ class GalleryController extends Controller
                         'uploaded_by' => auth()->id(),
                         'file_size' => $photo->getSize(),
                         'mime_type' => $photo->getMimeType(),
-                        'is_primary' => $setAsPrimary && $index === 0, // Only first photo is primary
+                        'is_primary' => $setAsPrimary ? 1 : 0,
                     ]);
 
                     $uploadedPhotos[] = $gulmaPhoto;
@@ -128,7 +121,7 @@ class GalleryController extends Controller
 
             $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
-            $query->orderBy('is_primary', 'desc')->orderBy($sortBy, $sortOrder);
+            $query->orderBy($sortBy, $sortOrder);
 
             $perPage = $request->get('per_page', 12);
             $photos = $query->paginate($perPage);
@@ -152,7 +145,14 @@ class GalleryController extends Controller
     public function getByCategory($kategori)
     {
         try {
-            $photos = GulmaPhoto::getByKategori($kategori);
+            // Convert kategori to lowercase for case-insensitive search
+            $kategoriLower = strtolower($kategori);
+            
+            $photos = GulmaPhoto::whereRaw('LOWER(kategori) = ?', [$kategoriLower])
+                ->with('uploader')
+                ->orderBy('is_primary', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             return response()->json([
                 'success' => true,
@@ -164,37 +164,10 @@ class GalleryController extends Controller
                         'foto_url' => $photo->foto_url,
                         'deskripsi' => $photo->deskripsi,
                         'is_primary' => $photo->is_primary,
+                        'uploaded_by' => $photo->uploader?->name,
                         'uploaded_at' => $photo->created_at->format('d M Y'),
                     ];
                 })
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Set photo as primary for category
-     */
-    public function setPrimary($id)
-    {
-        try {
-            $photo = GulmaPhoto::findOrFail($id);
-            
-            // Unset other primary photos for this category
-            GulmaPhoto::where('kategori', $photo->kategori)
-                ->update(['is_primary' => false]);
-            
-            // Set this as primary
-            $photo->update(['is_primary' => true]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Foto berhasil diset sebagai foto utama'
             ]);
 
         } catch (\Exception $e) {

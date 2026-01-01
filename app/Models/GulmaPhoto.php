@@ -10,71 +10,105 @@ class GulmaPhoto extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Table name
+     */
+    protected $table = 'gulma_photos';
+
+    /**
+     * Mass assignable fields
+     */
     protected $fillable = [
         'kategori',
         'foto_path',
+        'is_primary',
         'deskripsi',
         'uploaded_by',
         'file_size',
         'mime_type',
-        'is_primary'
     ];
 
+    /**
+     * Casts
+     */
     protected $casts = [
         'is_primary' => 'boolean',
     ];
 
-    // Relationship
+    /**
+     * ======================
+     * RELATIONSHIPS
+     * ======================
+     */
+
+    /**
+     * User who uploaded the photo
+     */
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    // Accessor untuk URL foto
+    /**
+     * ======================
+     * ACCESSORS
+     * ======================
+     */
+
+    /**
+     * Get full photo URL
+     */
     public function getFotoUrlAttribute()
     {
-        return Storage::url($this->foto_path);
-    }
-
-    // Accessor untuk ukuran file yang readable
-    public function getFileSizeFormattedAttribute()
-    {
-        if (!$this->file_size) return 'N/A';
-        
-        $bytes = $this->file_size;
-        $units = ['B', 'KB', 'MB', 'GB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
+        if (!$this->foto_path) {
+            return '/image/roblox.png'; // Fallback placeholder
         }
         
+        // Check if file exists
+        if (Storage::disk('public')->exists($this->foto_path)) {
+            return Storage::disk('public')->url($this->foto_path);
+        }
+        
+        // If file doesn't exist, return placeholder
+        return '/image/roblox.png';
+    }
+
+    /**
+     * Get formatted file size
+     */
+    public function getFileSizeFormattedAttribute()
+    {
+        if (!$this->file_size) {
+            return null;
+        }
+
+        $bytes = (int) $this->file_size;
+        $units = ['B', 'KB', 'MB', 'GB'];
+
+        for ($i = 0; $bytes >= 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
-    // Get photos by category
-    public static function getByKategori($kategori, $limit = null)
+    /**
+     * ======================
+     * QUERY SCOPES
+     * ======================
+     */
+
+    /**
+     * Filter by kategori
+     */
+    public function scopeKategori($query, $kategori)
     {
-        $query = self::where('kategori', $kategori)
-            ->with('uploader')
-            ->orderBy('is_primary', 'desc')
-            ->orderBy('created_at', 'desc');
-        
-        if ($limit) {
-            return $query->limit($limit)->get();
-        }
-        
-        return $query->get();
+        return $query->where('kategori', $kategori);
     }
 
-    // Get primary photo for category
-    public static function getPrimaryPhoto($kategori)
-    {
-        return self::where('kategori', $kategori)
-            ->where('is_primary', true)
-            ->first();
-    }
-
-    // Get stats
+    /**
+     * Get stats for dashboard
+     */
     public static function getStats()
     {
         return [
@@ -87,11 +121,5 @@ class GulmaPhoto extends Model
                 ->whereYear('created_at', now()->year)
                 ->count(),
         ];
-    }
-
-    // Scope untuk filter
-    public function scopeKategori($query, $kategori)
-    {
-        return $query->where('kategori', $kategori);
     }
 }

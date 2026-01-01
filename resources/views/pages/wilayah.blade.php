@@ -38,7 +38,7 @@
             <div class="controls-row">
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-calendar"></i> Tahun
+                        <i class="fas fa-calendar"></i> Tahun <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
                     </label>
                     <input type="hidden" id="tahunSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('tahun')">
@@ -52,7 +52,7 @@
 
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-calendar-alt"></i> Bulan
+                        <i class="fas fa-calendar-alt"></i> Bulan <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
                     </label>
                     <input type="hidden" id="bulanSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('bulan')">
@@ -77,7 +77,7 @@
 
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-calendar-week"></i> Minggu
+                        <i class="fas fa-calendar-week"></i> Minggu <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
                     </label>
                     <input type="hidden" id="mingguSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('minggu')">
@@ -94,7 +94,7 @@
 
                 <div class="control-item compact">
                     <label class="control-label">
-                        <i class="fas fa-map-pin"></i> Wilayah
+                        <i class="fas fa-map-pin"></i> Wilayah <span style="font-size: 11px; font-weight: 400; color: #999;">(Opsional)</span>
                     </label>
                     <input type="hidden" id="wilayahSelect" value="">
                     <div class="button-grid-trigger" onclick="toggleButtonGrid('wilayah')">
@@ -109,14 +109,22 @@
 
             <!-- Baris 2: Action Buttons -->
             <div class="controls-buttons-row">
-                <button onclick="loadAllWilayah()" class="btn-primary">
+                <button onclick="loadAllWilayah()" class="btn-primary" title="Tampilkan peta untuk semua wilayah berdasarkan periode yang dipilih">
                     <i class="fas fa-globe"></i> Semua Wilayah
                 </button>
-                <button onclick="loadWilayahMap()" class="btn-secondary">
+                <button onclick="loadWilayahMap()" class="btn-secondary" title="Tampilkan peta berdasarkan wilayah dan periode yang dipilih (wilayah opsional)">
                     <i class="fas fa-search"></i> Tampilkan Peta
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- Help Text untuk pengguna -->
+    <div style="background: #ecf0f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #3498db; display: none;" id="helpText">
+        <i class="fas fa-lightbulb" style="color: #3498db; margin-right: 8px;"></i>
+        <span style="font-size: 12px; color: #555;">
+            💡 <strong>Cara menggunakan:</strong> Pilih <strong>Tahun, Bulan, dan Minggu</strong> (wajib), lalu pilih wilayah jika ingin (opsional). Klik "Tampilkan Peta" untuk melihat data.
+        </span>
     </div>
 
         <!-- Status Info -->
@@ -333,6 +341,24 @@
             white-space: normal;
             min-width: 80px;
             line-height: 1.3;
+            position: relative;
+        }
+
+        /* Disabled state untuk buttons yang tidak ada data */
+        .grid-btn[disabled] {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f5f5f5;
+            color: #999;
+            border-color: #ddd;
+        }
+
+        .grid-btn[disabled]:hover {
+            border-color: #ddd;
+            background: #f5f5f5;
+            color: #999;
+            transform: none;
+            box-shadow: none;
         }
 
         .grid-btn:hover {
@@ -869,6 +895,21 @@
             font-weight: 600;
             display: inline-block;
         }
+
+        .reset-icon {
+            color: #A6CE39; 
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .reset-icon:hover {
+            color: #128241;
+            text-shadow: 0 0 6px rgba(46, 204, 113, 0.9);
+            transform: rotate(-12deg) scale(1.1);
+        }
+
         
         .status-bersih { background: #3498db; color: white; }
         .status-ringan { background: #57ce39ff; color: white; }
@@ -882,7 +923,7 @@
         <div class="map-error-container"></div>
         <div id="map"></div>
         <div class="map-legend">
-            <h4 onclick="filterByStatus('')" style="cursor:pointer;">
+            <h4 onclick="filterByStatus('')" style="cursor:pointer;" title="Semua Wilayah">
     <i class="fas fa-info-circle"></i>  Status Gulma
 </h4>
             <div class="legend-item" onclick="filterByStatus('bersih')" title="Klik untuk filter">
@@ -901,21 +942,22 @@
                 <div class="legend-color" style="background: #e74c3c;"></div>
                 <span><strong>Berat</strong></span>
             </div>
-            <!-- <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
+            <div class="legend-item" onclick="filterByStatus('belum_dimonitoring')" title="Klik untuk filter">
                 <div class="legend-color" style="background: #ecf0f1; border-color: #c4c4c4;"></div>
                 <span><strong>Tidak Ada Data</strong></span>
-            </div> -->
+            </div>
         </div>
     </div>
 
     <!-- Daftar Wilayah -->
     <div style="margin: 30px 0 20px;">
-        <h2 style="font-size: 35px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-map-marked-alt" style="color: var(--primary-color);"></i>
-            Daftar Wilayah
+        <h2 style="font-size:35px;font-weight:700;color:#2c3e50;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer"
+    onclick="filterByStatus('')" title="Reset filter wilayah">
+    <i class="fas fa-map-marked-alt" style="color:var(--primary-color)"></i>
+    Daftar Wilayah
             <div style="display: flex; justify-content: space-between; align-items: center;">
             <button
-onclick="toggleLocationDetails()"
+onclick="event.preventDefault(); event.stopPropagation(); toggleLocationDetails();"
 style="
 background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
 color: white;
@@ -940,6 +982,10 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                 <i class="fas fa-table" id="toggleIcon"></i>
                 <span id="toggleText">Tampilkan Tabel Lokasi</span>
             </button>
+            <i class="fas fa-undo reset-icon"
+   onclick="filterByStatus('')"
+   title="Tampilkan Semua Wilayah"></i>
+
         </div>
         </h2>
         
@@ -1121,6 +1167,33 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         });
         event.target.classList.add('selected');
         
+        // CUSTOM LOGIC: Handle period-related dropdown updates
+        if (type === 'tahun') {
+            // Reset bulan & minggu selections
+            document.getElementById('bulanSelect').value = '';
+            document.getElementById('mingguSelect').value = '';
+            document.getElementById('bulanSelected').textContent = 'Pilih Bulan...';
+            document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+            
+            // Update bulan options
+            updateBulanDropdown(value);
+            
+            console.log(`✅ Tahun dipilih: ${value}`);
+        } else if (type === 'bulan') {
+            const tahun = document.getElementById('tahunSelect').value;
+            
+            // Reset minggu selection
+            document.getElementById('mingguSelect').value = '';
+            document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+            
+            // Update minggu options
+            updateMingguDropdown(tahun, value);
+            
+            console.log(`✅ Bulan dipilih: ${value}, tahun: ${tahun}`);
+        } else if (type === 'minggu') {
+            console.log(`✅ Minggu dipilih: ${value}`);
+        }
+        
         // Close grid
         grid.style.display = 'none';
         grid.previousElementSibling.classList.remove('active');
@@ -1145,18 +1218,35 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 
     // Toggle location details table
     function toggleLocationDetails() {
+        console.log('🔄 toggleLocationDetails() called');
         const table = document.getElementById('locationDetailsTable');
         const icon = document.getElementById('toggleIcon');
         const text = document.getElementById('toggleText');
         
+        // Debug: pastikan elemen ada
+        console.log('Table element found:', !!table);
+        console.log('Icon element found:', !!icon);
+        console.log('Text element found:', !!text);
+        
+        if (!table || !icon || !text) {
+            console.error('❌ Error: Tidak dapat menemukan elemen yang diperlukan');
+            return;
+        }
+        
+        console.log('Current active state:', table.classList.contains('active'));
+        
         if (table.classList.contains('active')) {
+            console.log('✓ Removing active class - hiding table');
             table.classList.remove('active');
             icon.className = 'fas fa-table';
             text.textContent = 'Tampilkan Tabel Lokasi';
+            console.log('✓ Active class removed, new state:', table.classList.contains('active'));
         } else {
+            console.log('✓ Adding active class - showing table');
             table.classList.add('active');
             icon.className = 'fas fa-times';
             text.textContent = 'Sembunyikan Tabel';
+            console.log('✓ Active class added, new state:', table.classList.contains('active'));
         }
     }
     
@@ -1168,23 +1258,21 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         // Set filter dropdown to match
         document.getElementById('filterKomoditas').value = status;
         
-        // Enable location labels when status filter is active
+        // SELALU TAMPILKAN TABEL LOKASI (baik saat filter aktif maupun reset)
+        console.log(`✓ Selalu tampilkan tabel lokasi`);
+        document.getElementById('locationDetailsTable').classList.add('active');
+        document.getElementById('toggleIcon').className = 'fas fa-times';
+        document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
+        
+        // Update labels visibility based on filter
         if (status) {
             console.log(`✓ Filter activated: ${status}`);
             showLocationLabels = true;
-            // Open location details table
-            document.getElementById('locationDetailsTable').classList.add('active');
-            document.getElementById('toggleIcon').className = 'fas fa-times';
-            document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
         } else {
-            // Reset: no labels, no table, reload all
-            console.log('✓ Filter reset - showing all data');
+            // Reset: no labels, but KEEP table visible
+            console.log('✓ Filter reset - showing all data with table');
             showLocationLabels = false;
             currentStatusFilter = '';
-            // Hide table when clicking "Semua Data"
-            document.getElementById('locationDetailsTable').classList.remove('active');
-            document.getElementById('toggleIcon').className = 'fas fa-table';
-            document.getElementById('toggleText').textContent = 'Tampilkan Tabel Lokasi';
         }
         
         // Reload map with filter applied
@@ -1250,7 +1338,15 @@ function initMap() {
         const kategori = img.dataset.kategori;
         console.log('📸 Loading photos for kategori:', kategori);
 
-        fetch(`/api/gallery/category/${kategori}`)
+        // Jika belum_dimonitoring atau tidak ada kategori, gunakan placeholder
+        if (!kategori || kategori === 'belum_dimonitoring') {
+            console.log('ℹ️  Status belum_dimonitoring, menggunakan foto placeholder');
+            img.src = '/image/foto.jpg';
+            return;
+        }
+
+        // Fetch photos dari API untuk kategori yang valid
+        fetch(`/api/gallery/kategori/${kategori}`)
             .then(r => {
                 console.log('API response status:', r.status);
                 return r.json();
@@ -1258,7 +1354,8 @@ function initMap() {
             .then(r => {
                 console.log('API response data:', r);
                 if (!r.success || !r.data || r.data.length === 0) {
-                    console.log('❌ No photos found for kategori:', kategori);
+                    console.log('ℹ️  Tidak ada foto untuk kategori:', kategori, '- menggunakan placeholder');
+                    img.src = '/image/foto.jpg';
                     return;
                 }
 
@@ -1269,6 +1366,7 @@ function initMap() {
             })
             .catch(err => {
                 console.error('❌ Gagal load foto:', err);
+                img.src = '/image/foto.jpg'; // Fallback ke placeholder jika error
             });
     });
 
@@ -1385,14 +1483,17 @@ function initMap() {
 
     // Load single wilayah
     async function loadWilayahMap() {
-        // Check period first
+        // Check period first (Tahun, Bulan, Minggu WAJIB)
         const periodOk = await checkPeriodAndLoadData();
         if (!periodOk) return;
         
         const wilayahNumber = document.getElementById('wilayahSelect').value;
         
+        // Wilayah OPSIONAL - jika tidak dipilih, tampilkan semua wilayah
         if (!wilayahNumber) {
-            alert('Silakan pilih wilayah terlebih dahulu');
+            console.log('⚠️  Wilayah tidak dipilih, menampilkan Semua Wilayah');
+            // Load all wilayah instead
+            await loadAllWilayah();
             return;
         }
 
@@ -1822,48 +1923,12 @@ function initMap() {
     }
 
     function createPopupContent(props) {
-<<<<<<< HEAD
-        const kategoriRaw = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || '';
-        const kategori = normalizeKategori(kategoriRaw);
-
-        const popupId = Math.random().toString(36).substring(7);
-
-        let html = `<div style="width:320px;">`;
-
-        if (kategori) {
-            html += `
-                <div style="width:100%; height:200px; border-radius:8px 8px 0 0;
-                            overflow:hidden; margin-bottom:10px;">
-                    <img id="popup-img-${popupId}"
-                        data-kategori="${kategori}"
-                        style="width:100%; height:100%; object-fit:cover;"
-                        src="/image/roblox.png">
-                </div>
-            `;
-        }
-
-        html += `<div style="padding:10px;">`;
-
-        if (props.Lokasi || props.LOKASI) {
-            html += `<h3 style="margin:0 0 10px;color:#128241;font-size:16px;">
-                📍 ${props.Lokasi || props.LOKASI}
-            </h3>`;
-        }
-
-        let statusColor = '#ecf0f1';
-        let textColor = '#333';
-
-        if (kategori === 'bersih') {
-            statusColor = '#3498db'; textColor = 'white';
-        } else if (kategori === 'ringan') {
-            statusColor = '#128241'; textColor = 'white';
-        } else if (kategori === 'sedang') {
-=======
         let html = '<div style="width: 250px; padding: 0;">';
         
-        // Foto
+        // Foto - tampil langsung dengan placeholder
+        const statusGulma = props.kategori || 'belum_dimonitoring';
         html += '<div style="width: 100%; height: 140px; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0;">';
-        html += '<img src="/image/roblox.png" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover;">';
+        html += `<img src="/image/foto.jpg" data-kategori="${statusGulma}" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover; display: block;">`;
         html += '</div>';
         
         html += '<div style="padding: 10px;">';
@@ -1876,7 +1941,6 @@ function initMap() {
         html += `</div>`;
 
         // Status Gulma dari CSV kategori
-        const statusGulma = props.kategori || 'Tidak Ada Data';
         let statusColor = '#ecf0f1';
         let textColor = '#333333';
         
@@ -1887,40 +1951,10 @@ function initMap() {
             statusColor = '#57ce39ff';
             textColor = 'white';
         } else if (statusGulma.toLowerCase().includes('sedang')) {
->>>>>>> 5329295 (Tambah fitur sorting tabel dan perbaiki tampilan di halaman wilayah)
             statusColor = '#f1c40f';
-        } else if (kategori === 'berat') {
+        } else if (statusGulma.toLowerCase().includes('berat')) {
             statusColor = '#e74c3c'; textColor = 'white';
         }
-<<<<<<< HEAD
-
-        html += `
-            <div style="background:${statusColor};color:${textColor};
-                padding:8px;margin-bottom:15px;border-radius:4px;
-                text-align:center;font-weight:bold;">
-                ${kategoriRaw || 'Tidak Ada Data'}
-            </div>
-        `;
-
-        html += `<table style="width:100%;font-size:13px;">`;
-
-        if (props.Wilayah || props.gulma_Wilayah) {
-            html += `<tr><td><strong>Wilayah</strong></td>
-                <td style="text-align:right;">${props.Wilayah || props.gulma_Wilayah}</td></tr>`;
-        }
-
-        if (props.Netto || props.netto) {
-            html += `<tr><td><strong>Luas Netto</strong></td>
-                <td style="text-align:right;">${props.Netto || props.netto} Ha</td></tr>`;
-        }
-
-        if (props.tk_ha) {
-            html += `<tr><td><strong>TK/Ha</strong></td>
-                <td style="text-align:right;">${props.tk_ha}</td></tr>`;
-        }
-
-        html += `</table></div></div>`;
-=======
         
         html += `<div style="background: ${statusColor}; color: ${textColor}; padding: 6px; margin-bottom: 8px; border-radius: 4px; text-align: center; font-weight: 600; font-size: 11px;">`;
         html += `${statusGulma}`;
@@ -1955,7 +1989,6 @@ function initMap() {
 
         html += '</div>';
         html += '</div>';
->>>>>>> 5329295 (Tambah fitur sorting tabel dan perbaiki tampilan di halaman wilayah)
 
         return html;
     }
@@ -2260,7 +2293,7 @@ function initMap() {
                 <td>${wilayah}</td>
                 <td><strong>${lokasi}</strong></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : tkHa + ' TK'}</td>
+                <td><strong>${tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : tkHa + ' TK'}</strong></td>
                 <td>${aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : aktivitas}</td>
                 <td>${luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : luasNetto + ' Ha'}</td>
             `;
@@ -2342,7 +2375,7 @@ function initMap() {
                 <td>${loc.wilayah}</td>
                 <td><strong>${loc.lokasi}</strong></td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${loc.tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.tkHa + ' TK'}</td>
+                <td><strong>${loc.tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.tkHa + ' TK'}</strong></td>
                 <td>${loc.aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.aktivitas}</td>
                 <td>${loc.luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.luasNetto + ' Ha'}</td>
             `;
@@ -2405,79 +2438,252 @@ function initMap() {
     // Real-time search
     document.getElementById('searchWilayah').addEventListener('keyup', filterWilayah);
 
-    // Update period info display
-    function updatePeriodInfoDisplay(period) {
+    // Update period info display with smart messaging
+    function updatePeriodInfoDisplay(period, isLatest = false) {
         const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         const bulanName = bulanNames[parseInt(period.bulan)];
         
+        let statusIcon = '⭐';
+        let statusMsg = 'Data Terpilih';
+        
+        if (isLatest) {
+            statusIcon = '⭐';
+            statusMsg = 'Data Terbaru (Published)';
+        }
+        
+        // Also show count of records available for this period (if we can)
+        let countText = '';
+        const matchingPeriods = availablePeriods.periods.filter(p => 
+            p.tahun == period.tahun && p.bulan == period.bulan && p.minggu == period.minggu
+        );
+        
+        if (matchingPeriods.length > 0) {
+            countText = ` • ${matchingPeriods[0].total_records || ''} records tersedia`;
+        }
+        
         document.getElementById('periodInfoText').innerHTML = 
-            `Menampilkan Data Terbaru - <strong>Tahun ${period.tahun}, ${bulanName}, Minggu ke-${period.minggu}</strong>`;
+            `${statusIcon} ${statusMsg} - <strong>Tahun ${period.tahun}, ${bulanName}, Minggu ke-${period.minggu}</strong>${countText}`;
     }
 
-    // Load available periods (tahun, bulan, minggu)
+    // Store available periods data for smart filtering
+    let availablePeriods = {
+        periods: [],
+        tahun_list: [],
+        latest_period: null
+    };
+
+    // Helper: Get available bulan for selected tahun
+    function getAvailableBulanForTahun(tahun) {
+        const bulanSet = new Set();
+        availablePeriods.periods.forEach(period => {
+            if (period.tahun == tahun) {
+                bulanSet.add(parseInt(period.bulan));
+            }
+        });
+        return Array.from(bulanSet).sort((a, b) => b - a);
+    }
+
+    // Helper: Get available minggu for selected tahun & bulan
+    function getAvailableMingguForTahunBulan(tahun, bulan) {
+        const mingguSet = new Set();
+        availablePeriods.periods.forEach(period => {
+            if (period.tahun == tahun && period.bulan == bulan) {
+                mingguSet.add(parseInt(period.minggu));
+            }
+        });
+        return Array.from(mingguSet).sort((a, b) => b - a);
+    }
+
+    // Update bulan dropdown based on selected tahun
+    function updateBulanDropdown(tahun) {
+        const bulanGrid = document.getElementById('bulanGrid');
+        const availableBulan = getAvailableBulanForTahun(tahun);
+        const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        
+        // Mark buttons based on availability
+        const buttons = bulanGrid.querySelectorAll('.grid-btn');
+        buttons.forEach(btn => {
+            const bulanValue = parseInt(btn.getAttribute('data-value'));
+            if (availableBulan.includes(bulanValue)) {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.disabled = false;
+                btn.title = `${bulanNames[bulanValue]} tersedia`;
+            } else {
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+                btn.disabled = true;
+                btn.title = `${bulanNames[bulanValue]} tidak ada data`;
+            }
+        });
+        
+        console.log(`📊 Bulan tersedia untuk tahun ${tahun}:`, availableBulan);
+    }
+
+    // Update minggu dropdown based on selected tahun & bulan
+    function updateMingguDropdown(tahun, bulan) {
+        const mingguGrid = document.getElementById('mingguGrid');
+        const availableMinggu = getAvailableMingguForTahunBulan(tahun, bulan);
+        
+        // Mark buttons based on availability
+        const buttons = mingguGrid.querySelectorAll('.grid-btn');
+        buttons.forEach(btn => {
+            const mingguValue = parseInt(btn.getAttribute('data-value'));
+            if (availableMinggu.includes(mingguValue)) {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.disabled = false;
+                btn.title = `Minggu ke-${mingguValue} tersedia`;
+            } else {
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+                btn.disabled = true;
+                btn.title = `Minggu ke-${mingguValue} tidak ada data`;
+            }
+        });
+        
+        console.log(`📊 Minggu tersedia untuk ${tahun}/${bulan}:`, availableMinggu);
+    }
+
+    // Modified selectGridOption to handle period changes
+    const originalSelectGridOption = window.selectGridOption;
+    window.selectGridOption = function(type, value, label) {
+        originalSelectGridOption(type, value, label);
+        
+        // Update dependent dropdowns
+        if (type === 'tahun') {
+            // Reset bulan & minggu selections
+            document.getElementById('bulanSelect').value = '';
+            document.getElementById('mingguSelect').value = '';
+            document.getElementById('bulanSelected').textContent = 'Pilih Bulan...';
+            document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+            
+            // Update bulan options
+            updateBulanDropdown(value);
+            
+            // Close bulan grid
+            toggleButtonGrid('bulan');
+            
+            console.log(`✅ Tahun dipilih: ${value}`);
+        } else if (type === 'bulan') {
+            const tahun = document.getElementById('tahunSelect').value;
+            
+            // Reset minggu selection
+            document.getElementById('mingguSelect').value = '';
+            document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+            
+            // Update minggu options
+            updateMingguDropdown(tahun, value);
+            
+            // Close minggu grid
+            toggleButtonGrid('minggu');
+            
+            console.log(`✅ Bulan dipilih: ${value}, tahun: ${tahun}`);
+        } else if (type === 'minggu') {
+            // Close minggu grid
+            toggleButtonGrid('minggu');
+            
+            console.log(`✅ Minggu dipilih: ${value}`);
+        }
+    };
+
+    // Load available periods (tahun, bulan, minggu) dengan SMART FILTERING
     async function loadAvailablePeriods() {
         try {
+            // PENTING: Load latest published data, bukan latest upload
+            console.log('📥 [WILAYAH PUBLIC] Loading available publication periods...');
+            
             const response = await fetch('/api/wilayah/periods');
             const data = await response.json();
             
             if (data.success) {
-                // Populate tahun button grid
+                console.log('✅ Loaded periods:', data.periods.length, 'unique periods');
+                
+                // Store periods data for smart filtering
+                availablePeriods = {
+                    periods: data.periods,
+                    tahun_list: data.tahun_list,
+                    latest_period: data.latest_period
+                };
+                
+                // Populate tahun button grid with ALL years
                 const tahunGrid = document.getElementById('tahunGrid');
                 tahunGrid.innerHTML = '';
                 
-                data.tahun_list.forEach(tahun => {
+                data.tahun_list.forEach(tahunItem => {
                     const btn = document.createElement('button');
                     btn.className = 'grid-btn';
-                    btn.setAttribute('data-value', tahun);
-                    btn.textContent = tahun;
-                    btn.onclick = () => selectGridOption('tahun', tahun, tahun);
+                    btn.setAttribute('data-value', tahunItem);
+                    btn.textContent = tahunItem;
+                    btn.title = `Data tersedia untuk tahun ${tahunItem}`;
+                    btn.onclick = () => selectGridOption('tahun', tahunItem, tahunItem);
                     tahunGrid.appendChild(btn);
                 });
                 
-                // Store latest period
-                latestPeriod = data.latest_period;
+                console.log(`📅 Tahun buttons populated: ${data.tahun_list.join(', ')}`);
                 
                 // Set default to latest period if available
-                if (latestPeriod) {
-                    document.getElementById('tahunSelect').value = latestPeriod.tahun;
-                    document.getElementById('bulanSelect').value = latestPeriod.bulan;
-                    document.getElementById('mingguSelect').value = latestPeriod.minggu;
+                if (data.latest_period) {
+                    const tahun = data.latest_period.tahun;
+                    const bulan = data.latest_period.bulan;
+                    const minggu = data.latest_period.minggu;
+                    
+                    console.log('🎯 Setting default to latest period:', {tahun, bulan, minggu});
+                    
+                    // Set selectors
+                    document.getElementById('tahunSelect').value = tahun;
+                    document.getElementById('bulanSelect').value = bulan;
+                    document.getElementById('mingguSelect').value = minggu;
                     
                     // Update display
-                    document.getElementById('tahunSelected').textContent = latestPeriod.tahun;
+                    document.getElementById('tahunSelected').textContent = tahun;
                     const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                    document.getElementById('bulanSelected').textContent = bulanNames[parseInt(latestPeriod.bulan)];
-                    document.getElementById('mingguSelected').textContent = 'Minggu ke-' + latestPeriod.minggu;
+                    document.getElementById('bulanSelected').textContent = bulanNames[parseInt(bulan)];
+                    document.getElementById('mingguSelected').textContent = 'Minggu ke-' + minggu;
                     
                     // Mark selected buttons
-                    tahunGrid.querySelector(`[data-value="${latestPeriod.tahun}"]`)?.classList.add('selected');
-                    document.getElementById('bulanGrid').querySelector(`[data-value="${latestPeriod.bulan}"]`)?.classList.add('selected');
-                    document.getElementById('mingguGrid').querySelector(`[data-value="${latestPeriod.minggu}"]`)?.classList.add('selected');
+                    tahunGrid.querySelector(`[data-value="${tahun}"]`)?.classList.add('selected');
+                    document.getElementById('bulanGrid').querySelector(`[data-value="${bulan}"]`)?.classList.add('selected');
+                    document.getElementById('mingguGrid').querySelector(`[data-value="${minggu}"]`)?.classList.add('selected');
                     
-                    currentPeriod = latestPeriod;
+                    // Initialize dependent dropdowns
+                    updateBulanDropdown(tahun);
+                    updateMingguDropdown(tahun, bulan);
+                    
+                    currentPeriod = data.latest_period;
+                    latestPeriod = data.latest_period;
                     
                     updatePeriodInfoDisplay(latestPeriod);
                     
-                    console.log('Loading data for latest period:', latestPeriod);
-                }
-                
-                // Load wilayah data and stats
-                loadWilayahDataAndStats();
-                
-                console.log('🗺️  Auto-loading map dengan data terbaru...');
-                if (map) {
-                    loadAllWilayah();
+                    console.log('📍 Period defaults set to latest:', data.latest_period);
                 } else {
-                    console.log('Map belum ready, tunggu sebentar...');
-                    setTimeout(() => {
-                        if (map) {
-                            loadAllWilayah();
-                        } else {
-                            console.error('Map masih belum ready setelah delay!');
-                        }
-                    }, 200);
+                    console.warn('⚠️  No latest period available, user will need to select manually');
                 }
+            } else {
+                console.error('❌ Failed to load periods:', data.error);
+            }
+            
+            // Load wilayah data and stats
+            loadWilayahDataAndStats();
+            
+            // TAMPILKAN TABEL LOKASI secara otomatis saat awal load
+            document.getElementById('locationDetailsTable').classList.add('active');
+            document.getElementById('toggleIcon').className = 'fas fa-times';
+            document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';
+            
+            console.log('🗺️  Auto-loading map dengan data terbaru (published)...');
+            if (map) {
+                loadAllWilayah();
+            } else {
+                console.log('Map belum ready, tunggu sebentar...');
+                setTimeout(() => {
+                    if (map) {
+                        loadAllWilayah();
+                    } else {
+                        console.error('Map masih belum ready setelah delay!');
+                    }
+                }, 200);
             }
         } catch (error) {
             console.error('Error loading periods:', error);
@@ -2496,14 +2702,21 @@ function initMap() {
         }
     }
 
-    // Check and load data for selected period
+    // Check and load data for selected period dengan SMART VALIDATION
     async function checkPeriodAndLoadData() {
         const tahun = document.getElementById('tahunSelect').value;
         const bulan = document.getElementById('bulanSelect').value;
         const minggu = document.getElementById('mingguSelect').value;
         
+        // VALIDASI: HANYA Tahun, Bulan, Minggu yang WAJIB (Wilayah OPSIONAL)
         if (!tahun || !bulan || !minggu) {
-            alert('Silakan pilih Tahun, Bulan, dan Minggu terlebih dahulu');
+            const missing = [];
+            if (!tahun) missing.push('Tahun');
+            if (!bulan) missing.push('Bulan');
+            if (!minggu) missing.push('Minggu');
+            
+            const alertMsg = `⚠️  ${missing.join(', ')} belum dipilih!\n\nSilakan pilih ${missing.join(', ')} untuk melanjutkan.\n\n💡 Catatan: Wilayah bersifat opsional. Jika tidak dipilih, peta akan menampilkan semua wilayah.`;
+            alert(alertMsg);
             return false;
         }
         
@@ -2514,52 +2727,120 @@ function initMap() {
             latestPeriod.minggu == minggu;
         
         try {
+            console.log(`🔍 Checking data availability for ${tahun}/${bulan}/W${minggu}...`);
+            
             const response = await fetch(`/api/wilayah/data-by-period?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`);
             const data = await response.json();
             
             if (!data.data_available) {
-                // Show notification
+                console.log('⚠️  Data tidak tersedia untuk periode ini, fallback ke latest');
+                
+                // Show notification dengan info yang jelas
                 const notification = document.createElement('div');
                 notification.style.cssText = `
                     position: fixed;
                     top: 80px;
                     right: 20px;
-                    background: #f39c12;
+                    background: #e74c3c;
                     color: white;
                     padding: 15px 20px;
                     border-radius: 8px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                     z-index: 10000;
-                    max-width: 400px;
+                    max-width: 500px;
+                    font-size: 13px;
+                    line-height: 1.5;
                 `;
                 notification.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i> ${data.message}
+                    <strong style="display: block; margin-bottom: 5px;">📂 Data Tidak Ditemukan</strong>
+                    ${data.message}<br>
+                    <small style="opacity: 0.9;">Kami akan menampilkan data terbaru yang tersedia...</small>
                 `;
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
                     notification.remove();
-                }, 5000);
+                }, 6000);
                 
-                // Update to latest period
+                // Auto-redirect to latest period
                 if (data.showing_latest && data.period) {
+                    console.log('🔄 Auto-redirecting to latest available period:', data.period);
+                    
                     document.getElementById('tahunSelect').value = data.period.tahun;
                     document.getElementById('bulanSelect').value = data.period.bulan;
                     document.getElementById('mingguSelect').value = data.period.minggu;
+                    
+                    // Update display labels
+                    document.getElementById('tahunSelected').textContent = data.period.tahun;
+                    const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    document.getElementById('bulanSelected').textContent = bulanNames[parseInt(data.period.bulan)];
+                    document.getElementById('mingguSelected').textContent = 'Minggu ke-' + data.period.minggu;
+                    
+                    // Update selected buttons
+                    document.getElementById('tahunGrid').querySelectorAll('.grid-btn').forEach(btn => {
+                        if (btn.getAttribute('data-value') == data.period.tahun) {
+                            btn.classList.add('selected');
+                        } else {
+                            btn.classList.remove('selected');
+                        }
+                    });
+                    document.getElementById('bulanGrid').querySelectorAll('.grid-btn').forEach(btn => {
+                        if (btn.getAttribute('data-value') == data.period.bulan) {
+                            btn.classList.add('selected');
+                        } else {
+                            btn.classList.remove('selected');
+                        }
+                    });
+                    document.getElementById('mingguGrid').querySelectorAll('.grid-btn').forEach(btn => {
+                        if (btn.getAttribute('data-value') == data.period.minggu) {
+                            btn.classList.add('selected');
+                        } else {
+                            btn.classList.remove('selected');
+                        }
+                    });
+                    
                     currentPeriod = data.period;
-                    // Don't update display - keep showing "Data Terbaru"
+                    updatePeriodInfoDisplay(data.period, true);
                 }
             } else {
                 currentPeriod = { tahun, bulan, minggu };
                 // Only update display if user manually selected different period
                 if (!isLatestPeriod) {
                     updatePeriodInfoDisplay(currentPeriod);
+                    console.log('✅ Periode data tersedia:', currentPeriod);
+                } else {
+                    console.log('✅ Using latest published period');
                 }
             }
             
             return true;
         } catch (error) {
             console.error('Error checking period:', error);
+            
+            // Show error notification
+            const errorNotif = document.createElement('div');
+            errorNotif.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: #c0392b;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 400px;
+            `;
+            errorNotif.innerHTML = `
+                <strong>❌ Error Validasi</strong><br>
+                <small style="opacity: 0.9;">Lanjutkan dengan periode yang dipilih.</small>
+            `;
+            document.body.appendChild(errorNotif);
+            
+            setTimeout(() => {
+                errorNotif.remove();
+            }, 5000);
+            
             return true; // Continue anyway
         }
     }

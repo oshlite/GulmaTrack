@@ -18,6 +18,10 @@ class WilayahController extends Controller
         try {
             \Log::info("=== Getting GeoJSON for Wilayah {$wilayah_number} ===");
             
+            // Log ALL query parameters for debugging
+            $queryString = $request ? $request->getQueryString() : '';
+            \Log::info("Full query string: {$queryString}");
+            
             // Check custom admin header (most reliable)
             $hasAdminHeader = $request && $request->header('X-Admin-Request') === '1';
             
@@ -62,23 +66,36 @@ class WilayahController extends Controller
             }
 
             // Cache key untuk converted GeoJSON (1 jam cache)
+            // PENTING: Jangan cache jika ada import_id spesifik, karena data berbeda per import
+            $importId = $request ? $request->query('import_id') : null;
+            \Log::info("IMPORT_ID PARAMETER: " . ($importId ? "YES (ID: {$importId})" : "NOT SET"));
+            
             $cacheKey = "geojson_wgs84_wil_{$wilayah_number}";
             $cacheTTL = 3600; // 1 jam
             
-            // Try to get from cache first
-            $geojson = \Cache::get($cacheKey);
+            // Try to get from cache first - HANYA jika tidak ada import_id spesifik
+            $geojson = null;
+            if (!$importId) {
+                $geojson = \Cache::get($cacheKey);
+            }
             
             if (!$geojson) {
-                \Log::info("Cache miss for {$cacheKey}, converting coordinates...");
+                if ($importId) {
+                    \Log::info("Skipping cache for import_id {$importId}, loading fresh GeoJSON");
+                } else {
+                    \Log::info("Cache miss for {$cacheKey}, converting coordinates...");
+                }
                 $geojson = json_decode(file_get_contents($filePath), true);
                 \Log::info("Original GeoJSON features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
                 
                 // Convert dari UTM Zone 48S ke WGS84
                 $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
                 
-                // Store in cache
-                \Cache::put($cacheKey, $geojson, $cacheTTL);
-                \Log::info("Cached converted GeoJSON for 1 hour");
+                // Store in cache - HANYA jika tidak ada import_id spesifik
+                if (!$importId) {
+                    \Cache::put($cacheKey, $geojson, $cacheTTL);
+                    \Log::info("Cached converted GeoJSON for 1 hour");
+                }
             } else {
                 \Log::info("Cache hit for {$cacheKey}");
             }
@@ -93,8 +110,15 @@ class WilayahController extends Controller
             // Query data from database for this wilayah
             $query = DataGulma::where('wilayah_id', $wilayah_number);
 
-            // If period filters are provided, get only the latest import for that period
-            if ($tahun && $bulan && $minggu) {
+            // Priority 1: If specific import_id is provided, use it
+            if ($importId) {
+                \Log::info("🎯 FILTERING BY IMPORT_ID: {$importId}");
+                \Log::info("Before query - count all records for wilayah {$wilayah_number}: " . DataGulma::where('wilayah_id', $wilayah_number)->count());
+                $query->where('import_log_id', $importId);
+                \Log::info("After where import_log_id - count: " . $query->count());
+            }
+            // Priority 2: If period filters are provided, get only the latest import for that period
+            elseif ($tahun && $bulan && $minggu) {
                 // Find the latest import_log_id for this period
                 $latestImportLog = \App\Models\ImportLog::where('tahun', $tahun)
                     ->where('bulan', $bulan)
@@ -113,26 +137,65 @@ class WilayahController extends Controller
                     $geojson['features'] = [];
                     return response()->json($geojson);
                 }
-            } else {
-                // Both guest (when published) and admin should show latest import data
-                $latestImportLog = \App\Models\ImportLog::where('status', 'success')
-                    ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-                
-                if ($latestImportLog) {
-                    $userType = $isAdmin ? 'Admin' : 'Guest';
-                    \Log::info("{$userType} user: showing latest import_log_id {$latestImportLog->id}");
-                    $query->where('import_log_id', $latestImportLog->id);
+            }
+            // Priority 3: Default - show data based on user type
+            else {
+                if ($isAdmin) {
+                    // ADMIN: Show latest import (admin dapat preview semua data termasuk yang belum dipublikasi)
+                    $latestImportLog = \App\Models\ImportLog::where('status', 'success')
+                        ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+                    
+                    if ($latestImportLog) {
+                        \Log::info("✅ ADMIN MODE: Using latest import_log_id {$latestImportLog->id}");
+                        $query->where('import_log_id', $latestImportLog->id);
+                    } else {
+                        \Log::warning("❌ ADMIN MODE: No import logs found for wilayah {$wilayah_number}");
+                    }
                 } else {
-                    \Log::warning("No import logs found for wilayah {$wilayah_number}");
-                    // For admin, still show features even if no data in DB
-                    // This way map loads but without gulma data
+                    // GUEST: Show published map data ONLY - prioritas publikasi per-periode
+                    // Get recent periods (last 3 months worth of data)
+                    $importLog = \App\Models\ImportLog::where('status', 'success')
+                        ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
+                        ->orderBy('tahun', 'desc')
+                        ->orderBy('bulan', 'desc')
+                        ->orderBy('minggu', 'desc')
+                        ->take(12)
+                        ->get();
+                    
+                    // Try to find published publication for any of these periods
+                    $publishedLog = null;
+                    foreach ($importLog as $log) {
+                        $pub = \App\Models\MapPublication::getPublishedForPeriod($log->tahun, $log->bulan, $log->minggu);
+                        if ($pub && $pub->importLog) {
+                            $publishedLog = $pub->importLog;
+                            \Log::info("✅ GUEST MODE: Found published data for period {$log->tahun}/{$log->bulan}/W{$log->minggu} - import_id {$pub->import_log_id}");
+                            break;
+                        }
+                    }
+                    
+                    if ($publishedLog) {
+                        $query->where('import_log_id', $publishedLog->id);
+                    } else {
+                        // Fallback: gunakan yang paling baru saja
+                        $latestLog = $importLog->first();
+                        if ($latestLog) {
+                            \Log::info("⚠️  GUEST MODE: No published data found, fallback to latest import_log_id {$latestLog->id}");
+                            $query->where('import_log_id', $latestLog->id);
+                        } else {
+                            \Log::info("⚠️  GUEST MODE: No published data available for wilayah {$wilayah_number}");
+                        }
+                    }
                 }
             }
             
             $gulmaData = $query->get();
-            \Log::info("Database records for wilayah {$wilayah_number}: " . $gulmaData->count());
+            \Log::info("🎯 Final query result for wilayah {$wilayah_number}: " . $gulmaData->count() . " records");
+            
+            // Log actual import_log_ids yang fetched
+            $importLogIds = $gulmaData->pluck('import_log_id')->unique()->toArray();
+            \Log::info("Import log IDs in result: " . json_encode($importLogIds));
             
             // Create a lookup map by seksi (normalized)
             $gulmaMap = [];
@@ -216,6 +279,44 @@ class WilayahController extends Controller
             
             \Log::info("Merged {$mergedCount} features with database data");
             \Log::info("Final features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
+
+            // PENTING: Jika menggunakan import_id spesifik (published map), FILTER features tanpa kategori
+            \Log::info("=== CHECKING FILTER CONDITION ===");
+            \Log::info("importId value: " . ($importId ? "YES ({$importId})" : "NULL/FALSE"));
+            
+            if ($importId) {
+                \Log::info("🎯 FILTER CONDITION MET - Filtering features without kategori");
+                $beforeFilter = isset($geojson['features']) ? count($geojson['features']) : 0;
+                \Log::info("Before filter: $beforeFilter features");
+                
+                // Count how many will be filtered
+                $withKategori = 0;
+                $withoutKategori = 0;
+                foreach ($geojson['features'] as $feature) {
+                    if (isset($feature['properties']['kategori']) && !empty(trim($feature['properties']['kategori']))) {
+                        $withKategori++;
+                    } else {
+                        $withoutKategori++;
+                    }
+                }
+                \Log::info("Features breakdown: $withKategori WITH kategori, $withoutKategori WITHOUT kategori");
+                
+                // Filter: hanya tampilkan features yang punya kategori (tidak kosong)
+                $geojson['features'] = array_filter($geojson['features'], function($feature) {
+                    return isset($feature['properties']['kategori']) && 
+                           !empty(trim($feature['properties']['kategori']));
+                });
+                
+                // Re-index array setelah filter
+                $geojson['features'] = array_values($geojson['features']);
+                
+                $afterFilter = count($geojson['features']);
+                \Log::info("After filter: $afterFilter features");
+                \Log::info("🎯 PUBLISHED MAP FILTER: Removed " . ($beforeFilter - $afterFilter) . " features without kategori");
+                \Log::info("🎯 PUBLISHED MAP: Now showing $afterFilter features with kategori only");
+            } else {
+                \Log::info("⚠️  FILTER CONDITION NOT MET - importId is null/false, showing all features");
+            }
 
             // Add HTTP cache headers - cache for 1 hour
             return response()->json($geojson)

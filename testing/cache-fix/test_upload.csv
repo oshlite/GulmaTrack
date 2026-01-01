@@ -1,0 +1,6 @@
+PG,FM,Wilayah,SEKSI,Neto,Hasil,Umur Tanaman,Penanggungjawab,Kode Aktf,ACTIVITAS,KATEGORI,TK/HA,TOTAL TK
+PG001,FM001,16,SEKSI-A,10.5,2.3,45,Admin,KD001,Aktivitas 1,Ringan,0.5,10
+PG002,FM002,16,SEKSI-B,12.0,3.1,50,Admin,KD002,Aktivitas 2,Sedang,0.6,12
+PG003,FM003,17,SEKSI-C,9.5,1.8,40,Admin,KD003,Aktivitas 3,Berat,0.7,15
+PG004,FM004,17,SEKSI-D,11.0,2.9,48,Admin,KD004,Aktivitas 4,Ringan,0.5,11
+PG005,FM005,18,SEKSI-E,13.0,3.5,52,Admin,KD005,Aktivitas 5,Sedang,0.8,16

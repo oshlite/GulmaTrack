@@ -23,12 +23,12 @@
             align-items: center;
         }
 
-        .stats-controls input,
         .stats-controls select {
             padding: 10px 15px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+            min-width: 150px;
         }
 
         .stats-controls button {
@@ -140,75 +140,6 @@
             color: var(--primary-color);
         }
 
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .comparison-card {
-            background: linear-gradient(135deg, var(--light-color), #fff);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .comparison-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow);
-        }
-
-        .comparison-title {
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 15px;
-            font-size: 15px;
-        }
-
-        .comparison-stat {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .comparison-stat:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .comparison-label {
-            color: #666;
-            font-size: 13px;
-        }
-
-        .comparison-value {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .trend-indicator {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .trend-up {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .trend-down {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
         .export-btn {
             background-color: var(--secondary-color);
             color: white;
@@ -226,67 +157,32 @@
             transform: translateY(-2px);
         }
 
-        .year-comparison {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .year-item {
-            background: white;
-            padding: 20px;
+        .period-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 15px 20px;
             border-radius: 8px;
-            border-left: 5px solid var(--primary-color);
-            text-align: center;
+            margin-bottom: 20px;
+            border-left: 4px solid #1976d2;
         }
 
-        .year-item .year {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 5px;
-        }
-
-        .year-item .value {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .year-item .label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 8px;
+        .period-info strong {
+            color: #1976d2;
         }
     </style>
 
     <!-- Filter & Kontrol -->
     <div class="stats-controls">
-        <select id="filterTahun" style="min-width: 150px;">
-            <option value="">Semua Tahun</option>
-            <option value="2024">2024</option>
-            <option value="2025" selected>2025</option>
+        <select id="filterTahun">
+            <option value="">Memuat tahun...</option>
         </select>
 
-        <select id="filterBulan" style="min-width: 150px;">
-            <option value="">Semua Bulan</option>
-            <option value="1">Januari</option>
-            <option value="2">Februari</option>
-            <option value="3">Maret</option>
-            <option value="4">April</option>
-            <option value="5">Mei</option>
-            <option value="6">Juni</option>
-            <option value="7">Juli</option>
-            <option value="8">Agustus</option>
-            <option value="9">September</option>
-            <option value="10">Oktober</option>
-            <option value="11">November</option>
-            <option value="12" selected>Desember</option>
+        <select id="filterBulan">
+            <option value="">Memuat bulan...</option>
         </select>
 
-        <select id="filterMinggu" style="min-width: 150px;">
+        <select id="filterMinggu">
             <option value="">Semua Minggu</option>
-            <option value="1" selected>Minggu 1</option>
+            <option value="1">Minggu 1</option>
             <option value="2">Minggu 2</option>
             <option value="3">Minggu 3</option>
             <option value="4">Minggu 4</option>
@@ -297,6 +193,12 @@
         </button>
     </div>
 
+    <!-- Period Info Display -->
+    <div class="period-info" id="periodInfoDisplay" style="display: none;">
+        <i class="fas fa-info-circle"></i> 
+        <span id="periodInfoText">Menampilkan data terbaru</span>
+    </div>
+
     <!-- Ranking Wilayah -->
     <div class="stat-section">
         <h3><i class="fas fa-trophy"></i> Ranking Wilayah Berdasarkan Gulma</h3>
@@ -304,8 +206,6 @@
             <!-- Will be populated by JavaScript -->
         </div>
     </div>
-
-   
 
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
@@ -328,11 +228,11 @@
             </tbody>
         </table>
     </div>
+</div>
 
-    
 <script>
 /* ===============================
-   STATISTIK PAGE - FIXED VERSION
+   STATISTIK PAGE - WITH SMART DYNAMIC FILTERS
 ================================ */
 
 let currentPeriod = {
@@ -341,13 +241,153 @@ let currentPeriod = {
     minggu: null
 };
 
+let availablePeriods = {
+    periods: [],
+    tahun_list: [],
+    latest_period: null
+};
+
+const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
 /* ===============================
-   INIT - Load data saat halaman dimuat
+   INIT
 ================================ */
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('📊 Statistik page loaded');
-    await loadAllStatistics();
+    await loadAvailablePeriods();
 });
+
+/* ===============================
+   LOAD AVAILABLE PERIODS FROM API
+================================ */
+async function loadAvailablePeriods() {
+    try {
+        console.log('🔍 Loading available periods...');
+        
+        const response = await fetch('/api/wilayah/periods');
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch periods: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📅 Periods API response:', data);
+        
+        if (data.success) {
+            availablePeriods = {
+                periods: data.periods || [],
+                tahun_list: data.tahun_list || [],
+                latest_period: data.latest_period
+            };
+            
+            console.log('✅ Available years:', availablePeriods.tahun_list);
+            console.log('✅ Latest period:', availablePeriods.latest_period);
+            
+            // Populate filters
+            populateYearFilter();
+            populateMonthFilter();
+            
+            // Set default to latest period
+            if (availablePeriods.latest_period) {
+                const latest = availablePeriods.latest_period;
+                currentPeriod = latest;
+                
+                document.getElementById('filterTahun').value = latest.tahun;
+                document.getElementById('filterBulan').value = latest.bulan;
+                document.getElementById('filterMinggu').value = latest.minggu || '';
+                
+                updatePeriodInfoDisplay();
+                
+                console.log('✅ Default period set:', latest);
+            }
+            
+            // Load statistics
+            await loadAllStatistics();
+            
+        } else {
+            throw new Error('API returned success: false');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading periods:', error);
+        
+        // Fallback: populate with current year
+        const currentYear = new Date().getFullYear();
+        availablePeriods.tahun_list = [currentYear];
+        populateYearFilter();
+        populateMonthFilter();
+        
+        // Still try to load data
+        await loadAllStatistics();
+    }
+}
+
+/* ===============================
+   POPULATE YEAR FILTER
+================================ */
+function populateYearFilter() {
+    const select = document.getElementById('filterTahun');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Semua Tahun</option>';
+    
+    if (availablePeriods.tahun_list && availablePeriods.tahun_list.length > 0) {
+        availablePeriods.tahun_list.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            select.appendChild(option);
+        });
+        console.log('✅ Year filter populated:', availablePeriods.tahun_list.length, 'years');
+    } else {
+        console.warn('⚠️ No years available');
+    }
+}
+
+/* ===============================
+   POPULATE MONTH FILTER
+================================ */
+function populateMonthFilter() {
+    const select = document.getElementById('filterBulan');
+    if (!select) return;
+
+    // Reset dropdown
+    select.innerHTML = '<option value="">Semua Bulan</option>';
+
+    // Selalu tampilkan 12 bulan
+    for (let i = 1; i <= 12; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = monthNames[i];
+        select.appendChild(option);
+    }
+
+    console.log('✅ Month filter populated: all months (1–12)');
+}
+
+
+/* ===============================
+   UPDATE PERIOD INFO DISPLAY
+================================ */
+function updatePeriodInfoDisplay() {
+    const display = document.getElementById('periodInfoDisplay');
+    const textEl = document.getElementById('periodInfoText');
+    
+    if (!currentPeriod.tahun) {
+        display.style.display = 'none';
+        return;
+    }
+    
+    const tahun = currentPeriod.tahun;
+    const bulan = currentPeriod.bulan ? monthNames[currentPeriod.bulan] : 'Semua Bulan';
+    const minggu = currentPeriod.minggu ? `Minggu ke-${currentPeriod.minggu}` : 'Semua Minggu';
+    
+    textEl.innerHTML = `Menampilkan data: <strong>Tahun ${tahun}, ${bulan}, ${minggu}</strong>`;
+    display.style.display = 'block';
+    
+    console.log('📍 Period display updated:', currentPeriod);
+}
 
 /* ===============================
    LOAD ALL STATISTICS
@@ -358,7 +398,6 @@ async function loadAllStatistics() {
     try {
         console.log('🚀 Loading statistics...');
         
-        // Build query string dari filter
         const tahun = document.getElementById('filterTahun')?.value;
         const bulan = document.getElementById('filterBulan')?.value;
         const minggu = document.getElementById('filterMinggu')?.value;
@@ -372,65 +411,30 @@ async function loadAllStatistics() {
         
         console.log('📡 Query:', queryString);
         
-        // Load all endpoints
-        const [summaryRes, rankingRes, productivityRes, yearlyRes] = await Promise.all([
+        const [summaryRes, rankingRes] = await Promise.all([
             fetch(`/api/statistik/summary${queryString}`),
-            fetch(`/api/statistik/ranking${queryString}`),
-            fetch(`/api/statistik/productivity${queryString}`),
-            fetch(`/api/statistik/yearly-comparison`)
+            fetch(`/api/statistik/ranking${queryString}`)
         ]);
 
-        // Check responses
-        if (!summaryRes.ok) {
-            throw new Error(`Summary API: ${summaryRes.status} ${summaryRes.statusText}`);
-        }
-        if (!rankingRes.ok) {
-            throw new Error(`Ranking API: ${rankingRes.status} ${rankingRes.statusText}`);
-        }
-        if (!productivityRes.ok) {
-            throw new Error(`Productivity API: ${productivityRes.status} ${productivityRes.statusText}`);
-        }
-        if (!yearlyRes.ok) {
-            throw new Error(`Yearly API: ${yearlyRes.status} ${yearlyRes.statusText}`);
-        }
+        if (!summaryRes.ok) throw new Error(`Summary API: ${summaryRes.status}`);
+        if (!rankingRes.ok) throw new Error(`Ranking API: ${rankingRes.status}`);
 
         const summary = await summaryRes.json();
         const ranking = await rankingRes.json();
-        const productivity = await productivityRes.json();
-        const yearly = await yearlyRes.json();
 
         console.log('📊 Summary:', summary);
         console.log('🏆 Ranking:', ranking);
-        console.log('📈 Productivity:', productivity);
-        console.log('📅 Yearly:', yearly);
 
-        // Render sections
         if (summary.success) {
             renderDetailStats(summary.data);
         } else {
-            console.error('Summary error:', summary.message);
-            showError('Summary', summary.message);
+            showEmptyState('detailStatsTable', 'Tidak ada data statistik');
         }
         
         if (ranking.success) {
             renderRanking(ranking.data);
         } else {
-            console.error('Ranking error:', ranking.message);
-            showError('Ranking', ranking.message);
-        }
-        
-        if (productivity.success) {
-            renderProductivity(productivity.data);
-        } else {
-            console.error('Productivity error:', productivity.message);
-            showError('Productivity', productivity.message);
-        }
-        
-        if (yearly.success) {
-            renderYearlyComparison(yearly.data);
-        } else {
-            console.error('Yearly error:', yearly.message);
-            showError('Yearly', yearly.message);
+            showEmptyState('bar-chart', 'Tidak ada data ranking');
         }
 
         hideLoading();
@@ -444,7 +448,7 @@ async function loadAllStatistics() {
 }
 
 /* ===============================
-   UPDATE STATS WITH FILTER
+   UPDATE STATS
 ================================ */
 async function updateStats() {
     const tahun = document.getElementById('filterTahun')?.value;
@@ -454,11 +458,12 @@ async function updateStats() {
     console.log('🔍 Filter:', { tahun, bulan, minggu });
     currentPeriod = { tahun, bulan, minggu };
     
+    updatePeriodInfoDisplay();
     await loadAllStatistics();
 }
 
 /* ===============================
-   RENDER DETAIL STATS TABLE
+   RENDER FUNCTIONS
 ================================ */
 function renderDetailStats(data) {
     const tbody = document.getElementById('detailStatsTable');
@@ -469,10 +474,10 @@ function renderDetailStats(data) {
     if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align:center; padding: 40px;">
+                <td colspan="8" style="text-align:center; padding: 40px;">
                     <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3;"></i><br>
                     <strong>Tidak ada data</strong><br>
-                    <small>Upload CSV di halaman Admin</small>
+                    <small>Pilih periode lain atau upload CSV di Admin</small>
                 </td>
             </tr>
         `;
@@ -494,9 +499,6 @@ function renderDetailStats(data) {
     });
 }
 
-/* ===============================
-   RENDER RANKING
-================================ */
 function renderRanking(data) {
     const container = document.querySelector('.bar-chart');
     if (!container) return;
@@ -504,7 +506,12 @@ function renderRanking(data) {
     container.innerHTML = '';
 
     if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding: 40px;"><i class="fas fa-chart-bar" style="font-size: 48px; opacity: 0.3;"></i><br><strong>Tidak ada data ranking</strong></p>';
+        container.innerHTML = `
+            <p style="text-align:center; padding: 40px;">
+                <i class="fas fa-chart-bar" style="font-size: 48px; opacity: 0.3;"></i><br>
+                <strong>Tidak ada data ranking</strong>
+            </p>
+        `;
         return;
     }
 
@@ -527,85 +534,21 @@ function renderRanking(data) {
     });
 }
 
-/* ===============================
-   RENDER PRODUCTIVITY
-================================ */
-function renderProductivity(data) {
-    const tbody = document.getElementById('productivityTable');
-    if (!tbody) return;
-
-    const tinggi = data.tinggi || { count: 0, avg: 0 };
-    const sedang = data.sedang || { count: 0, avg: 0 };
-    const rendah = data.rendah || { count: 0, avg: 0 };
-
-    tbody.innerHTML = `
-        <tr>
-            <td><strong>Produktivitas Tinggi (>9 T/Ha)</strong></td>
-            <td>${tinggi.count}</td>
-            <td class="stat-value">${parseFloat(tinggi.avg).toFixed(2)} T/Ha</td>
-            <td>${Math.max(0, 10 - tinggi.avg).toFixed(1)} T/Ha</td>
-            <td><span class="trend-indicator trend-up">✓ Optimal</span></td>
-        </tr>
-        <tr>
-            <td><strong>Produktivitas Sedang (8-9 T/Ha)</strong></td>
-            <td>${sedang.count}</td>
-            <td class="stat-value">${parseFloat(sedang.avg).toFixed(2)} T/Ha</td>
-            <td>${Math.max(0, 9 - sedang.avg).toFixed(1)} T/Ha</td>
-            <td><span class="trend-indicator trend-up">⚠ Dapat Ditingkatkan</span></td>
-        </tr>
-        <tr>
-            <td><strong>Produktivitas Rendah (<8 T/Ha)</strong></td>
-            <td>${rendah.count}</td>
-            <td class="stat-value">${parseFloat(rendah.avg).toFixed(2)} T/Ha</td>
-            <td>${Math.max(0, 8 - rendah.avg).toFixed(1)} T/Ha</td>
-            <td><span class="trend-indicator trend-down">✕ Perlu Intervensi</span></td>
-        </tr>
+function showEmptyState(elementId, message) {
+    const element = document.getElementById(elementId) || document.querySelector(`.${elementId}`);
+    if (!element) return;
+    
+    element.innerHTML = `
+        <div style="text-align:center; padding: 40px; color: #999;">
+            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i><br>
+            <strong>${message}</strong>
+        </div>
     `;
 }
 
 /* ===============================
-   RENDER YEARLY COMPARISON
+   LOADING HELPERS
 ================================ */
-function renderYearlyComparison(data) {
-    const container = document.querySelector('.year-comparison');
-    if (!container) return;
-    
-    container.innerHTML = '';
-
-    if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding: 40px; grid-column: 1/-1;"><i class="fas fa-calendar" style="font-size: 48px; opacity: 0.3;"></i><br><strong>Tidak ada data tahunan</strong></p>';
-        return;
-    }
-
-    data.forEach((item, i) => {
-        const isLast = i === data.length - 1;
-        const yearItem = document.createElement('div');
-        yearItem.className = 'year-item';
-        
-        if (isLast) {
-            yearItem.style.borderLeftColor = 'var(--secondary-color)';
-        }
-        
-        const hasil = parseFloat(item.total_hasil || 0);
-        
-        yearItem.innerHTML = `
-            <div class="year">${item.tahun}</div>
-            <div class="value" ${isLast ? 'style="color: var(--secondary-color);"' : ''}>
-                ${hasil.toLocaleString('id-ID')}
-            </div>
-            <div class="label">Ton ${isLast ? '(Current)' : ''}</div>
-        `;
-        container.appendChild(yearItem);
-    });
-}
-
-/* ===============================
-   HELPERS
-================================ */
-function viewDetail(wilayahId) {
-    window.location.href = `/wilayah?wilayah=${wilayahId}`;
-}
-
 function showLoading() {
     document.body.style.cursor = 'wait';
     const overlay = document.getElementById('loadingOverlay');
@@ -628,10 +571,6 @@ function hideLoading() {
     document.body.style.cursor = 'default';
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.remove();
-}
-
-function showError(section, message) {
-    console.error(`${section} error:`, message);
 }
 </script>
 

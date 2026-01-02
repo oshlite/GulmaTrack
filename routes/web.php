@@ -66,6 +66,7 @@ Route::prefix('api/gallery')
     ->name('api.gallery.')
     ->group(function () {
         Route::get('/kategori/{kategori}', [GalleryController::class, 'getByCategory'])->name('by-category');
+        Route::get('/image/{id}', [GalleryController::class, 'serveImage'])->name('image');
     });
 
 /*

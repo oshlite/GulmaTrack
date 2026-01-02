@@ -64,13 +64,8 @@ class GulmaPhoto extends Model
             return '/image/roblox.png'; // Fallback placeholder
         }
         
-        // Check if file exists
-        if (Storage::disk('public')->exists($this->foto_path)) {
-            return Storage::disk('public')->url($this->foto_path);
-        }
-        
-        // If file doesn't exist, return placeholder
-        return '/image/roblox.png';
+        // Return public API route untuk serve image file langsung
+        return route('api.gallery.image', ['id' => $this->id]);
     }
 
     /**

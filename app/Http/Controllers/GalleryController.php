@@ -294,4 +294,28 @@ class GalleryController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Serve image file directly
+     */
+    public function serveImage($id)
+    {
+        try {
+            $photo = GulmaPhoto::findOrFail($id);
+
+            if (!Storage::disk('public')->exists($photo->foto_path)) {
+                return response()->file(public_path('image/roblox.png'));
+            }
+
+            $filePath = Storage::disk('public')->path($photo->foto_path);
+            
+            return response()->file($filePath, [
+                'Content-Type' => $photo->mime_type ?? 'image/jpeg',
+                'Cache-Control' => 'public, max-age=31536000',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->file(public_path('image/roblox.png'));
+        }
+    }
 }

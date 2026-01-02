@@ -305,13 +305,7 @@
         </div>
     </div>
 
-    <!-- Perbandingan Tahun -->
-    <div class="stat-section">
-        <h3><i class="fas fa-calendar"></i> Perbandingan Produksi Tahunan</h3>
-        <div class="year-comparison">
-            <!-- Will be populated by JavaScript -->
-        </div>
-    </div>
+   
 
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
@@ -335,26 +329,7 @@
         </table>
     </div>
 
-    <!-- Analisis Produktivitas -->
-    <div class="stat-section">
-        <h3><i class="fas fa-bolt"></i> Analisis Produktivitas</h3>
-        <table class="stat-table">
-            <thead>
-                <tr>
-                    <th>Kategori</th>
-                    <th>Jumlah Features</th>
-                    <th>Rata-rata Produktivitas</th>
-                    <th>Potensi Peningkatan</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="productivityTable">
-                <!-- Will be populated by JavaScript -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
+    
 <script>
 /* ===============================
    STATISTIK PAGE - FIXED VERSION

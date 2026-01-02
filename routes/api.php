@@ -46,27 +46,27 @@ Route::get('/excel-data', [ExcelDataController::class, 'getExcelData'])
 // Get kategori color mapping
 Route::get('/kategori-colors', [\App\Http\Controllers\AdminController::class, 'getKategoriColors'])
     ->name('api.kategori.colors')
-    ->withoutMiddleware('api');
+    ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Map publications - get latest published
 Route::get('/map-publications/latest-published', [\App\Http\Controllers\AdminController::class, 'getLatestPublished'])
     ->name('api.map-publications.latest')
-    ->withoutMiddleware('api');
+    ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Data gulma by import ID
 Route::get('/data-gulma/by-import/{importId}', [\App\Http\Controllers\AdminController::class, 'getDataByImport'])
     ->name('api.data-gulma.by-import')
-    ->withoutMiddleware('api');
+    ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Import logs - get list with filters
 Route::get('/import-logs', [\App\Http\Controllers\AdminController::class, 'getImportLogs'])
     ->name('api.import-logs')
-    ->withoutMiddleware('api');
+    ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Debug endpoint - check data in database
 Route::get('/debug/import/{importId}', [\App\Http\Controllers\AdminController::class, 'debugImport'])
     ->name('api.debug.import')
-    ->withoutMiddleware('api');
+    ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Maintenance endpoint - fix missing import_log_id
 Route::post('/maintenance/fix-import-log-ids', [\App\Http\Controllers\AdminController::class, 'fixMissingImportLogIds'])

@@ -1952,9 +1952,13 @@
 
             for (const wilayahNum of wilayahNumbers) {
                 try {
-                    const geoResponse = await fetch(`/api/wilayah/geojson/${wilayahNum}?admin=1`);
+                    const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}`;
+                    console.log(`📥 Fetching wilayah ${wilayahNum} with import_id=${importId} - URL: ${url}`);
+                    const geoResponse = await fetch(url);
+                    console.log(`🗺️  Wilayah ${wilayahNum}: ${geoResponse.status} HTTP status, ${geoResponse.ok ? 'OK' : 'FAILED'}`);
                     if (!geoResponse.ok) continue;
                     const geojson = await geoResponse.json();
+                    console.log(`🗺️  Wilayah ${wilayahNum}: ${geojson.features ? geojson.features.length : 0} features from import ${importId}`);
                     
                     // Merge data dengan geojson
                     const dataRecords = byWilayah[wilayahNum];

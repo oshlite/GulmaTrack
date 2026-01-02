@@ -21,6 +21,8 @@ class WilayahController extends Controller
             // Log ALL query parameters for debugging
             $queryString = $request ? $request->getQueryString() : '';
             \Log::info("Full query string: {$queryString}");
+            \Log::info("Request URL: " . ($request ? $request->url() : 'N/A'));
+            \Log::info("Request query params: " . json_encode($request ? $request->query() : []));
             
             // Check custom admin header (most reliable)
             $hasAdminHeader = $request && $request->header('X-Admin-Request') === '1';
@@ -280,6 +282,18 @@ class WilayahController extends Controller
             \Log::info("Merged {$mergedCount} features with database data");
             \Log::info("Final features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
+            // DEBUG: Check first few features
+            if (isset($geojson['features']) && count($geojson['features']) > 0) {
+                \Log::info("DEBUG - First 3 features after merge:");
+                for ($i = 0; $i < min(3, count($geojson['features'])); $i++) {
+                    $f = $geojson['features'][$i];
+                    $kategori = $f['properties']['kategori'] ?? 'MISSING';
+                    $seksi = $f['properties']['seksi'] ?? 'MISSING';
+                    $lokasi = $f['properties']['Lokasi'] ?? 'MISSING';
+                    \Log::info("  [$i] Lokasi=$lokasi, seksi=$seksi, kategori=$kategori");
+                }
+            }
+
             // PENTING: Jika menggunakan import_id spesifik (published map), FILTER features tanpa kategori
             \Log::info("=== CHECKING FILTER CONDITION ===");
             \Log::info("importId value: " . ($importId ? "YES ({$importId})" : "NULL/FALSE"));
@@ -318,10 +332,20 @@ class WilayahController extends Controller
                 \Log::info("⚠️  FILTER CONDITION NOT MET - importId is null/false, showing all features");
             }
 
-            // Add HTTP cache headers - cache for 1 hour
-            return response()->json($geojson)
-                ->header('Cache-Control', 'public, max-age=3600')
-                ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
+            // Add HTTP cache headers - ONLY if no specific import_id
+            // When import_id is specified, data is temporary/unique, so don't cache
+            if ($importId) {
+                // No caching for specific import queries - each import has unique data
+                return response()->json($geojson)
+                    ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                    ->header('Pragma', 'no-cache')
+                    ->header('Expires', '0');
+            } else {
+                // Cache general queries for 1 hour
+                return response()->json($geojson)
+                    ->header('Cache-Control', 'public, max-age=3600')
+                    ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
+            }
         } catch (\Exception $e) {
             \Log::error("Error in getGeojson: " . $e->getMessage());
             \Log::error($e->getTraceAsString());

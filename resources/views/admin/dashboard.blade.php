@@ -1811,34 +1811,148 @@
 
     // Load published map or fallback to latest uploaded data
     async function loadPublishedMapOrLatestUpload() {
-        console.log('🗺️  === [DASHBOARD] Loading published map or latest upload ===');
+    console.log('🗺️  === [DASHBOARD] Loading latest published map ===');
 
-        try {
-            // Check apakah ada published map
-            const pubResponse = await fetch('/api/publication-status');
-            if (pubResponse.ok) {
-                const pubData = await pubResponse.json();
-                if (pubData.is_published && pubData.import_log && pubData.import_log.id) {
-                    console.log('✅ [DASHBOARD] Found published map with import_id:', pubData.import_log.id);
-                    await loadDataForImport(
-                        pubData.import_log.id,
-                        pubData.import_log.tahun,
-                        pubData.import_log.bulan,
-                        pubData.import_log.minggu
-                    );
-                    return;
-                }
+    try {
+        // ✅ SIMPLIFIED: Always get latest published
+        const cacheBust = new Date().getTime();
+        const pubResponse = await fetch(`/api/publication-status?_t=${cacheBust}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
-            
-            // Fallback: load latest uploaded
-            console.log('⚠️  [DASHBOARD] No published map found, loading latest upload...');
-            loadLatestUploadedData();
-        } catch (error) {
-            console.error('❌ [DASHBOARD] Error loading published map:', error);
-            console.log('🔄 [DASHBOARD] Fallback: loading latest upload...');
-            loadLatestUploadedData();
+        });
+        if (pubResponse.ok) {
+            const pubData = await pubResponse.json();
+            if (pubData.is_published && pubData.import_log && pubData.import_log.id) {
+                console.log('✅ [DASHBOARD] Found published map with import_id:', pubData.import_log.id);
+                await loadDataForImport(
+                    pubData.import_log.id,
+                    pubData.import_log.tahun,
+                    pubData.import_log.bulan,
+                    pubData.import_log.minggu
+                );
+                return;
+            }
         }
+        
+        // Fallback jika belum ada publikasi
+        console.log('⚠️  [DASHBOARD] No published map found, showing empty map');
+        const loadingDiv = document.getElementById('mapLoadingIndicator');
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        
+        showMapError('Belum ada data yang dipublikasikan. Silakan upload CSV dan klik "Perbarui Peta Publik".');
+    } catch (error) {
+        console.error('❌ [DASHBOARD] Error loading published map:', error);
+        showMapError('Gagal memuat data: ' + error.message);
     }
+}
+
+// ✅ Upload Form Handler - Setelah upload, auto-reload map
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const tahun = document.getElementById('tahun').value;
+    const bulan = document.getElementById('bulan').value;
+    const minggu = document.getElementById('minggu').value;
+    const file = document.getElementById('csvFile').files[0];
+    const messageDiv = document.getElementById('uploadMessage');
+
+    if (!tahun || !bulan || !minggu) {
+        messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih tahun, bulan, dan minggu terlebih dahulu';
+        messageDiv.className = 'message show error';
+        setTimeout(() => messageDiv.className = 'message', 4000);
+        return;
+    }
+
+    if (!file) {
+        messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih file CSV terlebih dahulu';
+        messageDiv.className = 'message show error';
+        setTimeout(() => messageDiv.className = 'message', 4000);
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tahun', tahun);
+    formData.append('bulan', bulan);
+    formData.append('minggu', minggu);
+    formData.append('_token', document.querySelector('[name="_token"]').value);
+
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses file...';
+    messageDiv.innerHTML = '<div class="loading-spinner"></div> Memproses file...';
+    messageDiv.className = 'message show';
+
+    try {
+        const res = await fetch('{{ route("admin.upload-csv") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
+            }
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
+            messageDiv.className = 'message show success';
+            
+            console.log('✅ Upload berhasil dan AUTO-PUBLISHED');
+            console.log('📊 Import Log ID:', data.import_log_id);
+            
+            // Clear form
+            document.getElementById('csvFile').value = '';
+            document.getElementById('fileStatus').style.display = 'none';
+            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
+            document.getElementById('uploadBtn').disabled = true;
+            
+            // ✅ RELOAD MAP dengan data terbaru yang sudah auto-published
+            console.log('🔄 Reloading map with latest published data...');
+            
+            // Clear existing layers
+            Object.keys(geoJsonLayers).forEach(key => {
+                if (geoJsonLayers[key]) {
+                    map.removeLayer(geoJsonLayers[key]);
+                }
+            });
+            geoJsonLayers = {};
+            
+            // Show loading
+            const loadingDiv = document.getElementById('mapLoadingIndicator');
+            if (loadingDiv) loadingDiv.style.display = 'block';
+            
+            // ✅ Load data yang baru di-publish (import_log_id dari response)
+            await loadDataForImport(data.import_log_id, tahun, bulan, minggu);
+            
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            
+            // Refresh table history
+            fetchImportHistory();
+            
+            // Update statistics
+            document.getElementById('statTotalData').textContent = data.berhasil;
+            
+            // Scroll to map
+            setTimeout(() => {
+                document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+            
+        } else {
+            const errorData = await res.json();
+            messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorData.message || 'Terjadi kesalahan'}`;
+            messageDiv.className = 'message show error';
+        }
+    } catch (error) {
+        messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+        messageDiv.className = 'message show error';
+    } finally {
+        document.getElementById('uploadBtn').disabled = false;
+        document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
+    }
+});
 
     // Load latest uploaded data on map (CSV terakhir diupload, BUKAN publikasi)
     async function loadLatestUploadedData() {
@@ -1846,7 +1960,14 @@
 
         try {
             // Get latest import log - coba endpoint yang berbeda
-            let response = await fetch('/api/import-logs');
+            const cacheBust = new Date().getTime();
+            let response = await fetch(`/api/import-logs?_t=${cacheBust}`, {
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             console.log('📡 [DASHBOARD] API response status:', response.status);
             
             if (!response.ok) {
@@ -1910,7 +2031,14 @@
         console.log(`🚀 Loading data for import ${importId}: ${tahun}/${bulan}/w${minggu}`);
         
         try {
-            const response = await fetch(`/api/data-gulma/by-import/${importId}`);
+            const cacheBust = new Date().getTime();
+            const response = await fetch(`/api/data-gulma/by-import/${importId}?_t=${cacheBust}`, {
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`API returned status ${response.status}`);
             }
@@ -1952,9 +2080,16 @@
 
             for (const wilayahNum of wilayahNumbers) {
                 try {
-                    const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}`;
+                    const cacheBust = new Date().getTime();
+                    const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}&_t=${cacheBust}`;
                     console.log(`📥 Fetching wilayah ${wilayahNum} with import_id=${importId} - URL: ${url}`);
-                    const geoResponse = await fetch(url);
+                    const geoResponse = await fetch(url, {
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
                     console.log(`🗺️  Wilayah ${wilayahNum}: ${geoResponse.status} HTTP status, ${geoResponse.ok ? 'OK' : 'FAILED'}`);
                     if (!geoResponse.ok) continue;
                     const geojson = await geoResponse.json();
@@ -2677,7 +2812,14 @@
     // Load publication status
     async function loadPublicationStatus() {
         try {
-            const res = await fetch('{{ route("admin.publication-status") }}');
+            const cacheBust = new Date().getTime();
+            const res = await fetch(`{{ route("admin.publication-status") }}?_t=${cacheBust}`, {
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             const data = await res.json();
             
             if (data.success && data.is_published) {
@@ -2694,77 +2836,86 @@
 
     // Publish map to public
     async function publishMapToPublic() {
-        const btn = document.getElementById('publishMapBtn');
-        const originalHtml = btn.innerHTML;
-        
-        if (!confirm('Apakah Anda yakin ingin memperbarui peta publik dengan data terbaru?')) {
-            return;
-        }
+    const btn = document.getElementById('publishMapBtn');
+    const originalHtml = btn.innerHTML;
+    
+    if (!confirm('Apakah Anda yakin ingin memperbarui peta publik dengan data terbaru?')) {
+        return;
+    }
 
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
-        try {
-            console.log('📤 Publishing map to public...');
+    try {
+        console.log('📤 Publishing map to public...');
 
-            const res = await fetch('{{ route("admin.publish-map") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
-                },
-                body: JSON.stringify({})
+        const res = await fetch('{{ route("admin.publish-map") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
+            },
+            body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            console.log('✅ Map published successfully');
+            
+            // ✅ RELOAD MAP dengan data yang baru dipublish (dengan cache-busting)
+            Object.keys(geoJsonLayers).forEach(key => {
+                if (geoJsonLayers[key]) {
+                    map.removeLayer(geoJsonLayers[key]);
+                }
             });
-
-            const data = await res.json();
-
-            if (data.success) {
-                console.log('✅ Map published successfully');
-                console.log('   File:', data.nama_file);
-                console.log('   Period:', data.tahun + '/' + data.bulan + '/W' + data.minggu);
-                console.log('   Import ID:', data.import_id);
-                
-                // PENTING: Clear all existing layers sebelum load data baru
-                Object.keys(geoJsonLayers).forEach(key => {
-                    if (geoJsonLayers[key]) {
-                        map.removeLayer(geoJsonLayers[key]);
-                    }
-                });
-                geoJsonLayers = {};
-                
-                // Reload all wilayah dengan import_id yang baru dipublish
-                loadAllWilayahWithImportId(data.import_id);
-                
-                // Show success message dengan detail file
-                const statusDiv = document.getElementById('publishStatus');
-                const detailText = `${data.nama_file} (${data.tahun}/${data.bulan}/W${data.minggu})`;
-                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ✅ ${data.message} | ${detailText}`;
-                statusDiv.style.color = '#128241';
-                
-                // Update button
-                btn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dipublikasi!';
-                btn.style.background = 'linear-gradient(135deg, #128241 0%, #2ecc71 100%)';
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
-                    loadPublicationStatus();
-                }, 3000);
-            } else {
-                console.error('❌ Publish failed:', data.message);
-                alert('❌ ' + data.message + '\n\n💡 Pastikan Anda sudah upload CSV dan status menjadi "SUCCESS" terlebih dahulu.');
+            geoJsonLayers = {};
+            
+            // Load dengan import_id yang baru dipublish + timestamp untuk bust cache
+            const timestamp = new Date().getTime();
+            await loadDataForImport(data.import_id, data.tahun, data.bulan, data.minggu, timestamp);
+            
+            // Update status
+            const statusDiv = document.getElementById('publishStatus');
+            statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ✅ ${data.message}`;
+            
+            btn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dipublikasi!';
+            btn.style.background = 'linear-gradient(135deg, #128241 0%, #2ecc71 100%)';
+            
+            setTimeout(() => {
                 btn.innerHTML = originalHtml;
                 btn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
                 btn.disabled = false;
-            }
-        } catch (error) {
-            console.error('❌ Network error:', error);
-            alert('⚠️  Terjadi kesalahan: ' + error.message + '\n\n💡 Periksa console (F12) untuk detail error.');
+                loadPublicationStatus();
+            }, 3000);
+        } else {
+            alert('❌ ' + data.message);
             btn.innerHTML = originalHtml;
-            btn.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
             btn.disabled = false;
         }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        alert('⚠️  Terjadi kesalahan: ' + error.message);
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
     }
+}
+
+// Initialize on page load
+setTimeout(() => {
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded!');
+        return;
+    }
+    console.log('🗺️ Initializing map...');
+    
+    initMap();
+    loadPublicationStatus();
+    
+    // ✅ Load latest published data
+    console.log('📥 Loading latest published data...');
+    loadPublishedMapOrLatestUpload();
+}, 200);
 
     // Load all wilayah with specific import_id
     function loadAllWilayahWithImportId(importId) {
@@ -3022,7 +3173,14 @@
         try {
             // Fetch data from import to get actual wilayah IDs
             console.log(`📥 Fetching data from import ${importId}...`);
-            const dataResponse = await fetch(`/api/data-gulma/by-import/${importId}`);
+            const cacheBust = new Date().getTime();
+            const dataResponse = await fetch(`/api/data-gulma/by-import/${importId}?_t=${cacheBust}`, {
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             
             if (!dataResponse.ok) {
                 throw new Error(`Failed to fetch data from import: ${dataResponse.status}`);
@@ -3078,12 +3236,16 @@
             
             // Load each wilayah - Pass importId to API
             const promises = wilayahArray.map(wilayahNum => {
-                const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}`;
+                const cacheBust = new Date().getTime();
+                const url = `/api/wilayah/geojson/${wilayahNum}?admin=1&import_id=${importId}&_t=${cacheBust}`;
                 console.log(`🌐 Fetching: ${url}`);
                 
                 return fetch(url, {
                     headers: {
-                        'X-Admin-Request': '1'
+                        'X-Admin-Request': '1',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
                     }
                 })
                     .then(r => {

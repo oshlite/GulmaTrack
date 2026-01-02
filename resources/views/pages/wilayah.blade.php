@@ -1513,7 +1513,14 @@ function initMap() {
         showMapLoading(true);
         const startTime = performance.now();
 
-        fetch(`/api/wilayah/geojson/${wilayahNumber}`)
+        const cacheBust = new Date().getTime();
+        fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1698,7 +1705,14 @@ function initMap() {
             // Load each wilayah
             const promises = wilayahNumbers.map(num => {
                 console.log(`🌍 [wilayah.blade] Fetching wilayah ${num}...`);
-                return fetch(`/api/wilayah/geojson/${num}`)
+                const cacheBust = new Date().getTime();
+                return fetch(`/api/wilayah/geojson/${num}?_t=${cacheBust}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                })
                     .then(r => {
                         console.log(`📥 [wilayah.blade] Wilayah ${num} response: status ${r.status}`);
                         if (!r.ok) {
@@ -2058,7 +2072,14 @@ function initMap() {
 
                 // Fetch all wilayah data to calculate per-wilayah statistics
                 const promises = enrichedData.map(wilayah => {
-                    return fetch(`/api/wilayah/geojson/${wilayah.wilayah}`)
+                    const cacheBust = new Date().getTime();
+                    return fetch(`/api/wilayah/geojson/${wilayah.wilayah}?_t=${cacheBust}`, {
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    })
                         .then(r => r.ok ? r.json() : null)
                         .then(geojson => {
                             if (!geojson || !geojson.features) return wilayah;

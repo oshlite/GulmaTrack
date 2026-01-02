@@ -106,8 +106,6 @@ class AdminController extends Controller
             'tahun' => $request->input('tahun'),
             'bulan' => $request->input('bulan'),
             'minggu' => $request->input('minggu'),
-            'expectsJson' => $request->expectsJson(),
-            'accept_header' => $request->header('Accept')
         ]);
         
         $request->validate([
@@ -117,19 +115,10 @@ class AdminController extends Controller
             'minggu' => 'required|integer|min:1|max:4',
         ], [
             'file.required' => 'File harus dipilih',
-            'file.file' => 'File tidak valid',
             'file.mimes' => 'File harus berformat CSV atau TXT',
-            'file.max' => 'Ukuran file maksimal 10MB',
             'tahun.required' => 'Tahun harus diisi',
-            'tahun.integer' => 'Tahun harus berupa angka',
-            'tahun.min' => 'Tahun minimal 1900',
-            'tahun.digits' => 'Tahun harus 4 digit',
             'bulan.required' => 'Bulan harus dipilih',
-            'bulan.min' => 'Bulan harus antara 1-12',
-            'bulan.max' => 'Bulan harus antara 1-12',
             'minggu.required' => 'Minggu harus dipilih',
-            'minggu.min' => 'Minggu harus antara 1-4',
-            'minggu.max' => 'Minggu harus antara 1-4',
         ]);
 
         try {
@@ -139,28 +128,22 @@ class AdminController extends Controller
             \Log::info('Starting CSV upload', [
                 'file' => $file->getClientOriginalName(),
                 'size' => $file->getSize(),
-                'path' => $path
             ]);
             
             $csv = array_map('str_getcsv', file($path));
-            
-            \Log::info('CSV parsed', ['rows' => count($csv)]);
             
             // Validate headers
             $headers = array_shift($csv);
             $headers = array_map('strtolower', $headers);
             $headers = array_map('trim', $headers);
             
-            \Log::info('CSV headers', ['headers' => $headers]);
-
-            // Check required columns: PG, FM, Wilayah, SEKSI, dll
             $required = ['pg', 'fm', 'wilayah', 'seksi'];
             $missing = array_diff($required, $headers);
 
             if (!empty($missing)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: PG, FM, Wilayah, SEKSI, Neto, Hasil, Umur Tanaman, Penanggungjawab, Kode Aktf, ACTIVITAS, KATEGORI, TK/HA, TOTAL TK'
+                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: ' . implode(', ', $required)
                 ], 400);
             }
 
@@ -183,7 +166,7 @@ class AdminController extends Controller
                 ], 400);
             }
 
-            // Create import log with all wilayah (comma separated)
+            // Create import log
             $wilayahList = implode(',', array_keys($allWilayah));
             $importLog = ImportLog::create([
                 'nama_file' => $file->getClientOriginalName(),
@@ -198,8 +181,7 @@ class AdminController extends Controller
                 'user_id' => auth()->id()
             ]);
 
-            // PENTING: Delete ONLY existing records for THIS IMPORT (not all historical data)
-            // This ensures each import keeps its own data
+            // Delete ONLY existing records for THIS IMPORT
             DataGulma::where('import_log_id', $importLog->id)->delete();
             
             \Log::info("Deleted previous records for import {$importLog->id}");
@@ -216,22 +198,18 @@ class AdminController extends Controller
                     $data = array_combine($headers, $row);
                     $data = array_map('trim', $data);
 
-                    // Validation basic
                     if (empty($data['seksi'])) {
                         throw new \Exception('SEKSI kosong');
                     }
 
-                    // Get wilayah from current row
                     $rowWilayahId = !empty($data['wilayah']) ? (int) $data['wilayah'] : null;
                     
                     if (!$rowWilayahId || $rowWilayahId < 16 || $rowWilayahId > 23) {
                         throw new \Exception('Wilayah tidak valid: ' . ($data['wilayah'] ?? 'kosong'));
                     }
 
-                    // id_feature langsung dari SEKSI (ini harus match dengan property di GeoJSON)
                     $idFeature = $data['seksi'];
 
-                    // Parse numeric values dengan handling empty/null
                     $parseFloat = function($val) {
                         if (empty($val) || !is_numeric($val)) return null;
                         return (float) $val;
@@ -242,7 +220,6 @@ class AdminController extends Controller
                         return (int) $val;
                     };
 
-                    // Create record for this import
                     DataGulma::create([
                         'wilayah_id' => $rowWilayahId,
                         'id_feature' => $idFeature,
@@ -278,65 +255,76 @@ class AdminController extends Controller
                 'error_log' => !empty($errors) ? json_encode($errors) : null
             ]);
 
-            // PENTING: Simpan import_log_id ke session untuk menampilkan data temporary di dashboard
-            // Data ini akan ditampilkan hingga admin refresh halaman atau klik "Perbarui Peta Publik"
+            // ✅ FIX 1: AUTO-PUBLISH UPLOAD TERBARU
+            \Log::info('🚀 AUTO-PUBLISHING latest upload...');
+            
+            // Unpublish semua publikasi lama
+            \App\Models\MapPublication::where('status', 'published')
+                ->update(['status' => 'draft']);
+            
+            // Publish upload yang baru saja berhasil
             if ($berhasil > 0) {
-                session(['temp_import_log_id' => $importLog->id]);
-                \Log::info('Temp import saved to session', [
-                    'temp_import_log_id' => $importLog->id,
-                    'berhasil' => $berhasil
-                ]);
+                $publication = \App\Models\MapPublication::updateOrCreate(
+                    [
+                        'tahun' => $importLog->tahun,
+                        'bulan' => $importLog->bulan,
+                        'minggu' => $importLog->minggu
+                    ],
+                    [
+                        'import_log_id' => $importLog->id,
+                        'status' => 'published',
+                        'published_at' => now(),
+                        'published_by' => auth()->id()
+                    ]
+                );
+                
+                \Log::info('✅ Auto-published import_log_id: ' . $importLog->id);
             }
 
-            // JANGAN auto-publish! Admin harus klik "Perbarui Peta Publik" untuk publish
-            // Ini memastikan data yang ditampilkan kepada publik adalah yang sudah dikonfirmasi admin
-
-            $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
-            $message = "File CSV berhasil diproses! $wilayahText - Berhasil: $berhasil, Gagal: $gagal. Silakan klik 'Perbarui Peta Publik' untuk mempublikasikan data ini.";
+            // ✅ FIX 2: CLEAR ALL CACHE (Critical!)
+            \Log::info("🗑️ Clearing ALL GeoJSON cache after upload...");
+            for ($wil = 16; $wil <= 23; $wil++) {
+                $cacheKey = "geojson_wgs84_wil_{$wil}";
+                \Cache::forget($cacheKey);
+                \Log::info("   ✓ Cleared cache: {$cacheKey}");
+            }
+            \Cache::forget('wilayah_summary_all');
             
-            \Log::info('CSV upload successful', [
+            // ✅ FIX 3: NO MORE temp_import_log_id session
+            // Dashboard dan Wilayah akan langsung baca dari published data
+            
+            $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
+            $message = "✅ File CSV berhasil diproses dan dipublikasikan! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
+            
+            \Log::info('✅ CSV upload & auto-publish complete', [
                 'import_id' => $importLog->id,
                 'berhasil' => $berhasil,
                 'gagal' => $gagal,
                 'wilayah' => $wilayahList
             ]);
             
-            // Return JSON untuk AJAX
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message,
-                    'wilayah_id' => $wilayahList,
-                    'wilayah_count' => count($allWilayah),
-                    'berhasil' => $berhasil,
-                    'gagal' => $gagal,
-                    'import_log_id' => $importLog->id
-                ], 200, [], JSON_UNESCAPED_SLASHES);
-            }
-
-            return redirect()->route('admin.dashboard')
-                ->with('success', $message);
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'wilayah_id' => $wilayahList,
+                'wilayah_count' => count($allWilayah),
+                'berhasil' => $berhasil,
+                'gagal' => $gagal,
+                'import_log_id' => $importLog->id
+            ], 200);
 
         } catch (\Exception $e) {
             $message = 'Error: ' . $e->getMessage();
             
             \Log::error('CSV upload error', [
                 'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
             
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $message,
-                    'error_detail' => $e->getTraceAsString()
-                ], 400, [], JSON_UNESCAPED_SLASHES);
-            }
-
-            return redirect()->route('admin.dashboard')
-                ->with('error', $message);
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ], 400);
         }
     }
 
@@ -390,68 +378,40 @@ class AdminController extends Controller
     public function publishMap(Request $request)
     {
         try {
-            // PRIORITAS 1: Jika frontend pass import_id, gunakan itu
             $importLogId = $request->input('import_log_id');
             
-            // PRIORITAS 2: Cek apakah ada temp import_log_id dari upload baru
             if (!$importLogId) {
-                $importLogId = session('temp_import_log_id');
-                if ($importLogId) {
-                    \Log::info('Using temp_import_log_id from session: ' . $importLogId);
-                }
-            }
-            
-            // PRIORITAS 3: Gunakan latest import jika tidak ada pilihan
-            if (!$importLogId) {
-                $latest = \App\Models\ImportLog::where('status', 'success')
+                // Get latest successful import
+                $latest = ImportLog::where('status', 'success')
                     ->latest('created_at')
                     ->first();
-                if ($latest) {
-                    $importLogId = $latest->id;
-                    \Log::info('Using latest import_log_id: ' . $importLogId);
-                } else {
-                    \Log::warning('No successful import logs found in database');
+                
+                if (!$latest) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Tidak ada data import yang berhasil. Silakan upload file CSV terlebih dahulu.'
+                        'message' => 'Tidak ada data import. Upload CSV terlebih dahulu.'
                     ], 400);
                 }
+                
+                $importLogId = $latest->id;
             }
 
-            // Validasi dan fetch import log yang akan dipublish
-            $importToDeploy = \App\Models\ImportLog::find($importLogId);
-            if (!$importToDeploy) {
-                \Log::warning('Import log not found: ' . $importLogId);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'File import tidak ditemukan (ID: ' . $importLogId . ')'
-                ], 400);
-            }
+            $importToDeploy = ImportLog::find($importLogId);
             
-            if ($importToDeploy->status !== 'success') {
-                \Log::warning('Import log status not success: ' . $importLogId . ' (status: ' . $importToDeploy->status . ')');
+            if (!$importToDeploy || $importToDeploy->status !== 'success') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'File import belum berhasil diproses (status: ' . $importToDeploy->status . ')'
+                    'message' => 'File import tidak valid atau gagal'
                 ], 400);
             }
 
-            \Log::info('Publishing import_log_id: ' . $importLogId . ' (' . $importToDeploy->nama_file . ')');
+            \Log::info("📤 Publishing import_log_id: {$importLogId}");
 
-            // Unpublish file lain untuk PERIODE YANG SAMA (tidak global)
-            $oldPublications = \App\Models\MapPublication::where('tahun', $importToDeploy->tahun)
-                ->where('bulan', $importToDeploy->bulan)
-                ->where('minggu', $importToDeploy->minggu)
-                ->where('status', 'published')
-                ->where('import_log_id', '!=', $importLogId)
-                ->get();
-            
-            foreach ($oldPublications as $pub) {
-                $pub->update(['status' => 'draft']);
-                \Log::info('Unpublished previous publication for period: ' . $importToDeploy->tahun . '/' . $importToDeploy->bulan . '/W' . $importToDeploy->minggu);
-            }
+            // Unpublish old publications
+            \App\Models\MapPublication::where('status', 'published')
+                ->update(['status' => 'draft']);
 
-            // Create/Update publication record WITH import_log_id DAN periode columns
+            // Create new publication
             $publication = \App\Models\MapPublication::updateOrCreate(
                 [
                     'tahun' => $importToDeploy->tahun,
@@ -462,25 +422,22 @@ class AdminController extends Controller
                     'import_log_id' => $importToDeploy->id,
                     'status' => 'published',
                     'published_at' => now(),
-                    'published_by' => auth()->id(),
-                    'notes' => $request->notes ?? 'Publikasi peta dengan data terbaru'
+                    'published_by' => auth()->id()
                 ]
             );
 
-            // PENTING: Clear GeoJSON cache karena data terbaru sudah dipublish
-            // Cache keys: geojson_wgs84_wil_16 hingga geojson_wgs84_wil_23
+            // ✅ CRITICAL: Clear ALL GeoJSON cache
+            \Log::info("🗑️ Clearing ALL GeoJSON cache after publish...");
             for ($wil = 16; $wil <= 23; $wil++) {
                 $cacheKey = "geojson_wgs84_wil_{$wil}";
                 \Cache::forget($cacheKey);
-                \Log::info("Cleared cache: {$cacheKey}");
+                \Log::info("   ✓ Cleared: {$cacheKey}");
             }
-
-            // Clear session setelah publish berhasil
-            session()->forget('temp_import_log_id');
+            \Cache::forget('wilayah_summary_all');
 
             return response()->json([
                 'success' => true,
-                'message' => 'Peta berhasil dipublikasikan! Data sekarang dapat dilihat oleh publik.',
+                'message' => '✅ Peta berhasil dipublikasikan!',
                 'published_at' => $publication->published_at->format('d M Y H:i'),
                 'import_id' => $importToDeploy->id,
                 'nama_file' => $importToDeploy->nama_file,

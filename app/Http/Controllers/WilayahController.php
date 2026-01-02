@@ -16,227 +16,107 @@ class WilayahController extends Controller
     public function getGeojson($wilayah_number, Request $request = null): JsonResponse
     {
         try {
-            \Log::info("=== Getting GeoJSON for Wilayah {$wilayah_number} ===");
+            \Log::info("🗺️ === Getting GeoJSON for Wilayah {$wilayah_number} ===");
             
-            // Log ALL query parameters for debugging
-            $queryString = $request ? $request->getQueryString() : '';
-            \Log::info("Full query string: {$queryString}");
-            \Log::info("Request URL: " . ($request ? $request->url() : 'N/A'));
-            \Log::info("Request query params: " . json_encode($request ? $request->query() : []));
-            
-            // Check custom admin header (most reliable)
+            // Check if admin (sama untuk dashboard & wilayah page)
             $hasAdminHeader = $request && $request->header('X-Admin-Request') === '1';
-            
-            // Check if user is authenticated admin OR if admin header is passed
             $isAdminParam = $request && $request->query('admin') == '1';
-            
-            // PENTING: Prioritaskan header dan param, karena session bisa expire
             $isAdmin = $hasAdminHeader || $isAdminParam || (auth()->check() && optional(auth()->user())->is_admin === 1);
             
-            \Log::info("X-Admin-Request header: " . ($hasAdminHeader ? 'YES' : 'NO'));
-            \Log::info("Admin param: " . ($isAdminParam ? 'YES' : 'NO'));
-            \Log::info("User auth: " . (auth()->check() ? 'authenticated' : 'guest'));
-            \Log::info("Final is_admin: " . ($isAdmin ? 'YES (ADMIN MODE)' : 'NO (GUEST MODE)'));
-            
-            // Check if map is published for guest users ONLY
-            if (!$isAdmin) {
-                $isPublished = \App\Models\MapPublication::isDataPublished();
-                \Log::info("Is published: " . ($isPublished ? 'YES' : 'NO'));
-                
-                if (!$isPublished) {
-                    \Log::warning("Guest user accessing unpublished map");
-                    return response()->json([
-                        'type' => 'FeatureCollection',
-                        'features' => []
-                    ], 200); // Return empty GeoJSON structure
-                }
-            } else {
-                \Log::info("ADMIN MODE: Will load latest data without publication check");
-            }
+            \Log::info("User type: " . ($isAdmin ? 'ADMIN' : 'PUBLIC'));
 
-            // Use base_path instead of storage_path for dataya folder
             $filePath = base_path("dataya/Wil{$wilayah_number}.geojson");
-            \Log::info("File path: {$filePath}");
-            \Log::info("File exists: " . (file_exists($filePath) ? 'YES' : 'NO'));
-
+            
             if (!file_exists($filePath)) {
-                \Log::error("GeoJSON file not found: {$filePath}");
                 return response()->json([
-                    'error' => "GeoJSON file for Wil{$wilayah_number} not found",
+                    'error' => "GeoJSON file not found",
                     'features' => []
                 ], 404);
             }
 
-            // Cache key untuk converted GeoJSON (1 jam cache)
-            // PENTING: Jangan cache jika ada import_id spesifik, karena data berbeda per import
+            // Get import_id dari parameter (for specific imports)
             $importId = $request ? $request->query('import_id') : null;
-            \Log::info("IMPORT_ID PARAMETER: " . ($importId ? "YES (ID: {$importId})" : "NOT SET"));
+            
+            // ✅ FIX: Consistent caching logic
+            // - NEVER cache if import_id specified
+            // - NEVER cache if admin (always fresh data)
+            // - Cache for public only
+            $timestamp = $request ? $request->query('_t') : null;
+            $shouldCache = !$importId && !$timestamp && !$isAdmin;
             
             $cacheKey = "geojson_wgs84_wil_{$wilayah_number}";
-            $cacheTTL = 3600; // 1 jam
-            
-            // Try to get from cache first - HANYA jika tidak ada import_id spesifik
             $geojson = null;
-            if (!$importId) {
+            
+            if ($shouldCache) {
                 $geojson = \Cache::get($cacheKey);
+                if ($geojson) {
+                    \Log::info("✓ Cache HIT for wilayah {$wilayah_number}");
+                }
             }
             
             if (!$geojson) {
-                if ($importId) {
-                    \Log::info("Skipping cache for import_id {$importId}, loading fresh GeoJSON");
-                } else {
-                    \Log::info("Cache miss for {$cacheKey}, converting coordinates...");
-                }
+                \Log::info("Loading fresh GeoJSON for wilayah {$wilayah_number}");
                 $geojson = json_decode(file_get_contents($filePath), true);
-                \Log::info("Original GeoJSON features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
-                
-                // Convert dari UTM Zone 48S ke WGS84
                 $geojson = CoordinateTransformer::convertGeoJsonToWgs84($geojson);
                 
-                // Store in cache - HANYA jika tidak ada import_id spesifik
-                if (!$importId) {
-                    \Cache::put($cacheKey, $geojson, $cacheTTL);
-                    \Log::info("Cached converted GeoJSON for 1 hour");
+                // Only cache for public
+                if ($shouldCache) {
+                    \Cache::put($cacheKey, $geojson, 3600);
+                    \Log::info("✓ Cached GeoJSON for wilayah {$wilayah_number}");
                 }
-            } else {
-                \Log::info("Cache hit for {$cacheKey}");
             }
-            
-            \Log::info("After conversion features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
-            // Get filter parameters if provided
-            $tahun = $request ? $request->query('tahun') : null;
-            $bulan = $request ? $request->query('bulan') : null;
-            $minggu = $request ? $request->query('minggu') : null;
-
-            // Query data from database for this wilayah
+            // ✅ FIX: SIMPLIFIED data selection logic
+            // BOTH admin and public get LATEST PUBLISHED data by default
             $query = DataGulma::where('wilayah_id', $wilayah_number);
 
-            // Priority 1: If specific import_id is provided, use it
             if ($importId) {
-                \Log::info("🎯 FILTERING BY IMPORT_ID: {$importId}");
-                \Log::info("Before query - count all records for wilayah {$wilayah_number}: " . DataGulma::where('wilayah_id', $wilayah_number)->count());
+                // Case 1: Specific import requested (dari URL parameter)
+                \Log::info("Using specific import_id from parameter: {$importId}");
                 $query->where('import_log_id', $importId);
-                \Log::info("After where import_log_id - count: " . $query->count());
-            }
-            // Priority 2: If period filters are provided, get only the latest import for that period
-            elseif ($tahun && $bulan && $minggu) {
-                // Find the latest import_log_id for this period
-                $latestImportLog = \App\Models\ImportLog::where('tahun', $tahun)
-                    ->where('bulan', $bulan)
-                    ->where('minggu', $minggu)
-                    ->where('status', 'success')
-                    ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
-                    ->orderBy('created_at', 'desc')
+            } else {
+                // Case 2: Get LATEST PUBLISHED data (for both admin & public)
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->orderBy('published_at', 'desc')
                     ->first();
-
-                if ($latestImportLog) {
-                    \Log::info("Using latest import log ID: {$latestImportLog->id} for period {$tahun}/{$bulan}/W{$minggu}");
-                    $query->where('import_log_id', $latestImportLog->id);
+                
+                if ($latestPublication && $latestPublication->import_log_id) {
+                    \Log::info("Using LATEST PUBLISHED import_id: {$latestPublication->import_log_id}");
+                    $query->where('import_log_id', $latestPublication->import_log_id);
                 } else {
-                    \Log::info("No data found for period {$tahun}/{$bulan}/W{$minggu}, returning empty");
-                    // Return empty features if no matching period
+                    \Log::warning("No published data found!");
+                    // Return empty features
                     $geojson['features'] = [];
                     return response()->json($geojson);
                 }
             }
-            // Priority 3: Default - show data based on user type
-            else {
-                if ($isAdmin) {
-                    // ADMIN: Show latest import (admin dapat preview semua data termasuk yang belum dipublikasi)
-                    $latestImportLog = \App\Models\ImportLog::where('status', 'success')
-                        ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-                    
-                    if ($latestImportLog) {
-                        \Log::info("✅ ADMIN MODE: Using latest import_log_id {$latestImportLog->id}");
-                        $query->where('import_log_id', $latestImportLog->id);
-                    } else {
-                        \Log::warning("❌ ADMIN MODE: No import logs found for wilayah {$wilayah_number}");
-                    }
-                } else {
-                    // GUEST: Show published map data ONLY - prioritas publikasi per-periode
-                    // Get recent periods (last 3 months worth of data)
-                    $importLog = \App\Models\ImportLog::where('status', 'success')
-                        ->where('wilayah_id', 'LIKE', "%{$wilayah_number}%")
-                        ->orderBy('tahun', 'desc')
-                        ->orderBy('bulan', 'desc')
-                        ->orderBy('minggu', 'desc')
-                        ->take(12)
-                        ->get();
-                    
-                    // Try to find published publication for any of these periods
-                    $publishedLog = null;
-                    foreach ($importLog as $log) {
-                        $pub = \App\Models\MapPublication::getPublishedForPeriod($log->tahun, $log->bulan, $log->minggu);
-                        if ($pub && $pub->importLog) {
-                            $publishedLog = $pub->importLog;
-                            \Log::info("✅ GUEST MODE: Found published data for period {$log->tahun}/{$log->bulan}/W{$log->minggu} - import_id {$pub->import_log_id}");
-                            break;
-                        }
-                    }
-                    
-                    if ($publishedLog) {
-                        $query->where('import_log_id', $publishedLog->id);
-                    } else {
-                        // Fallback: gunakan yang paling baru saja
-                        $latestLog = $importLog->first();
-                        if ($latestLog) {
-                            \Log::info("⚠️  GUEST MODE: No published data found, fallback to latest import_log_id {$latestLog->id}");
-                            $query->where('import_log_id', $latestLog->id);
-                        } else {
-                            \Log::info("⚠️  GUEST MODE: No published data available for wilayah {$wilayah_number}");
-                        }
-                    }
-                }
-            }
             
             $gulmaData = $query->get();
-            \Log::info("🎯 Final query result for wilayah {$wilayah_number}: " . $gulmaData->count() . " records");
-            
-            // Log actual import_log_ids yang fetched
-            $importLogIds = $gulmaData->pluck('import_log_id')->unique()->toArray();
-            \Log::info("Import log IDs in result: " . json_encode($importLogIds));
-            
-            // Create a lookup map by seksi (normalized)
+            \Log::info("Loaded {$gulmaData->count()} records for wilayah {$wilayah_number}");
+
+            // Merge data
             $gulmaMap = [];
             foreach ($gulmaData as $data) {
-                // Normalize seksi for matching - remove spaces, lowercase
                 $normalizedSeksi = strtolower(trim($data->seksi));
                 $gulmaMap[$normalizedSeksi] = $data;
             }
-            \Log::info("Gulma map size: " . count($gulmaMap));
-            if (count($gulmaMap) > 0) {
-                \Log::info("Sample seksi from database: " . implode(', ', array_slice(array_keys($gulmaMap), 0, 5)));
-            }
 
-            // Merge data into GeoJSON features
             $mergedCount = 0;
             if (isset($geojson['features'])) {
-                // Log sample property names from first feature for debugging
-                if (count($geojson['features']) > 0 && isset($geojson['features'][0]['properties'])) {
-                    \Log::info("Sample GeoJSON property keys: " . implode(', ', array_keys($geojson['features'][0]['properties'])));
-                }
-                
                 foreach ($geojson['features'] as &$feature) {
                     if (isset($feature['properties'])) {
-                        // Try to get seksi from various property names
                         $seksiValue = $feature['properties']['Lokasi'] 
-                                  ?? $feature['properties']['SEKSI'] 
-                                  ?? $feature['properties']['Seksi'] 
-                                  ?? $feature['properties']['seksi']
-                                  ?? $feature['properties']['LOKASI']
-                                  ?? null;
+                                ?? $feature['properties']['SEKSI'] 
+                                ?? $feature['properties']['Seksi'] 
+                                ?? $feature['properties']['seksi']
+                                ?? null;
 
-                        // Normalize seksi for matching
                         $normalizedSeksiValue = $seksiValue ? strtolower(trim($seksiValue)) : null;
                         
-                        // If we found a matching seksi in database, merge the data
                         if ($normalizedSeksiValue && isset($gulmaMap[$normalizedSeksiValue])) {
                             $data = $gulmaMap[$normalizedSeksiValue];
                             
-                            // Inject semua data CSV ke properties
+                            // Merge all CSV data
                             $feature['properties']['seksi'] = $data->seksi;
                             $feature['properties']['pg'] = $data->pg;
                             $feature['properties']['fm'] = $data->fm;
@@ -251,106 +131,32 @@ class WilayahController extends Controller
                             $feature['properties']['total_tk'] = $data->total_tk;
                             $feature['properties']['tanggal'] = $data->tanggal;
                             
-                            // Keep old data jika ada
-                            if ($data->status_gulma) {
-                                $feature['properties']['status_gulma'] = $data->status_gulma;
-                                $feature['properties']['persentase'] = $data->persentase;
-                            }
-                            
                             $mergedCount++;
                         } else {
-                            // Feature tidak ada di database - set kategori kosong (Tidak Ada Data)
+                            // No data for this feature
                             $feature['properties']['kategori'] = '';
-                            $feature['properties']['seksi'] = $feature['properties']['seksi'] ?? '';
-                            $feature['properties']['pg'] = '';
-                            $feature['properties']['fm'] = '';
-                            $feature['properties']['neto'] = '';
-                            $feature['properties']['hasil'] = '';
-                            $feature['properties']['umur_tanaman'] = '';
-                            $feature['properties']['penanggungjawab'] = '';
-                            $feature['properties']['kode_aktf'] = '';
-                            $feature['properties']['activitas'] = '';
-                            $feature['properties']['tk_ha'] = '';
-                            $feature['properties']['total_tk'] = '';
-                            $feature['properties']['tanggal'] = '';
                         }
                     }
                 }
-                unset($feature); // Break reference
+                unset($feature);
             }
             
             \Log::info("Merged {$mergedCount} features with database data");
-            \Log::info("Final features count: " . (isset($geojson['features']) ? count($geojson['features']) : 0));
 
-            // DEBUG: Check first few features
-            if (isset($geojson['features']) && count($geojson['features']) > 0) {
-                \Log::info("DEBUG - First 3 features after merge:");
-                for ($i = 0; $i < min(3, count($geojson['features'])); $i++) {
-                    $f = $geojson['features'][$i];
-                    $kategori = $f['properties']['kategori'] ?? 'MISSING';
-                    $seksi = $f['properties']['seksi'] ?? 'MISSING';
-                    $lokasi = $f['properties']['Lokasi'] ?? 'MISSING';
-                    \Log::info("  [$i] Lokasi=$lokasi, seksi=$seksi, kategori=$kategori");
-                }
-            }
-
-            // PENTING: Jika menggunakan import_id spesifik (published map), FILTER features tanpa kategori
-            \Log::info("=== CHECKING FILTER CONDITION ===");
-            \Log::info("importId value: " . ($importId ? "YES ({$importId})" : "NULL/FALSE"));
-            
-            if ($importId) {
-                \Log::info("🎯 FILTER CONDITION MET - Filtering features without kategori");
-                $beforeFilter = isset($geojson['features']) ? count($geojson['features']) : 0;
-                \Log::info("Before filter: $beforeFilter features");
-                
-                // Count how many will be filtered
-                $withKategori = 0;
-                $withoutKategori = 0;
-                foreach ($geojson['features'] as $feature) {
-                    if (isset($feature['properties']['kategori']) && !empty(trim($feature['properties']['kategori']))) {
-                        $withKategori++;
-                    } else {
-                        $withoutKategori++;
-                    }
-                }
-                \Log::info("Features breakdown: $withKategori WITH kategori, $withoutKategori WITHOUT kategori");
-                
-                // Filter: hanya tampilkan features yang punya kategori (tidak kosong)
-                $geojson['features'] = array_filter($geojson['features'], function($feature) {
-                    return isset($feature['properties']['kategori']) && 
-                           !empty(trim($feature['properties']['kategori']));
-                });
-                
-                // Re-index array setelah filter
-                $geojson['features'] = array_values($geojson['features']);
-                
-                $afterFilter = count($geojson['features']);
-                \Log::info("After filter: $afterFilter features");
-                \Log::info("🎯 PUBLISHED MAP FILTER: Removed " . ($beforeFilter - $afterFilter) . " features without kategori");
-                \Log::info("🎯 PUBLISHED MAP: Now showing $afterFilter features with kategori only");
+            // ✅ Cache control headers
+            if ($shouldCache) {
+                return response()->json($geojson)
+                    ->header('Cache-Control', 'public, max-age=3600');
             } else {
-                \Log::info("⚠️  FILTER CONDITION NOT MET - importId is null/false, showing all features");
-            }
-
-            // Add HTTP cache headers - ONLY if no specific import_id
-            // When import_id is specified, data is temporary/unique, so don't cache
-            if ($importId) {
-                // No caching for specific import queries - each import has unique data
                 return response()->json($geojson)
                     ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                     ->header('Pragma', 'no-cache')
                     ->header('Expires', '0');
-            } else {
-                // Cache general queries for 1 hour
-                return response()->json($geojson)
-                    ->header('Cache-Control', 'public, max-age=3600')
-                    ->header('Expires', \Carbon\Carbon::now()->addHours(1)->toRfc7231String());
             }
         } catch (\Exception $e) {
             \Log::error("Error in getGeojson: " . $e->getMessage());
-            \Log::error($e->getTraceAsString());
             return response()->json([
-                'error' => 'Failed to load GeoJSON: ' . $e->getMessage(),
+                'error' => 'Failed to load GeoJSON',
                 'features' => []
             ], 500);
         }
@@ -495,40 +301,34 @@ class WilayahController extends Controller
     public function getPeriods(): JsonResponse
     {
         try {
-            $periods = \App\Models\ImportLog::where('status', 'success')
-                ->whereNotNull('tahun')
-                ->whereNotNull('bulan')
-                ->whereNotNull('minggu')
-                ->select('tahun', 'bulan', 'minggu')
-                ->distinct()
+            // Get all published periods
+            $publications = \App\Models\MapPublication::where('status', 'published')
+                ->with('importLog')
                 ->orderBy('tahun', 'desc')
                 ->orderBy('bulan', 'desc')
                 ->orderBy('minggu', 'desc')
                 ->get();
+            
+            $periods = $publications->map(function($pub) {
+                return [
+                    'tahun' => $pub->tahun,
+                    'bulan' => $pub->bulan,
+                    'minggu' => $pub->minggu,
+                    'import_log_id' => $pub->import_log_id,
+                    'published_at' => $pub->published_at
+                ];
+            });
 
             // Get unique years
             $tahun_list = $periods->pluck('tahun')->unique()->values();
             
-            // Get latest publication info
-            $latest = \App\Models\MapPublication::getLatestPublished();
-            $latestPeriod = null;
-            
-            if ($latest) {
-                // Get the import log associated with the latest publication
-                // Assuming the latest published is the most recent import
-                $latestImport = \App\Models\ImportLog::where('status', 'success')
-                    ->whereNotNull('tahun')
-                    ->latest('created_at')
-                    ->first();
-                    
-                if ($latestImport) {
-                    $latestPeriod = [
-                        'tahun' => $latestImport->tahun,
-                        'bulan' => $latestImport->bulan,
-                        'minggu' => $latestImport->minggu
-                    ];
-                }
-            }
+            // Get latest published
+            $latest = $publications->first();
+            $latestPeriod = $latest ? [
+                'tahun' => $latest->tahun,
+                'bulan' => $latest->bulan,
+                'minggu' => $latest->minggu
+            ] : null;
 
             return response()->json([
                 'success' => true,

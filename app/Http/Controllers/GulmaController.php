@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DataGulma;
 use App\Models\ImportLog;
+use App\Models\MapPublication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,31 +42,45 @@ class GulmaController extends Controller
     public function getStatistikSummary(Request $request)
     {
         try {
-            $query = DataGulma::select(
-                'wilayah_id',
-                DB::raw('COUNT(DISTINCT id_feature) AS total_features'),
-                DB::raw('SUM(neto) AS total_neto'),
-                DB::raw('SUM(hasil) AS total_hasil'),
-                DB::raw('AVG(hasil) AS avg_hasil'),
-                DB::raw('AVG(umur_tanaman) AS avg_umur'),
-                DB::raw('SUM(tk_ha) AS total_tenaga_kerja')
-            )
-            ->groupBy('wilayah_id')
-            ->orderBy('wilayah_id');
+            // Get latest published import
+            $latestPublication = MapPublication::where('status', 'published')
+                ->orderBy('published_at', 'desc')
+                ->first();
 
-            $this->applyPeriodFilter($query, $request);
+            if (!$latestPublication) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data publikasi yang tersedia',
+                    'data' => []
+                ]);
+            }
 
-            $data = $query->get();
+            // Get all records from latest published import
+            $allData = DataGulma::where('import_log_id', $latestPublication->import_log_id)->get();
+
+            // Group by wilayah_id and calculate aggregates in PHP (like WilayahController)
+            $groupedData = $allData->groupBy('wilayah_id')->map(function ($wilayahData) {
+                return [
+                    'wilayah_id' => $wilayahData->first()->wilayah_id,
+                    'total_features' => $wilayahData->count(),
+                    'total_neto' => round($wilayahData->sum('neto'), 2),
+                    'total_hasil' => round($wilayahData->sum('hasil'), 2),
+                    'avg_hasil' => round($wilayahData->avg('hasil'), 2),
+                    'avg_umur' => round($wilayahData->avg('umur_tanaman'), 2),
+                    'total_tenaga_kerja' => round($wilayahData->sum('tk_ha'), 2)
+                ];
+            })->values();
 
             return response()->json([
                 'success' => true,
-                'data' => $data,
-                'filters' => $request->only(['tahun', 'bulan', 'minggu'])
+                'data' => $groupedData,
+                'filters' => $request->only(['tahun', 'bulan', 'minggu']),
+                'published_at' => $latestPublication->published_at
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Query statistik gagal'
+                'message' => 'Query statistik gagal: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -76,26 +91,43 @@ class GulmaController extends Controller
     public function getStatistikRanking(Request $request)
     {
         try {
-            $query = DataGulma::select(
-                'wilayah_id',
-                DB::raw('SUM(hasil) AS total_hasil'),
-                DB::raw('AVG(hasil) AS avg_hasil'),
-                DB::raw('COUNT(DISTINCT id_feature) AS jumlah_features'),
-                DB::raw('SUM(neto) AS total_neto')
-            )
-            ->groupBy('wilayah_id')
-            ->orderByDesc('total_hasil');
+            // Get latest published import
+            $latestPublication = MapPublication::where('status', 'published')
+                ->orderBy('published_at', 'desc')
+                ->first();
 
-            $this->applyPeriodFilter($query, $request);
+            if (!$latestPublication) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data publikasi yang tersedia',
+                    'data' => []
+                ]);
+            }
+
+            // Get all records from latest published import
+            $allData = DataGulma::where('import_log_id', $latestPublication->import_log_id)->get();
+
+            // Group by wilayah_id and calculate aggregates in PHP
+            $rankingData = $allData->groupBy('wilayah_id')->map(function ($wilayahData) {
+                return [
+                    'wilayah_id' => $wilayahData->first()->wilayah_id,
+                    'total_hasil' => round($wilayahData->sum('hasil'), 2),
+                    'avg_hasil' => round($wilayahData->avg('hasil'), 2),
+                    'jumlah_features' => $wilayahData->count(),
+                    'total_neto' => round($wilayahData->sum('neto'), 2),
+                    'total_tenaga_kerja' => round($wilayahData->sum('tk_ha'), 2)
+                ];
+            })->values()->sortByDesc('total_hasil')->values();
 
             return response()->json([
                 'success' => true,
-                'data' => $query->get()
+                'data' => $rankingData,
+                'published_at' => $latestPublication->published_at
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil ranking'
+                'message' => 'Gagal mengambil ranking: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -217,9 +217,9 @@
                     <th>Wilayah</th>
                     <th>Luas Wilayah (Ha)</th>
                     <th>Total Neto</th>
-                    <th>Total Gulma (T/Ha)</th>
+                    <th>Total Gulma (Ton)</th>
                     <th>Rata-rata Umur Tanaman</th>
-                    <th>Total Tenaga Kerja</th>
+                    <th>Total Tenaga Kerja (Orang)</th>
                     <th>Tahun</th>
                 </tr>
             </thead>
@@ -491,9 +491,9 @@ function renderDetailStats(data) {
             <td><strong>Wilayah ${item.wilayah_id}</strong></td>
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
-            <td class="stat-value">${parseFloat(item.avg_hasil || 0).toFixed(2)} T/Ha</td>
-            <td>${parseFloat(item.avg_umur || 0).toFixed(1)} bulan</td>
-            <td>${parseInt(item.total_tenaga_kerja || 0).toLocaleString('id-ID')} Orang</td>
+            <td class="stat-value">${parseFloat(item.total_hasil || 0).toFixed(2)} Ton</td>
+            <td>${parseFloat(item.avg_umur || 0).toFixed(2)} bulan</td>
+            <td class="stat-value">${parseFloat(item.total_tenaga_kerja || 0).toFixed(2)}</td>
             <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
         `;
     });

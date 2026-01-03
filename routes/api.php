@@ -26,6 +26,14 @@ Route::get('/wilayah/geojson/{wilayah_number}', [WilayahController::class, 'getG
     ->name('api.wilayah.geojson')
     ->withoutMiddleware('api'); // Bypass API middleware if needed
 
+Route::get('/wilayah/stats/{wilayah_number}', [WilayahController::class, 'getWilayahStats'])
+    ->name('api.wilayah.stats')
+    ->withoutMiddleware('api'); // Get statistics directly from database
+
+Route::get('/wilayah/records/{wilayah_number}', [WilayahController::class, 'getWilayahRecords'])
+    ->name('api.wilayah.records')
+    ->withoutMiddleware('api'); // Get all records from database for table display
+
 Route::get('/wilayah/data', [WilayahController::class, 'getData'])
     ->name('api.wilayah.data')
     ->withoutMiddleware('api'); // Bypass API middleware if needed

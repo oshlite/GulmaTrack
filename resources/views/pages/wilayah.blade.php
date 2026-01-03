@@ -991,6 +991,35 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         
     </div>
     
+    <!-- Wilayah Stats Summary (from database) -->
+    <div id="wilayahStatsSummary" style="display: none; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #ecf0f1); border-radius: 10px; border-left: 4px solid #128241;">
+        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; font-weight: 600;">
+            <i class="fas fa-chart-bar"></i> Ringkasan Status Gulma (Database)
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 28px; font-weight: 700; color: #3498db;" id="statsBersih">-</div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Bersih</div>
+            </div>
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 28px; font-weight: 700; color: #57ce39;" id="statsRingan">-</div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Ringan</div>
+            </div>
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 28px; font-weight: 700; color: #f1c40f;" id="statsSedang">-</div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Sedang</div>
+            </div>
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 28px; font-weight: 700; color: #e74c3c;" id="statsBerat">-</div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Berat</div>
+            </div>
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size: 28px; font-weight: 700; color: #128241;" id="statsTotalTK">-</div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">Total TK</div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Location Details Table -->
     <div class="location-details-container" id="locationDetailsTable">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -1514,40 +1543,66 @@ function initMap() {
         const startTime = performance.now();
 
         const cacheBust = new Date().getTime();
-        fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}`, {
+        
+        // Load GeoJSON (for map display), stats (for summary), and records (for table)
+        const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}`, {
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
                 'Expires': '0'
             }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        });
+        
+        const statsPromise = fetch(`/api/wilayah/stats/${wilayahNumber}?_t=${cacheBust}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        }).then(response => {
+            if (!response.ok) return null;
+            return response.json();
+        });
+        
+        const recordsPromise = fetch(`/api/wilayah/records/${wilayahNumber}?_t=${cacheBust}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        }).then(response => {
+            if (!response.ok) return null;
+            return response.json();
+        });
+        
+        Promise.all([geojsonPromise, statsPromise, recordsPromise])
+            .then(([data, stats, records]) => {
+                const response = data;
                 const loadTime = (performance.now() - startTime).toFixed(2);
                 console.log(`✅ Wilayah ${wilayahNumber} loaded in ${loadTime}ms`);
                 showMapLoading(false);
                 
-                if (data.error) {
+                if (response.error) {
                     // Check if error is about unpublished data
-                    if (data.error.includes('belum dipublikasikan')) {
+                    if (response.error.includes('belum dipublikasikan')) {
                         alert('⚠️ Peta belum tersedia.\n\nData peta belum dipublikasikan oleh administrator. Silakan hubungi admin untuk memperbarui peta.');
                         return;
                     }
-                    throw new Error(data.error);
+                    throw new Error(response.error);
                 }
 
-                if (!data.features || data.features.length === 0) {
+                if (!response.features || response.features.length === 0) {
                     alert('Tidak ada data untuk wilayah ini');
                     return;
                 }
 
                 // Add GeoJSON layer with styling
-                const layer = L.geoJSON(data, {
+                const layer = L.geoJSON(response, {
                     style: function(feature) {
                         return getFeatureStyle(feature);
                     },
@@ -1605,10 +1660,27 @@ function initMap() {
                     map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14 });
                 }
 
-                console.log(`Wilayah ${wilayahNumber} loaded: ${data.features.length} features`);
+                console.log(`Wilayah ${wilayahNumber} loaded: ${response.features.length} features (${stats ? stats.bersih_count + ' bersih, ' + stats.ringan_count + ' ringan' : 'stats pending'})`);
                 
-                // Populate location table
-                populateLocationTable(data.features, wilayahNumber);
+                // Display stats summary if available
+                if (stats && stats.bersih_count !== undefined) {
+                    document.getElementById('wilayahStatsSummary').style.display = 'block';
+                    document.getElementById('statsBersih').textContent = stats.bersih_count;
+                    document.getElementById('statsRingan').textContent = stats.ringan_count;
+                    document.getElementById('statsSedang').textContent = stats.sedang_count || 0;
+                    document.getElementById('statsBerat').textContent = stats.berat_count || 0;
+                    document.getElementById('statsTotalTK').textContent = Math.round(stats.total_tk) + ' TK';
+                } else {
+                    document.getElementById('wilayahStatsSummary').style.display = 'none';
+                }
+                
+                // Use database records for location table (not GeoJSON features)
+                // This ensures ALL records are shown, not just those that match GeoJSON
+                if (records && records.features) {
+                    populateLocationTable(records.features, wilayahNumber);
+                } else {
+                    populateLocationTable(response.features, wilayahNumber);
+                }
             })
             .catch(error => {
                 showMapLoading(false);
@@ -2070,21 +2142,50 @@ function initMap() {
 
                 document.getElementById('totalArea').textContent = totalArea.toFixed(2) + ' Ha';
 
-                // Fetch all wilayah data to calculate per-wilayah statistics
+                // Fetch all wilayah data: both GeoJSON (for map) and stats (for accurate counts)
                 const promises = enrichedData.map(wilayah => {
                     const cacheBust = new Date().getTime();
-                    return fetch(`/api/wilayah/geojson/${wilayah.wilayah}?_t=${cacheBust}`, {
+                    
+                    // Fetch both GeoJSON and stats in parallel
+                    const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayah.wilayah}?_t=${cacheBust}`, {
                         headers: {
                             'Cache-Control': 'no-cache, no-store, must-revalidate',
                             'Pragma': 'no-cache',
                             'Expires': '0'
                         }
-                    })
-                        .then(r => r.ok ? r.json() : null)
-                        .then(geojson => {
+                    }).then(r => r.ok ? r.json() : null);
+                    
+                    const statsPromise = fetch(`/api/wilayah/stats/${wilayah.wilayah}?_t=${cacheBust}`, {
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    }).then(r => r.ok ? r.json() : null);
+                    
+                    return Promise.all([geojsonPromise, statsPromise])
+                        .then(([geojson, stats]) => {
                             if (!geojson || !geojson.features) return wilayah;
                             
-                            // Calculate totals from features
+                            // Use stats endpoint for accurate counts
+                            if (stats && stats.bersih_count !== undefined) {
+                                const statusCounts = {
+                                    bersih: stats.bersih_count || 0,
+                                    ringan: stats.ringan_count || 0,
+                                    sedang: stats.sedang_count || 0,
+                                    berat: stats.berat_count || 0,
+                                    belum_dimonitoring: 0 // will be calculated if needed
+                                };
+                                
+                                return {
+                                    ...wilayah,
+                                    total_luas_netto: stats.total_neto || 0,
+                                    total_tk: stats.total_tk || 0,
+                                    status_counts: statusCounts
+                                };
+                            }
+                            
+                            // Fallback: Calculate totals from features (for backward compatibility)
                             let totalLuasNetto = 0;
                             let totalTk = 0;
                             const statusCounts = {
@@ -2120,6 +2221,19 @@ function initMap() {
                                     statusCounts.berat++;
                                 }
                             });
+
+                            // DEBUG: Log data untuk wilayah 16
+                            if (wilayah.wilayah == 16) {
+                                console.log('🔍 [DEBUG WILAYAH 16 - GeoJSON Only]', {
+                                    total_features: geojson.features.length,
+                                    with_kategori: geojson.features.filter(f => f.properties.kategori).length,
+                                    totalTk,
+                                    totalLuasNetto,
+                                    statusCounts,
+                                    stats_endpoint_available: !!stats,
+                                    stats: stats
+                                });
+                            }
 
                             return {
                                 ...wilayah,
@@ -2228,7 +2342,7 @@ function initMap() {
                             <span>Luas Netto Wilayah</span>
                         </span>
                         <span class="info-value">
-                            ${parseFloat(wilayah.total_luas_netto ?? 0).toFixed(2)} Ha
+                            ${(wilayah.total_luas_netto ? parseFloat(wilayah.total_luas_netto).toFixed(2) : '0.00')} Ha
                         </span>
                     </div>
                     <div class="info-row">
@@ -2237,7 +2351,7 @@ function initMap() {
                             <span>Total Kebutuhan Tenaga Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${Math.round(parseFloat(wilayah.total_tk ?? 0))} TK
+                            ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk)) : '0')} TK
                         </span>
                     </div>
                     <div>

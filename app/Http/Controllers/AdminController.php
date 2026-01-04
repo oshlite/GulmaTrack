@@ -229,7 +229,7 @@ class AdminController extends Controller
                         'seksi' => $data['seksi'] ?? null,
                         'neto' => $parseFloat($data['neto'] ?? null),
                         'hasil' => $parseFloat($data['hasil'] ?? null),
-                        'umur_tanaman' => $parseInt($data['umur tanaman'] ?? null),
+                        'umur_tanaman' => $parseFloat($data['umur tanaman'] ?? null),
                         'penanggungjawab' => $data['penanggungjawab'] ?? null,
                         'kode_aktf' => $data['kode aktf'] ?? null,
                         'activitas' => $data['activitas'] ?? null,

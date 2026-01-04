@@ -26,7 +26,7 @@ return new class extends Migration
                 $table->decimal('hasil', 10, 2)->nullable();
             }
             if (!Schema::hasColumn('data_gulma', 'umur_tanaman')) {
-                $table->integer('umur_tanaman')->nullable();
+                $table->decimal('umur_tanaman', 10, 2)->nullable();
             }
             if (!Schema::hasColumn('data_gulma', 'penanggungjawab')) {
                 $table->string('penanggungjawab')->nullable();

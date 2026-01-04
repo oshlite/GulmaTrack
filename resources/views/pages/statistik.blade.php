@@ -23,12 +23,12 @@
             align-items: center;
         }
 
+        .stats-controls input,
         .stats-controls select {
             padding: 10px 15px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
-            min-width: 150px;
         }
 
         .stats-controls button {
@@ -140,6 +140,75 @@
             color: var(--primary-color);
         }
 
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: linear-gradient(135deg, var(--light-color), #fff);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .comparison-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-stat:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .comparison-label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .comparison-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .trend-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .trend-up {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .trend-down {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
         .export-btn {
             background-color: var(--secondary-color);
             color: white;
@@ -157,16 +226,37 @@
             transform: translateY(-2px);
         }
 
-        .period-info {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #1976d2;
+        .year-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        .period-info strong {
-            color: #1976d2;
+        .year-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .year-item .year {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .year-item .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .year-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
         }
     </style>
 
@@ -198,6 +288,37 @@
         <i class="fas fa-info-circle"></i> 
         <span id="periodInfoText">Menampilkan data terbaru</span>
     </div>
+
+     <!-- Perbandingan Produksi -->
+    <div class="stat-section">
+        <h3><i class="fas fa-chart-bar"></i> Perbandingan Produksi Komoditas</h3>
+        <div class="comparison-grid">
+            <div class="comparison-card">
+                <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
+                <div class="comparison-stat">
+                    <span class="comparison-label">Luas Perkebunan:</span>
+                    <span class="comparison-value">20,825 Ha</span>
+                </div>
+                <div class="comparison-stat">
+                    <span class="comparison-label">Total Neto:</span>
+                    <span class="comparison-value">2,450 Ha</span>
+                </div>
+                <div class="comparison-stat">
+                    <span class="comparison-label">Total Gulma:</span>
+                    <span class="comparison-value">8.5 T/Ha</span>
+                </div>
+                <div class="comparison-stat">
+                    <span class="comparison-label">Tenaga Kerja:</span>
+                    <span class="comparison-value">892 Orang</span>
+                </div>
+                <div class="comparison-stat">
+                    <span class="comparison-label">Perubahan:</span>
+                    <span class="comparison-value"><span class="trend-indicator trend-up">↑ +2.3%</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Ranking Wilayah -->
     <div class="stat-section">

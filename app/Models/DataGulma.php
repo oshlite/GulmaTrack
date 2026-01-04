@@ -40,7 +40,7 @@ class DataGulma extends Model
         'neto' => 'decimal:2',
         'hasil' => 'decimal:2',
         'tk_ha' => 'decimal:2',
-        'umur_tanaman' => 'integer',
+        'umur_tanaman' => 'decimal:2',
         'total_tk' => 'integer',
         'persentase' => 'integer',
         'wilayah_id' => 'integer'

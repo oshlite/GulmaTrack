@@ -292,30 +292,8 @@
      <!-- Perbandingan Produksi -->
     <div class="stat-section">
         <h3><i class="fas fa-chart-bar"></i> Perbandingan Produksi Komoditas</h3>
-        <div class="comparison-grid">
-            <div class="comparison-card">
-                <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Luas Perkebunan:</span>
-                    <span class="comparison-value">20,825 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Total Neto:</span>
-                    <span class="comparison-value">2,450 Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Total Gulma:</span>
-                    <span class="comparison-value">8.5 T/Ha</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Tenaga Kerja:</span>
-                    <span class="comparison-value">892 Orang</span>
-                </div>
-                <div class="comparison-stat">
-                    <span class="comparison-label">Perubahan:</span>
-                    <span class="comparison-value"><span class="trend-indicator trend-up">↑ +2.3%</span></span>
-                </div>
-            </div>
+        <div class="comparison-grid" id="comparisonGrid">
+            <!-- Will be populated by JavaScript -->
         </div>
     </div>
 
@@ -548,6 +526,7 @@ async function loadAllStatistics() {
 
         if (summary.success) {
             renderDetailStats(summary.data);
+            renderComparison(summary.data);
         } else {
             showEmptyState('detailStatsTable', 'Tidak ada data statistik');
         }
@@ -618,6 +597,54 @@ function renderDetailStats(data) {
             <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
         `;
     });
+}
+
+function renderComparison(data) {
+    const container = document.getElementById('comparisonGrid');
+    if (!container) return;
+    
+    container.innerHTML = '';
+
+    if (!data || data.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px; width: 100%; color: #999;">
+                <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i><br>
+                <strong>Tidak ada data</strong>
+            </div>
+        `;
+        return;
+    }
+
+    // Calculate totals for all data
+    const totalLuas = data.reduce((sum, item) => sum + (parseFloat(item.total_neto) || 0), 0);
+    const totalNeto = data.reduce((sum, item) => sum + (parseFloat(item.total_neto) || 0), 0);
+    const totalHasil = data.reduce((sum, item) => sum + (parseFloat(item.total_hasil) || 0), 0);
+    const totalTenagaKerja = data.reduce((sum, item) => sum + (parseFloat(item.total_tenaga_kerja) || 0), 0);
+
+    // Create single card with aggregated data
+    const card = document.createElement('div');
+    card.className = 'comparison-card';
+    card.innerHTML = `
+        <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
+        
+        <div class="comparison-stat">
+            <span class="comparison-label">Luas Wilayah:</span>
+            <span class="comparison-value">${totalLuas.toFixed(2)} Ha</span>
+        </div>
+        <div class="comparison-stat">
+            <span class="comparison-label">Total Neto:</span>
+            <span class="comparison-value">${totalNeto.toFixed(2)} Ha</span>
+        </div>
+        <div class="comparison-stat">
+            <span class="comparison-label">Total Gulma:</span>
+            <span class="comparison-value">${totalHasil.toFixed(2)} Ton</span>
+        </div>
+        <div class="comparison-stat">
+            <span class="comparison-label">Tenaga Kerja:</span>
+            <span class="comparison-value">${totalTenagaKerja.toFixed(0)} Orang</span>
+        </div>
+    `;
+    container.appendChild(card);
 }
 
 function renderRanking(data) {

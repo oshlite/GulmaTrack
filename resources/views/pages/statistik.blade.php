@@ -316,7 +316,7 @@
                     <th>Wilayah</th>
                     <th>Luas Wilayah (Ha)</th>
                     <th>Total Neto</th>
-                    <th>Total Gulma (Ton)</th>
+                    <th>Total Gulma (Ha)</th>
                     <th>Rata-rata Umur Tanaman</th>
                     <th>Total Tenaga Kerja (Orang)</th>
                     <th>Tahun</th>
@@ -591,7 +591,7 @@ function renderDetailStats(data) {
             <td><strong>Wilayah ${item.wilayah_id}</strong></td>
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
             <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
-            <td class="stat-value">${parseFloat(item.total_hasil || 0).toFixed(2)} Ton</td>
+            <td class="stat-value">${parseFloat(item.total_hasil || 0).toFixed(2)} Ha</td>
             <td>${parseFloat(item.avg_umur || 0).toFixed(2)} bulan</td>
             <td class="stat-value">${parseFloat(item.total_tenaga_kerja || 0).toFixed(2)}</td>
             <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
@@ -637,7 +637,7 @@ function renderComparison(data) {
         </div>
         <div class="comparison-stat">
             <span class="comparison-label">Total Gulma:</span>
-            <span class="comparison-value">${totalHasil.toFixed(2)} Ton</span>
+            <span class="comparison-value">${totalHasil.toFixed(2)} Ha</span>
         </div>
         <div class="comparison-stat">
             <span class="comparison-label">Tenaga Kerja:</span>
@@ -674,9 +674,9 @@ function renderRanking(data) {
         barItem.innerHTML = `
             <div class="bar-label">Wilayah ${item.wilayah_id}</div>
             <div class="bar-container">
-                <div class="bar-fill" style="width:${percent}%">${hasil.toFixed(2)} Ton</div>
+                <div class="bar-fill" style="width:${percent}%">${hasil.toFixed(2)} Ha</div>
             </div>
-            <div class="bar-value">${hasil.toFixed(2)} T</div>
+            <div class="bar-value">${hasil.toFixed(2)} Ha</div>
         `;
         container.appendChild(barItem);
     });

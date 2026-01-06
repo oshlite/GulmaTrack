@@ -643,8 +643,8 @@
 <!-- Hero Section - Fullscreen -->
 <section class="hero-section">
     <div class="hero-content">
-        <h1>Sistem Visualisasi Penyebaran Gulma</h1>
-        <p>Monitoring dan analisis penyebaran gulma pada pertanian nanas dengan teknologi data interaktif</p>
+        <h1>Sistem Visualisasi Persebaran Gulma</h1>
+        <p>Monitoring dan analisis persebaran gulma pada pertanian nanas dengan teknologi data interaktif</p>
         <div class="hero-buttons">
             <a href="{{ route('wilayah') }}" class="btn-hero third">
                 <i class="fas fa-map-marker-alt"></i> Lihat Peta
@@ -662,7 +662,7 @@
     <!-- Features Section -->
     <section class="features-section">
         <h2 class="section-title">Fitur Unggulan</h2>
-        <p class="section-subtitle">Solusi lengkap untuk monitoring dan analisis penyebaran gulma</p>
+        <p class="section-subtitle">Solusi lengkap untuk monitoring dan analisis persebaran gulma</p>
         <div class="features-grid">
             <div class="feature-card" onclick="window.location.href='/wilayah'">
                 <div class="feature-icon">
@@ -709,7 +709,7 @@
     <!-- CTA Section -->
     <section class="cta-section">
         <h2>Mulai Monitoring Gulma Sekarang</h2>
-        <p>Dapatkan insight lengkap tentang penyebaran gulma di area pertanian Anda</p>
+        <p>Dapatkan insight lengkap tentang persebaran gulma di area pertanian Anda</p>
         <div class="cta-buttons">
             <a href="{{ route('wilayah') }}" class="btn-hero secondary">
                 <i class="fas fa-map-location-dot"></i> Jelajahi Wilayah

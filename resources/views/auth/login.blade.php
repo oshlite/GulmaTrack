@@ -487,7 +487,7 @@
                         <img src="{{ asset('image/logo3.png') }}" alt="GulmaTrack Logo" class="logo-icon">
                     </div>
                     <h1>GulmaTrack Admin</h1>
-                    <p>Sistem Visualisasi Penyebaran Gulma</p>
+                    <p>Sistem Visualisasi Persebaran Gulma</p>
                 </div>
 
                 <!-- Content -->

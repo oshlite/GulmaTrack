@@ -1035,7 +1035,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <h1><i class="fas fa-chart-line"></i> Dashboard Admin</h1>
-        <p>Kelola dan pantau data penyebaran gulma secara real-time dengan visualisasi peta interaktif</p>
+        <p>Kelola dan pantau data persebaran gulma secara real-time dengan visualisasi peta interaktif</p>
     </div>
 
     <!-- Success/Error Message -->
@@ -1199,7 +1199,7 @@
                     Gunakan form di sebelah kiri untuk:
                 </p>
                 <ul style="margin-left: 20px; margin-top: 10px; font-size: 14px;">
-                    <li style="margin-bottom: 8px;">📤 Upload file CSV dengan data penyebaran gulma</li>
+                    <li style="margin-bottom: 8px;">📤 Upload file CSV dengan data persebaran gulma</li>
                     <li style="margin-bottom: 8px;">📊 Melihat statistik data yang telah diupload</li>
                     <li style="margin-bottom: 8px;">🗺️ Mengelola informasi wilayah dan tanaman</li>
                 </ul>
@@ -1786,13 +1786,30 @@
             console.log('🆕 [DASHBOARD] Creating new map instance...');
             map = L.map('map').setView([-7.5, 107], 11);
             
-            console.log('🗺️  [DASHBOARD] Adding tile layer...');
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            console.log('🗺️  [DASHBOARD] Adding tile layers...');
+            // Define base layers
+            var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19
-            }).addTo(map);
+            });
+
+            var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                maxZoom: 19
+            });
+
+            // Add default layer (OpenStreetMap)
+            osmLayer.addTo(map);
+
+            // Layer control
+            var baseLayers = {
+                "🗺️ Peta": osmLayer,
+                "🛰️ Satelit": satelliteLayer
+            };
+
+            L.control.layers(baseLayers).addTo(map);
             
-            console.log('✅ [DASHBOARD] Map initialized successfully!');
+            console.log('✅ [DASHBOARD] Map initialized successfully with layer control!');
             
             // Show loading indicator
             const loadingDiv = document.getElementById('mapLoadingIndicator');

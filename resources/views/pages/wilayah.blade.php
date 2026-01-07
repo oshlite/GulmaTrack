@@ -913,9 +913,9 @@
         
         .status-bersih { background: #3498db; color: white; }
         .status-ringan { background: #57ce39ff; color: white; }
-        .status-sedang { background: #f1c40f; color: #333; }
+        .status-sedang { background: #f1c40f; color: white; }
         .status-berat { background: #e74c3c; color: white; }
-        .status-unknown { background: #ecf0f1; color: #666; }
+        .status-unknown { background: #ecf0f1; color: #333; }
     </style>
 
     <!-- Map Container -->
@@ -989,35 +989,6 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         </div>
         </h2>
         
-    </div>
-    
-    <!-- Wilayah Stats Summary (from database) -->
-    <div id="wilayahStatsSummary" style="display: none; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #ecf0f1); border-radius: 10px; border-left: 4px solid #128241;">
-        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px; font-weight: 600;">
-            <i class="fas fa-chart-bar"></i> Ringkasan Status Gulma (Database)
-        </h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px;">
-            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size: 28px; font-weight: 700; color: #3498db;" id="statsBersih">-</div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Bersih</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size: 28px; font-weight: 700; color: #57ce39;" id="statsRingan">-</div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Ringan</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size: 28px; font-weight: 700; color: #f1c40f;" id="statsSedang">-</div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Sedang</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size: 28px; font-weight: 700; color: #e74c3c;" id="statsBerat">-</div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Berat</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size: 28px; font-weight: 700; color: #128241;" id="statsTotalTK">-</div>
-                <div style="font-size: 12px; color: #666; margin-top: 5px;">Total TK</div>
-            </div>
-        </div>
     </div>
     
     <!-- Location Details Table -->
@@ -1349,15 +1320,31 @@ function initMap() {
         attributionControl: true
     });
 
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Define base layers
+    var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
-    }).addTo(map);
+    });
 
-    // ===== PENTING: Event listener untuk load foto di popup =====
+    var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 19
+    });
+
+    // Add default layer (OpenStreetMap)
+    osmLayer.addTo(map);
+
+    // Layer control
+    var baseLayers = {
+        "🗺️ Peta": osmLayer,
+        "🛰️ Satelit": satelliteLayer
+    };
+
+    L.control.layers(baseLayers).addTo(map);
+
+    // ===== PENTING: Event listener untuk load foto di popup TANPA JEDA =====
     map.on('popupopen', function (e) {
-        console.log('🖼️  Popup opened, checking for image...');
+        console.log('🖼️  Popup opened, loading image...');
         const img = e.popup._contentNode.querySelector('img[data-kategori]');
         if (!img) {
             console.log('⚠️  No image with data-kategori found in popup');
@@ -1365,36 +1352,53 @@ function initMap() {
         }
 
         const kategori = img.dataset.kategori;
-        console.log('📸 Loading photos for kategori:', kategori);
+        console.log('📸 Fetching foto for kategori:', kategori);
 
         // Jika belum_dimonitoring atau tidak ada kategori, gunakan placeholder
         if (!kategori || kategori === 'belum_dimonitoring') {
-            console.log('ℹ️  Status belum_dimonitoring, menggunakan foto placeholder');
+            console.log('ℹ️  Status belum_dimonitoring, using placeholder');
             img.src = '/image/foto.jpg';
             return;
         }
 
         // Fetch photos dari API untuk kategori yang valid
-        fetch(`/api/gallery/kategori/${kategori}`)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        fetch(`/api/gallery/kategori/${kategori}`, {
+            signal: controller.signal
+        })
             .then(r => {
-                console.log('API response status:', r.status);
+                clearTimeout(timeoutId);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json();
             })
             .then(r => {
-                console.log('API response data:', r);
                 if (!r.success || !r.data || r.data.length === 0) {
-                    console.log('ℹ️  Tidak ada foto untuk kategori:', kategori, '- menggunakan placeholder');
+                    console.log('ℹ️  No photos found for kategori:', kategori);
                     img.src = '/image/foto.jpg';
                     return;
                 }
 
                 // Get primary photo or first photo
                 const primary = r.data.find(p => p.is_primary) || r.data[0];
-                console.log('✅ Setting image to:', primary.foto_url);
-                img.src = primary.foto_url;
+                console.log('✅ Loaded image:', primary.foto_url);
+                // Preload image before showing to avoid flicker
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                    img.src = primary.foto_url;
+                };
+                tempImg.onerror = () => {
+                    console.warn('⚠️  Image load failed, using placeholder');
+                    img.src = '/image/foto.jpg';
+                };
+                tempImg.src = primary.foto_url;
             })
             .catch(err => {
-                console.error('❌ Gagal load foto:', err);
+                clearTimeout(timeoutId);
+                if (err.name !== 'AbortError') {
+                    console.error('❌ Failed to load foto:', err.message);
+                }
                 img.src = '/image/foto.jpg'; // Fallback ke placeholder jika error
             });
     });
@@ -1609,8 +1613,8 @@ function initMap() {
                     onEachFeature: function(feature, layer) {
                         if (feature.properties) {
                             layer.bindPopup(createPopupContent(feature.properties), {
-                                maxWidth: 350,
-                                minWidth: 320,
+                                maxWidth: 300,
+                                minWidth: 150,
                                 maxHeight: 600,
                                 autoPan: true
                             });
@@ -1622,16 +1626,6 @@ function initMap() {
                                 direction: 'top',
                                 offset: [0, -10]
                             });
-                            
-                            // Add permanent label if showLocationLabels is true
-                            if (showLocationLabels) {
-                                const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
-                                layer.bindTooltip(lokasi, {
-                                    permanent: true,
-                                    direction: 'center',
-                                    className: 'location-label'
-                                });
-                            }
                             
                             // Add hover effect - lift on hover
                             layer.on('mouseover', function(e) {
@@ -1661,18 +1655,6 @@ function initMap() {
                 }
 
                 console.log(`Wilayah ${wilayahNumber} loaded: ${response.features.length} features (${stats ? stats.bersih_count + ' bersih, ' + stats.ringan_count + ' ringan' : 'stats pending'})`);
-                
-                // Display stats summary if available
-                if (stats && stats.bersih_count !== undefined) {
-                    document.getElementById('wilayahStatsSummary').style.display = 'block';
-                    document.getElementById('statsBersih').textContent = stats.bersih_count;
-                    document.getElementById('statsRingan').textContent = stats.ringan_count;
-                    document.getElementById('statsSedang').textContent = stats.sedang_count || 0;
-                    document.getElementById('statsBerat').textContent = stats.berat_count || 0;
-                    document.getElementById('statsTotalTK').textContent = Math.round(stats.total_tk) + ' TK';
-                } else {
-                    document.getElementById('wilayahStatsSummary').style.display = 'none';
-                }
                 
                 // Use database records for location table (not GeoJSON features)
                 // This ensures ALL records are shown, not just those that match GeoJSON
@@ -1856,16 +1838,6 @@ function initMap() {
                                     offset: [0, -10]
                                 });
                                 
-                                // Add permanent label if showLocationLabels is true
-                                if (showLocationLabels) {
-                                    const lokasi = feature.properties.Lokasi || feature.properties.LOKASI || feature.properties.seksi || feature.properties.id_feature || 'N/A';
-                                    layer.bindTooltip(lokasi, {
-                                        permanent: true,
-                                        direction: 'top',
-                                        className: 'location-label'
-                                    });
-                                }
-                                
                                 // Add hover effect - lift on hover
                                 layer.on('mouseover', function(e) {
                                     const originalStyle = getFeatureStyle(feature);
@@ -1987,12 +1959,28 @@ function initMap() {
 
     // Create tooltip content for hover (quick info)
     function createTooltipContent(props) {
-        const statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data';
+        let statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '';
         const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
+        
+        // Normalize status - check if it's a valid category
+        if (!statusGulma || statusGulma === 'belum_dimonitoring' || statusGulma.trim() === '') {
+            statusGulma = 'Tidak Ada Data';
+        } else {
+            // Check if status is one of the 4 valid categories
+            const statusLower = statusGulma.toLowerCase();
+            const isValidStatus = statusLower.includes('bersih') || statusLower.includes('ringan') || 
+                                 statusLower.includes('sedang') || statusLower.includes('berat');
+            if (!isValidStatus) {
+                // Invalid status (like "Nanas", etc.) - convert to "Tidak Ada Data"
+                statusGulma = 'Tidak Ada Data';
+            }
+        }
         
         // Get color for status
         let statusColor = '#9ca3af';
-        if (statusGulma.toLowerCase().includes('bersih')) {
+        if (statusGulma === 'Tidak Ada Data') {
+            statusColor = '#95a5a6';
+        } else if (statusGulma.toLowerCase().includes('bersih')) {
             statusColor = '#3498db';
         } else if (statusGulma.toLowerCase().includes('ringan')) {
             statusColor = '#57ce39ff';
@@ -2011,9 +1999,9 @@ function initMap() {
     function createPopupContent(props) {
         let html = '<div style="width: 250px; padding: 0;">';
         
-        // Foto - tampil langsung dengan placeholder
-        const statusGulma = props.kategori || 'belum_dimonitoring';
-        html += '<div style="width: 100%; height: 140px; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0;">';
+        // Foto - mulai dengan placeholder langsung, fetch foto asli di event listener
+        let statusGulma = props.kategori || 'belum_dimonitoring';
+        html += '<div style="width: 100%; height: 140px; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0; background: #f0f0f0;">';
         html += `<img src="/image/foto.jpg" data-kategori="${statusGulma}" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover; display: block;">`;
         html += '</div>';
         
@@ -2026,24 +2014,39 @@ function initMap() {
         html += `<p style="margin: 0; color: #128241; font-size: 16px; font-weight: 700;">📍 wil. ${wilayah} - ${lokasi}</p>`;
         html += `</div>`;
 
-        // Status Gulma dari CSV kategori
+        // Normalize status display - check if it's a valid category
+        let displayStatus;
+        if (!statusGulma || statusGulma === 'belum_dimonitoring' || statusGulma.trim() === '') {
+            displayStatus = 'Tidak Ada Data';
+        } else {
+            const statusLower = statusGulma.toLowerCase();
+            const isValidStatus = statusLower.includes('bersih') || statusLower.includes('ringan') || 
+                                 statusLower.includes('sedang') || statusLower.includes('berat');
+            displayStatus = isValidStatus ? statusGulma : 'Tidak Ada Data';
+        }
+        
         let statusColor = '#ecf0f1';
         let textColor = '#333333';
         
-        if (statusGulma.toLowerCase().includes('bersih')) {
+        if (displayStatus === 'Tidak Ada Data') {
+            statusColor = '#ecf0f1';
+            textColor = '#666666';
+        } else if (displayStatus.toLowerCase().includes('bersih')) {
             statusColor = '#3498db';
             textColor = 'white';
-        } else if (statusGulma.toLowerCase().includes('ringan')) {
+        } else if (displayStatus.toLowerCase().includes('ringan')) {
             statusColor = '#57ce39ff';
             textColor = 'white';
-        } else if (statusGulma.toLowerCase().includes('sedang')) {
+        } else if (displayStatus.toLowerCase().includes('sedang')) {
             statusColor = '#f1c40f';
-        } else if (statusGulma.toLowerCase().includes('berat')) {
-            statusColor = '#e74c3c'; textColor = 'white';
+            //textColor = 'white';
+        } else if (displayStatus.toLowerCase().includes('berat')) {
+            statusColor = '#e74c3c'; 
+            textColor = 'white';
         }
         
         html += `<div style="background: ${statusColor}; color: ${textColor}; padding: 6px; margin-bottom: 8px; border-radius: 4px; text-align: center; font-weight: 600; font-size: 11px;">`;
-        html += `${statusGulma}`;
+        html += `${displayStatus}`;
         html += `</div>`;
 
         // Data information - dari CSV dan GeoJSON

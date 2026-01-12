@@ -7,6 +7,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\GulmaController;
 use App\Http\Controllers\ExcelDataController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\DroneController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,7 @@ Route::view('/statistik', 'pages.statistik')->name('statistik');
 Route::view('/tentang', 'pages.about')->name('about');
 
 Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah');
+Route::get('/drone', [DroneController::class, 'userIndex'])->name('drone');
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +114,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
+// Download drone PDF (accessible to everyone)
+Route::get('/drone/download/{id}', [DroneController::class, 'download'])->name('drone.download');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN AREA
@@ -142,6 +147,17 @@ Route::prefix('admin')
             Route::get('/{id}', [GalleryController::class, 'show'])->name('show');
             Route::put('/{id}', [GalleryController::class, 'update'])->name('update');
             Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('destroy');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | DRONE (ADMIN)
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('drone')->name('drone.')->group(function () {
+            Route::get('/', [DroneController::class, 'adminIndex'])->name('index');
+            Route::post('/store', [DroneController::class, 'store'])->name('store');
+            Route::delete('/{id}', [DroneController::class, 'destroy'])->name('destroy');
         });
 
         /*

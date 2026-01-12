@@ -989,47 +989,6 @@
     }
 </style>
 
-<!-- Navbar Admin -->
-<nav class="admin-navbar">
-    <div class="navbar-container">
-        <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
-            <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo" class="logo-img">
-            <span>GulmaTrack</span>
-        </a>
-
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link active">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.gallery.index') }}" class="nav-link">
-                    <i class="fas fa-images"></i> Galeri
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('wilayah') }}" class="nav-link">
-                    <i class="fas fa-globe"></i> Publik
-                </a>
-            </li>
-        </ul>
-
-        <div class="navbar-right">
-            <div class="admin-info">
-                <div class="admin-avatar">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                <span>Administrator</span>
-            </div>
-            <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-                @csrf
-                <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
-    </div>
-</nav>
-
 <!-- Main Content -->
 <div class="admin-container">
     <!-- Page Header -->
@@ -1554,7 +1513,7 @@
 
                 <script>
                     const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-                    let allTableData = @json($importTerbaru->toArray());
+                    let allTableData = <?php echo json_encode($importTerbaru->toArray()); ?>;
                     let currentPage = 1;
                     let recordsPerPage = 10;
                     let filteredData = [...allTableData];

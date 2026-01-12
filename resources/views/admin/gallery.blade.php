@@ -3,7 +3,6 @@
 @section('title', 'Galeri Foto Gulma')
 
 @section('content')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -18,123 +17,6 @@
     body {
         font-family: 'Poppins';
         padding-top: 0;
-    }
-
-    /* Navbar & Container - SAMA seperti sebelumnya */
-    nav.admin-navbar {
-        background: #128241;
-        backdrop-filter: blur(100px);
-        padding: 0;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        border-bottom: 2px solid var(--secondary-color);
-        width: 100%;
-    }
-
-    .navbar-container {
-        max-width: 100%;
-        margin: 0;
-        padding: 0 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 70px;
-    }
-
-    .navbar-brand {
-        font-size: 25px;
-        font-family: 'Poppins';
-        font-weight: 800;
-        color: #FBA919;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand img {
-        width: 85px;
-        height: 60px;
-        object-fit: contain;
-    }
-
-    .nav-menu {
-        display: flex;
-        list-style: none;
-        gap: 2px;
-        margin: 0;
-    }
-
-    .nav-link {
-        color: #ecf0f1;
-        text-decoration: none;
-        padding: 10px 20px;
-        display: block;
-        transition: all 0.3s ease;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .nav-link.active {
-        color: var(--secondary-color);
-    }
-
-    .navbar-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .admin-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        color: #ecf0f1;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .admin-avatar {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
-        font-weight: 700;
-        font-family: 'Poppins';
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .logout-btn {
-        padding: 8px 16px;
-        background: #E74C3C;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        font-size: 13px;
-        font-family: 'Poppins';
-        letter-spacing: 0.3px;
-        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
-    }
-
-    .logout-btn:hover {
-        background: #c0392b;
-        transform: translateY(-2px);
     }
 
     .admin-container {
@@ -760,47 +642,6 @@
     }
 </style>
 
-<!-- Navbar Admin -->
-<nav class="admin-navbar">
-    <div class="navbar-container">
-        <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
-            <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo">
-            <span>GulmaTrack</span>
-        </a>
-
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.gallery.index') }}" class="nav-link active">
-                    <i class="fas fa-images"></i> Galeri
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('wilayah') }}" class="nav-link">
-                    <i class="fas fa-globe"></i> Publik
-                </a>
-            </li>
-        </ul>
-
-        <div class="navbar-right">
-            <div class="admin-info">
-                <div class="admin-avatar">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                <span>Administrator</span>
-            </div>
-            <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-                @csrf
-                <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
-    </div>
-</nav>
-
 <div class="admin-container">
     <!-- Page Header -->
     <div class="page-header">
@@ -918,12 +759,12 @@
     <!-- Gallery Grid -->
     <div class="gallery-grid" id="galleryGrid">
         @forelse($photos as $photo)
-            <div class="gallery-card" data-kategori="{{ $photo->kategori }}" onclick="openModal({{ $photo->id }})">
+            <div class="gallery-card" data-kategori="{{ $photo->kategori }}" data-photo-id="{{ $photo->id }}">
                 <div style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
                     @if($photo->is_primary)
                         <span class="primary-badge">⭐ FOTO UTAMA</span>
                     @endif
-                    <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image" onerror="console.error('Image load failed:', this.src); this.style.display='none';">
+                    <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image" onerror="this.style.display='none';">
                 </div>
                 <div class="gallery-info">
                     <div class="gallery-kategori">
@@ -946,11 +787,11 @@
                     @endif
                     <div class="action-buttons">
                         @if(!$photo->is_primary)
-                            <button class="btn btn-warning" onclick="event.stopPropagation(); setPrimary({{ $photo->id }})">
+                            <button class="btn btn-warning btn-set-primary" data-photo-id="{{ $photo->id }}">
                                 <i class="fas fa-star"></i> Set Utama
                             </button>
                         @endif
-                        <button class="btn btn-danger" onclick="event.stopPropagation(); confirmDelete({{ $photo->id }})">
+                        <button class="btn btn-danger btn-delete" data-photo-id="{{ $photo->id }}">
                             <i class="fas fa-trash"></i> Hapus
                         </button>
                     </div>
@@ -1164,6 +1005,32 @@ function filterGallery() {
         }
     });
 }
+
+// Gallery Card Click Handler
+document.querySelectorAll('.gallery-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const photoId = this.dataset.photoId;
+        openModal(photoId);
+    });
+});
+
+// Set Primary Button Handler
+document.querySelectorAll('.btn-set-primary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const photoId = this.dataset.photoId;
+        setPrimary(photoId);
+    });
+});
+
+// Delete Button Handler
+document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const photoId = this.dataset.photoId;
+        confirmDelete(photoId);
+    });
+});
 
 // Open Modal
 async function openModal(id) {

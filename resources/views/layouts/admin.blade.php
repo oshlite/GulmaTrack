@@ -43,6 +43,7 @@
             background-color: var(--light-bg);
             color: var(--text-color);
             line-height: 1.6;
+            padding-top: 70px;
         }
 
         .admin-wrapper {
@@ -53,6 +54,168 @@
 
         .admin-content {
             flex: 1;
+        }
+
+        /* Navbar Styles */
+        nav.admin-navbar {
+            background: #128241;
+            backdrop-filter: blur(100px);
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid var(--secondary-color);
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .navbar-brand {
+            font-size: 25px;
+            font-family: 'Poppins';
+            font-weight: 800;
+            color: #FBA919;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            color: #FBA919;
+        }
+
+        .navbar-brand img {
+            width: 85px;
+            height: 60px;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover img {
+            transform: rotate(1deg) scale(1);
+        }
+
+        .navbar-brand span {
+            color: #FBA919 !important;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2px;
+            flex-wrap: nowrap;
+            margin: 0;
+        }
+
+        .nav-item {
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-link:hover {
+            color: #ffffff;
+        }
+
+        .nav-link.active {
+            color: var(--secondary-color);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ecf0f1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .admin-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-family: 'Poppins';
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: #E74C3C;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-family: 'Poppins';
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
         }
 
         /* Animations */
@@ -74,12 +237,71 @@
             body {
                 font-size: 14px;
             }
+
+            .navbar-container {
+                flex-wrap: wrap;
+            }
+
+            .nav-menu {
+                gap: 0;
+            }
+
+            .nav-link {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <!-- Admin Content Only (No Guest Navbar, No Footer) -->
+        <!-- Admin Navbar -->
+        <nav class="admin-navbar">
+            <div class="navbar-container">
+                <a href="{{ route('admin.dashboard') }}" class="navbar-brand">
+                    <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo">
+                    <span>GulmaTrack</span>
+                </a>
+
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="fas fa-chart-line"></i> Wilayah
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.drone.index') }}" class="nav-link {{ request()->routeIs('admin.drone*') ? 'active' : '' }}">
+                            <i class="fas fa-cube"></i> Drone
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.gallery.index') }}" class="nav-link {{ request()->routeIs('admin.gallery*') ? 'active' : '' }}">
+                            <i class="fas fa-images"></i> Galeri
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('wilayah') }}" class="nav-link">
+                            <i class="fas fa-globe"></i> Publik
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="navbar-right">
+                    <div class="admin-info">
+                        <div class="admin-avatar">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                        <span>Administrator</span>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Admin Content -->
         <div class="admin-content fade-in">
             @yield('content')
         </div>

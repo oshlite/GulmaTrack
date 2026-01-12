@@ -26,6 +26,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('drone') }}" class="nav-link {{ request()->routeIs('drone') ? 'active' : '' }}">
+                    <i class="fas fa-cube"></i> Drone
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('login') }}" class="nav-link {{ request()->routeIs('login') ? 'active' : '' }}">
                     <i class="fas fa-sign-in-alt"></i> Admin
                 </a>

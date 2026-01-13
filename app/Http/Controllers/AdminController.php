@@ -1,11 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\DataGulma;
 use App\Models\ImportLog;
+use App\Models\Drone;
+use App\Models\MapPublication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;  // ✅ Ini harus ada
+use Illuminate\Support\Facades\Cache; // ✅ Tambah ini juga
 
 class AdminController extends Controller
 {
@@ -33,7 +36,7 @@ class AdminController extends Controller
             $totalTanaman = DataGulma::where('import_log_id', $tempImportLogId)->distinct('id_feature')->count('id_feature');
         } else {
             // DEFAULT: Tampilkan statistik dari published data saja
-            $published = \App\Models\MapPublication::getLatestPublished();
+            $published = MapPublication::getLatestPublished();
             
             if ($published && $published->importLog) {
                 // Ada publikasi, tampilkan dari situ
@@ -87,11 +90,21 @@ class AdminController extends Controller
         // Get all data without pagination - pagination will be handled client-side
         $importTerbaru = $query->get();
 
+        // Drone Statistics
+        $totalDrone = Drone::count();
+        $droneAktif = Drone::whereYear('tanggal_perencanaan', date('Y'))->count();
+        $totalPdf = Drone::count();
+        $droneUploadTerbaru = Drone::orderBy('created_at', 'desc')->first();
+
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
             'wilayahAktif' => $wilayahAktif,
             'totalTanaman' => $totalTanaman,
             'importTerbaru' => $importTerbaru,
+            'totalDrone' => $totalDrone,
+            'droneAktif' => $droneAktif,
+            'totalPdf' => $totalPdf,
+            'droneUploadTerbaru' => $droneUploadTerbaru,
         ]);
     }
 
@@ -101,7 +114,7 @@ class AdminController extends Controller
      */
     public function uploadCsv(Request $request)
     {
-        \Log::info('Upload CSV request received', [
+        Log::info('Upload CSV request received', [
             'has_file' => $request->hasFile('file'),
             'tahun' => $request->input('tahun'),
             'bulan' => $request->input('bulan'),
@@ -125,7 +138,7 @@ class AdminController extends Controller
             $file = $request->file('file');
             $path = $file->getRealPath();
             
-            \Log::info('Starting CSV upload', [
+            Log::info('Starting CSV upload', [
                 'file' => $file->getClientOriginalName(),
                 'size' => $file->getSize(),
             ]);
@@ -184,7 +197,7 @@ class AdminController extends Controller
             // Delete ONLY existing records for THIS IMPORT
             DataGulma::where('import_log_id', $importLog->id)->delete();
             
-            \Log::info("Deleted previous records for import {$importLog->id}");
+            Log::info("Deleted previous records for import {$importLog->id}");
 
             $berhasil = 0;
             $gagal = 0;
@@ -256,15 +269,15 @@ class AdminController extends Controller
             ]);
 
             // ✅ FIX 1: AUTO-PUBLISH UPLOAD TERBARU
-            \Log::info('🚀 AUTO-PUBLISHING latest upload...');
+            Log::info('🚀 AUTO-PUBLISHING latest upload...');
             
             // Unpublish semua publikasi lama
-            \App\Models\MapPublication::where('status', 'published')
+            MapPublication::where('status', 'published')
                 ->update(['status' => 'draft']);
             
             // Publish upload yang baru saja berhasil
             if ($berhasil > 0) {
-                $publication = \App\Models\MapPublication::updateOrCreate(
+                $publication = MapPublication::updateOrCreate(
                     [
                         'tahun' => $importLog->tahun,
                         'bulan' => $importLog->bulan,
@@ -278,17 +291,17 @@ class AdminController extends Controller
                     ]
                 );
                 
-                \Log::info('✅ Auto-published import_log_id: ' . $importLog->id);
+                Log::info('✅ Auto-published import_log_id: ' . $importLog->id);
             }
 
             // ✅ FIX 2: CLEAR ALL CACHE (Critical!)
-            \Log::info("🗑️ Clearing ALL GeoJSON cache after upload...");
+            Log::info("🗑️ Clearing ALL GeoJSON cache after upload...");
             for ($wil = 16; $wil <= 23; $wil++) {
                 $cacheKey = "geojson_wgs84_wil_{$wil}";
-                \Cache::forget($cacheKey);
-                \Log::info("   ✓ Cleared cache: {$cacheKey}");
+                Cache::forget($cacheKey);
+                Log::info("   ✓ Cleared cache: {$cacheKey}");
             }
-            \Cache::forget('wilayah_summary_all');
+            Cache::forget('wilayah_summary_all');
             
             // ✅ FIX 3: NO MORE temp_import_log_id session
             // Dashboard dan Wilayah akan langsung baca dari published data
@@ -296,7 +309,7 @@ class AdminController extends Controller
             $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
             $message = "✅ File CSV berhasil diproses dan dipublikasikan! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
             
-            \Log::info('✅ CSV upload & auto-publish complete', [
+            Log::info('✅ CSV upload & auto-publish complete', [
                 'import_id' => $importLog->id,
                 'berhasil' => $berhasil,
                 'gagal' => $gagal,
@@ -316,7 +329,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             $message = 'Error: ' . $e->getMessage();
             
-            \Log::error('CSV upload error', [
+            Log::error('CSV upload error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -405,14 +418,14 @@ class AdminController extends Controller
                 ], 400);
             }
 
-            \Log::info("📤 Publishing import_log_id: {$importLogId}");
+            Log::info("📤 Publishing import_log_id: {$importLogId}");
 
             // Unpublish old publications
-            \App\Models\MapPublication::where('status', 'published')
+            MapPublication::where('status', 'published')
                 ->update(['status' => 'draft']);
 
             // Create new publication
-            $publication = \App\Models\MapPublication::updateOrCreate(
+            $publication = MapPublication::updateOrCreate(
                 [
                     'tahun' => $importToDeploy->tahun,
                     'bulan' => $importToDeploy->bulan,
@@ -427,13 +440,13 @@ class AdminController extends Controller
             );
 
             // ✅ CRITICAL: Clear ALL GeoJSON cache
-            \Log::info("🗑️ Clearing ALL GeoJSON cache after publish...");
+            Log::info("🗑️ Clearing ALL GeoJSON cache after publish...");
             for ($wil = 16; $wil <= 23; $wil++) {
                 $cacheKey = "geojson_wgs84_wil_{$wil}";
-                \Cache::forget($cacheKey);
-                \Log::info("   ✓ Cleared: {$cacheKey}");
+                Cache::forget($cacheKey);
+                Log::info("   ✓ Cleared: {$cacheKey}");
             }
-            \Cache::forget('wilayah_summary_all');
+            Cache::forget('wilayah_summary_all');
 
             return response()->json([
                 'success' => true,
@@ -446,7 +459,7 @@ class AdminController extends Controller
                 'minggu' => $importToDeploy->minggu
             ]);
         } catch (\Exception $e) {
-            \Log::error('Publish map error: ' . $e->getMessage());
+            Log::error('Publish map error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage()
@@ -460,7 +473,7 @@ class AdminController extends Controller
     public function getPublicationStatus()
     {
         try {
-            $latest = \App\Models\MapPublication::getLatestPublished();
+            $latest = MapPublication::getLatestPublished();
             
             if ($latest && $latest->importLog) {
                 return response()->json([
@@ -562,7 +575,7 @@ class AdminController extends Controller
                 })
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getImportLogs: ' . $e->getMessage());
+            Log::error('Error in getImportLogs: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage()
@@ -576,15 +589,15 @@ class AdminController extends Controller
     public function getLatestPublished()
     {
         try {
-            \Log::info('=== getLatestPublished called ===');
+            Log::info('=== getLatestPublished called ===');
             
             // Get latest published map (for admin to see what's being shown to public)
-            $published = \App\Models\MapPublication::getLatestPublished();
+            $published = MapPublication::getLatestPublished();
             
-            \Log::info('Published data:', ['published' => $published ? $published->toArray() : null]);
+            Log::info('Published data:', ['published' => $published ? $published->toArray() : null]);
             
             if ($published && $published->importLog) {
-                \Log::info('Returning published import log ID: ' . $published->import_log_id);
+                Log::info('Returning published import log ID: ' . $published->import_log_id);
                 
                 return response()->json([
                     'success' => true,
@@ -596,17 +609,17 @@ class AdminController extends Controller
                 ]);
             }
             
-            \Log::info('No published data found, looking for latest successful import');
+            Log::info('No published data found, looking for latest successful import');
             
             // If no published data, return the latest successful import instead (fallback)
             $latest = ImportLog::where('status', 'success')
                 ->latest('created_at')
                 ->first();
             
-            \Log::info('Latest import log:', ['latest' => $latest ? $latest->toArray() : null]);
+            Log::info('Latest import log:', ['latest' => $latest ? $latest->toArray() : null]);
             
             if (!$latest) {
-                \Log::warning('No import logs found at all');
+                Log::warning('No import logs found at all');
                 return response()->json([
                     'success' => false,
                     'message' => 'No data found'
@@ -623,8 +636,8 @@ class AdminController extends Controller
                 'note' => 'Using latest upload (no published data)'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getLatestPublished: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Error in getLatestPublished: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -640,12 +653,12 @@ class AdminController extends Controller
     public function getDataByImport($importId)
     {
         try {
-            \Log::info("Getting data for import ID: $importId");
+            Log::info("Getting data for import ID: $importId");
             
             // Get import log first to verify it exists
             $importLog = ImportLog::find($importId);
             if (!$importLog) {
-                \Log::warning("Import log not found: $importId");
+                Log::warning("Import log not found: $importId");
                 return response()->json([
                     'success' => false,
                     'message' => 'Import not found',
@@ -653,7 +666,7 @@ class AdminController extends Controller
                 ], 404);
             }
             
-            \Log::info("Import log found", [
+            Log::info("Import log found", [
                 'id' => $importLog->id,
                 'nama_file' => $importLog->nama_file,
                 'tahun' => $importLog->tahun,
@@ -666,7 +679,7 @@ class AdminController extends Controller
             // Get all data for this import
             $data = DataGulma::where('import_log_id', $importId)->get();
             
-            \Log::info("Database query result", [
+            Log::info("Database query result", [
                 'import_log_id' => $importId,
                 'count' => $data->count(),
                 'first_record' => $data->first() ? $data->first()->toArray() : null
@@ -674,14 +687,14 @@ class AdminController extends Controller
             
             // If no data found, check if there's any published data to show as fallback
             if ($data->count() === 0) {
-                \Log::warning("No data found for import {$importId}, checking for published data as fallback...");
+                Log::warning("No data found for import {$importId}, checking for published data as fallback...");
                 
                 // Get the latest published data as fallback
-                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                $latestPublication = MapPublication::where('status', 'published')
                     ->orderBy('created_at', 'desc')
                     ->first();
                 
-                \Log::info("Fallback publication check", [
+                Log::info("Fallback publication check", [
                     'requested_import' => $importId,
                     'latest_pub_exists' => $latestPublication ? true : false,
                     'latest_pub_import_id' => $latestPublication ? $latestPublication->import_log_id : null
@@ -690,7 +703,7 @@ class AdminController extends Controller
                 if ($latestPublication && $latestPublication->import_log_id) {
                     // Return the latest published data instead of empty result
                     $data = DataGulma::where('import_log_id', $latestPublication->import_log_id)->get();
-                    \Log::info("Returning published data as fallback", [
+                    Log::info("Returning published data as fallback", [
                         'requested_import' => $importId,
                         'published_import' => $latestPublication->import_log_id,
                         'records_found' => $data->count()
@@ -707,7 +720,7 @@ class AdminController extends Controller
                 'count' => $data->count()
             ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getDataByImport', [
+            Log::error('Error in getDataByImport', [
                 'import_id' => $importId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -726,34 +739,34 @@ class AdminController extends Controller
     public function debugImport($importId)
     {
         try {
-            \Log::info("=== DEBUG IMPORT $importId ===");
+            Log::info("=== DEBUG IMPORT $importId ===");
             
             // Check ImportLog exists
             $importLog = ImportLog::find($importId);
-            \Log::info("ImportLog found: " . ($importLog ? 'YES' : 'NO'));
+            Log::info("ImportLog found: " . ($importLog ? 'YES' : 'NO'));
             if ($importLog) {
-                \Log::info("ImportLog data:", $importLog->toArray());
+                Log::info("ImportLog data:", $importLog->toArray());
             }
             
             // Check raw count in database
-            $count = \DB::table('data_gulmas')->where('import_log_id', $importId)->count();
-            \Log::info("Raw DB count for import_log_id=$importId: $count");
+            $count = DB::table('data_gulmas')->where('import_log_id', $importId)->count();
+            Log::info("Raw DB count for import_log_id=$importId: $count");
             
             // Check first few records
-            $samples = \DB::table('data_gulmas')
+            $samples = DB::table('data_gulmas')
                 ->where('import_log_id', $importId)
                 ->limit(5)
                 ->get();
-            \Log::info("Sample records:", $samples->toArray());
+            Log::info("Sample records:", $samples->toArray());
             
             // Also check by tahun/bulan/minggu if import has them
             if ($importLog) {
-                $count2 = \DB::table('data_gulmas')
+                $count2 = DB::table('data_gulmas')
                     ->where('tahun', $importLog->tahun)
                     ->where('bulan', $importLog->bulan)
                     ->where('minggu', $importLog->minggu)
                     ->count();
-                \Log::info("Count by tahun/bulan/minggu: $count2");
+                Log::info("Count by tahun/bulan/minggu: $count2");
             }
             
             return response()->json([
@@ -761,7 +774,7 @@ class AdminController extends Controller
                 'import_log_exists' => $importLog ? true : false,
                 'import_log' => $importLog ? $importLog->toArray() : null,
                 'data_count_by_import_log_id' => $count,
-                'data_count_by_period' => $importLog ? \DB::table('data_gulmas')
+                'data_count_by_period' => $importLog ? DB::table('data_gulmas')
                     ->where('tahun', $importLog->tahun)
                     ->where('bulan', $importLog->bulan)
                     ->where('minggu', $importLog->minggu)
@@ -770,7 +783,7 @@ class AdminController extends Controller
                 'message' => 'Check browser console (F12) for detailed logs'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Debug error: ' . $e->getMessage());
+            Log::error('Debug error: ' . $e->getMessage());
             return response()->json([
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -1052,7 +1065,7 @@ class AdminController extends Controller
             'bulan' => 'required|integer',
         ]);
 
-        $publication = \App\Models\MapPublication::where('tahun', $request->tahun)
+        $publication = MapPublication::where('tahun', $request->tahun)
             ->where('bulan', $request->bulan)
             ->where('status', 'published')
             ->orderByDesc('minggu')
@@ -1077,7 +1090,7 @@ class AdminController extends Controller
      */
     public function fixMissingImportLogIds()
     {
-        \Log::info('Starting fixMissingImportLogIds...');
+        Log::info('Starting fixMissingImportLogIds...');
         
         // Get all ImportLogs ordered by creation
         $imports = ImportLog::orderBy('created_at', 'asc')->get();
@@ -1101,7 +1114,7 @@ class AdminController extends Controller
                     ->update(['import_log_id' => $import->id]);
                 
                 $fixed += $updated;
-                \Log::info("ImportLog {$import->id}: Fixed {$updated} orphan records");
+                Log::info("ImportLog {$import->id}: Fixed {$updated} orphan records");
             } else {
                 $skipped++;
             }
@@ -1143,7 +1156,7 @@ class AdminController extends Controller
             ->get()
             ->map(function($import) use ($tahun, $bulan, $minggu) {
                 // Cek apakah file ini sedang dipublikasi untuk periode ini
-                $publication = \App\Models\MapPublication::where('import_log_id', $import->id)
+                $publication = MapPublication::where('import_log_id', $import->id)
                     ->where('tahun', $tahun)
                     ->where('bulan', $bulan)
                     ->where('minggu', $minggu)
@@ -1202,10 +1215,10 @@ class AdminController extends Controller
             // Mulai transaction untuk consistency
             DB::beginTransaction();
             
-            \Log::info('Setting publication for import_log_id: ' . $import_log_id . ' (' . $importLog->nama_file . ') for period ' . $tahun . '/' . $bulan . '/W' . $minggu);
+            Log::info('Setting publication for import_log_id: ' . $import_log_id . ' (' . $importLog->nama_file . ') for period ' . $tahun . '/' . $bulan . '/W' . $minggu);
             
             // Unpublish semua file lain untuk periode yang sama (gunakan periode columns)
-            $oldPublications = \App\Models\MapPublication::where('tahun', $tahun)
+            $oldPublications = MapPublication::where('tahun', $tahun)
                 ->where('bulan', $bulan)
                 ->where('minggu', $minggu)
                 ->where('status', 'published')
@@ -1214,11 +1227,11 @@ class AdminController extends Controller
             
             foreach ($oldPublications as $pub) {
                 $pub->update(['status' => 'draft']);
-                \Log::info('Unpublished previous publication for period: ' . $tahun . '/' . $bulan . '/W' . $minggu . ' (Import ID: ' . $pub->import_log_id . ')');
+                Log::info('Unpublished previous publication for period: ' . $tahun . '/' . $bulan . '/W' . $minggu . ' (Import ID: ' . $pub->import_log_id . ')');
             }
             
             // Set file baru sebagai published dengan periode tracking
-            $publication = \App\Models\MapPublication::updateOrCreate(
+            $publication = MapPublication::updateOrCreate(
                 ['tahun' => $tahun, 'bulan' => $bulan, 'minggu' => $minggu],
                 [
                     'import_log_id' => $import_log_id,
@@ -1232,8 +1245,8 @@ class AdminController extends Controller
             // Cache keys: geojson_wgs84_wil_16 hingga geojson_wgs84_wil_23
             for ($wil = 16; $wil <= 23; $wil++) {
                 $cacheKey = "geojson_wgs84_wil_{$wil}";
-                \Cache::forget($cacheKey);
-                \Log::info("Cleared cache: {$cacheKey} for period publication change");
+                Cache::forget($cacheKey);
+                Log::info("Cleared cache: {$cacheKey} for period publication change");
             }
             
             DB::commit();
@@ -1252,7 +1265,7 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Publication update error: ' . $e->getMessage());
+            Log::error('Publication update error: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
@@ -1261,3 +1274,4 @@ class AdminController extends Controller
         }
     }
 }
+

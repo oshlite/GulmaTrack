@@ -1,0 +1,11 @@
+parameters:
+    level: 5
+    paths:
+        - app
+        - config
+        - routes
+        - tests
+    ignoreErrors:
+        - '#Undefined type (Log|Cache|DB)#'
+    checkOctaneCompatibility: false
+    reportUnmatchedIgnoredErrors: false

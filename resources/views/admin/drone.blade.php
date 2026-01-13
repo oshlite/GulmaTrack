@@ -264,6 +264,50 @@
         margin-bottom: 15px;
     }
 
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        border-top: 4px solid var(--primary-color);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-icon {
+        font-size: 32px;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
     @media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -277,6 +321,10 @@
             font-size: 24px;
         }
 
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
         table {
             font-size: 12px;
         }
@@ -285,14 +333,49 @@
         table td {
             padding: 10px 5px;
         }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-sm {
+            width: 100%;
+            text-align: center;
+        }
     }
 </style>
 
-<div class="main-content">
-    <div class="page-header">
-        <h1 class="page-title">Manajemen Drone</h1>
-        <p class="page-subtitle">Upload dan kelola dokumen perencanaan drone</p>
-    </div>
+  <!-- Manajemen Drone Section -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-helicopter"></i> Manajemen Drone</h1>
+            <p>Kelola dan upload dokumen perencanaan drone untuk pengendalian gulma</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-label">Total PDF</div>
+                <div class="stat-value" id="statTotalPdf">{{ $totalPdf ?? 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-label">Upload Terbaru</div>
+                <div class="stat-value" id="statDroneUploadTerbaru">
+                    @if ($droneUploadTerbaru)
+                        {{ $droneUploadTerbaru->created_at->format('d-m-Y') }}
+                    @else
+                        -
+                    @endif
+                </div>
+            </div>
+        </div>
 
     <!-- Alert Messages -->
     @if ($errors->any())
@@ -320,20 +403,28 @@
 
     <!-- Form Upload Section -->
     <div class="form-section">
-        <h2 class="form-section-title">📤 Upload Drone PDF</h2>
+        <h2 class="form-section-title">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Drone PDF
+        </h2>
 
-        <form action="{{ route('admin.drone.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.drone.store') }}" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
             @csrf
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="judul">Judul <span style="color: red;">*</span></label>
                     <input type="text" id="judul" name="judul" placeholder="Contoh: Perencanaan Pengendalian Gulma Wilayah A" value="{{ old('judul') }}" required>
+                    @error('judul')
+                        <small style="color: red;">{{ $message }}</small>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="lokasi">Lokasi <span style="color: red;">*</span></label>
                     <input type="text" id="lokasi" name="lokasi" placeholder="Contoh: Wilayah Jakarta Timur" value="{{ old('lokasi') }}" required>
+                    @error('lokasi')
+                        <small style="color: red;">{{ $message }}</small>
+                    @enderror
                 </div>
             </div>
 
@@ -341,16 +432,22 @@
                 <div class="form-group">
                     <label for="tanggal_perencanaan">Tanggal Perencanaan <span style="color: red;">*</span></label>
                     <input type="date" id="tanggal_perencanaan" name="tanggal_perencanaan" value="{{ old('tanggal_perencanaan') }}" required>
+                    @error('tanggal_perencanaan')
+                        <small style="color: red;">{{ $message }}</small>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="persen_gulma">Persen Gulma (%)</label>
                     <input type="number" id="persen_gulma" name="persen_gulma" placeholder="Contoh: 45.5" step="0.01" min="0" max="100" value="{{ old('persen_gulma') }}">
+                    @error('persen_gulma')
+                        <small style="color: red;">{{ $message }}</small>
+                    @enderror
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" style="grid-column: 1 / -1;">
                     <label for="pdf_file">File PDF <span style="color: red;">*</span></label>
                     <div class="file-input-wrapper">
                         <label class="file-input-label">
@@ -359,10 +456,13 @@
                         </label>
                         <div class="file-name" id="file-name-display"></div>
                     </div>
+                    @error('pdf_file')
+                        <small style="color: red;">{{ $message }}</small>
+                    @enderror
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+            <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
                 ✅ Upload Drone
             </button>
         </form>
@@ -370,36 +470,38 @@
 
     <!-- Data Table Section -->
     <div class="table-section">
-        <h2 class="table-title">📋 Daftar Drone</h2>
+        <h2 class="table-title">
+            <i class="fas fa-table"></i> Daftar Drone
+        </h2>
 
         @if ($drones->count() > 0)
-            <div style="overflow-x: auto;">
+            <div style="overflow-x: auto; margin-bottom: 20px;">
                 <table>
                     <thead>
                         <tr>
-                            <th>No</th>
+                            <th style="text-align: center; width: 50px;">No</th>
                             <th>Judul</th>
-                            <th>Lokasi</th>
-                            <th>Tanggal Perencanaan</th>
-                            <th>File</th>
-                            <th>Dibuat</th>
-                            <th>Aksi</th>
+                            <th style="width: 150px;">Lokasi</th>
+                            <th style="width: 150px;">Tgl Perencanaan</th>
+                            <th style="width: 120px;">File</th>
+                            <th style="width: 150px;">Dibuat</th>
+                            <th style="text-align: center; width: 100px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($drones as $index => $drone)
                             <tr>
-                                <td>{{ ($drones->currentPage() - 1) * $drones->perPage() + $index + 1 }}</td>
+                                <td style="text-align: center;">{{ ($drones->currentPage() - 1) * $drones->perPage() + $index + 1 }}</td>
                                 <td><strong>{{ $drone->judul }}</strong></td>
                                 <td>{{ $drone->lokasi }}</td>
                                 <td>{{ $drone->tanggal_perencanaan->format('d/m/Y') }}</td>
                                 <td>
-                                    <a href="{{ route('drone.download', $drone->id) }}" class="btn-download">
+                                    <a href="{{ route('drone.download', $drone->id) }}" class="btn-download" target="_blank">
                                         📥 Download
                                     </a>
                                 </td>
                                 <td>{{ $drone->created_at->format('d/m/Y H:i') }}</td>
-                                <td>
+                                <td style="text-align: center;">
                                     <div class="action-buttons">
                                         <form action="{{ route('admin.drone.destroy', $drone->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus drone ini?');" style="display: inline;">
                                             @csrf
@@ -425,6 +527,7 @@
                 <p>Mulai upload drone PDF dengan form di atas</p>
             </div>
         @endif
+    </div>
     </div>
 </div>
 

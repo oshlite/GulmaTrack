@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Wilayah Admin')
 
 @section('content')
 <!-- Poppins Font -->
@@ -993,7 +993,7 @@
 <div class="admin-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1><i class="fas fa-chart-line"></i> Dashboard Admin</h1>
+        <h1><i class="fas fa-chart-line"></i> Wilayah Admin</h1>
         <p>Kelola dan pantau data persebaran gulma secara real-time dengan visualisasi peta interaktif</p>
     </div>
 
@@ -1044,6 +1044,8 @@
             <div class="stat-value" id="statUploadTerbaru">{{ $importTerbaru->count() ?? 0 }}</div>
         </div>
     </div>
+
+  
 
 <!-- Content Grid -->
     <div class="content-grid">

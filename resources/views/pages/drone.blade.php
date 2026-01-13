@@ -109,6 +109,13 @@
         margin-bottom: 15px;
     }
 
+    .card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        margin-bottom: 15px;
+    }
+
     .card-title {
         font-size: 16px;
         font-weight: 600;
@@ -120,7 +127,7 @@
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
         margin-top: 12px;
     }
 
@@ -134,12 +141,14 @@
         font-weight: 600;
     }
 
-    .badge-location {
-        background-color: var(--secondary-color);
+     .badge-location {
+        background-color: var(--primary-color);
+        color: white;
     }
 
     .badge-gulma {
-        background-color: var(--secondary-color);
+        background-color: var(--primary-color);
+        color: white;
     }
 
     .card-content {
@@ -331,6 +340,93 @@
         border-color: var(--primary-color);
     }
 
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 12px;
+        width: 95%;
+        max-width: 1200px;
+        height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .modal-close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+    }
+
+    .modal-close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow: auto;
+        padding: 20px;
+    }
+
+    .pdf-viewer {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
     @media (max-width: 768px) {
         .main-content {
             padding: 20px 15px;
@@ -347,6 +443,11 @@
 
         .page-header {
             margin-bottom: 30px;
+        }
+
+        .modal-content {
+            width: 95%;
+            height: 90vh;
         }
     }
 </style>
@@ -381,10 +482,10 @@
                     <div class="card-year">{{ $drone->tanggal_perencanaan->year }}</div>
                     
                     <div class="card-header">
-                        <div class="card-icon">🛸</div>
+                       <img src="{{ asset('images/drone/kp.png') }}" alt="Drone" class="card-image">
                         <h2 class="card-title">{{ Str::limit($drone->judul, 30) }}</h2>
                         <div class="card-badges">
-                            <span class="badge badge-location">{{ $drone->lokasi }}</span>
+                            <span class="badge badge-location">Lokasi {{ $drone->lokasi }}</span>
                             @if ($drone->persen_gulma !== null)
                                 <span class="badge badge-gulma">{{ number_format($drone->persen_gulma, 1) }}% Gulma</span>
                             @endif
@@ -394,12 +495,12 @@
                     <div class="card-content">
                         <div class="drone-info">
                             <div class="info-label">📅 Tanggal Perencanaan</div>
-                            <div class="info-value">{{ $drone->tanggal_perencanaan->translatedFormat('d MMMM Y') }}</div>
+                            <div class="info-value">{{ $drone->tanggal_perencanaan->translatedFormat('d F Y') }}</div>
                         </div>
 
                         <div class="drone-info">
                             <div class="info-label">⏰ Tanggal Pembuatan</div>
-                            <div class="info-value">{{ $drone->created_at->translatedFormat('d MMMM Y') }}</div>
+                            <div class="info-value">{{ $drone->created_at->translatedFormat('d F Y') }}</div>
                         </div>
                     </div>
 
@@ -407,7 +508,7 @@
                         <a href="{{ route('drone.download', $drone->id) }}" class="btn btn-download">
                             📥 Downloas PDF
                         </a>
-                        <button class="btn btn-view" onclick="alert('Detail view coming soon')">Detail</button>
+                        <button class="btn btn-view" data-pdf-url="{{ route('drone.view', $drone->id) }}" data-pdf-title="{{ $drone->judul }}" onclick="openPdfModal(this)">Detail</button>
                     </div>
                 </div>
             @endforeach
@@ -422,9 +523,16 @@
         </div>
     @endif
 
-    <!-- Footer -->
-    <div class="page-footer">
-        <p>© 2025 GULMATRACK - Sistem Informasi Pengendalian Gulma</p>
+<!-- PDF Modal -->
+<div id="pdfModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="pdfTitle">Detail PDF</h2>
+            <button class="modal-close-btn" onclick="closePdfModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
+        </div>
     </div>
 </div>
 
@@ -441,6 +549,34 @@
             }
         });
     }
+
+    function openPdfModal(button) {
+        const pdfUrl = button.getAttribute('data-pdf-url');
+        const title = button.getAttribute('data-pdf-title');
+        document.getElementById('pdfTitle').textContent = title;
+        document.getElementById('pdfViewer').src = pdfUrl;
+        document.getElementById('pdfModal').classList.add('show');
+    }
+
+    function closePdfModal() {
+        document.getElementById('pdfModal').classList.remove('show');
+        document.getElementById('pdfViewer').src = '';
+    }
+
+    // Tutup modal saat klik di luar konten modal
+    window.onclick = function(event) {
+        const modal = document.getElementById('pdfModal');
+        if (event.target == modal) {
+            closePdfModal();
+        }
+    }
+
+    // Tutup modal dengan tombol Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closePdfModal();
+        }
+    });
 </script>
 
 @endsection

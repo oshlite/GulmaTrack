@@ -117,6 +117,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
 // Download drone PDF (accessible to everyone)
 Route::get('/drone/download/{id}', [DroneController::class, 'download'])->name('drone.download');
 
+// View drone PDF inline (accessible to everyone)
+Route::get('/drone/view/{id}', [DroneController::class, 'view'])->name('drone.view');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN AREA

@@ -14,7 +14,9 @@ class DroneController extends Controller
     public function adminIndex()
     {
         $drones = Drone::orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.drone', compact('drones'));
+        $droneUploadTerbaru = Drone::orderBy('created_at', 'desc')->first();
+        $totalPdf = Drone::count();
+        return view('admin.drone', compact('drones', 'droneUploadTerbaru', 'totalPdf'));
     }
 
     /**
@@ -80,6 +82,25 @@ class DroneController extends Controller
         }
 
         return response()->download($filePath, $drone->pdf_filename);
+    }
+
+    /**
+     * Tampilkan PDF drone secara inline (bukan download)
+     */
+    public function view($id)
+    {
+        $drone = Drone::findOrFail($id);
+        
+        $filePath = storage_path('app/public/' . $drone->pdf_path);
+        
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'File tidak ditemukan!');
+        }
+
+        return response()->file($filePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $drone->pdf_filename . '"',
+        ]);
     }
 
     /**

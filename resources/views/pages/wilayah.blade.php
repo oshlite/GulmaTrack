@@ -946,6 +946,10 @@
                 <div class="legend-color" style="background: #ecf0f1; border-color: #c4c4c4;"></div>
                 <span><strong>Tidak Ada Data</strong></span>
             </div>
+            <div class="legend-item" onclick="filterByStatus('non-nanas')" title="Klik untuk filter - Pisang, Singkong, Riset">
+                <div class="legend-color" style="background: #9b59b6;"></div>
+                <span><strong>Lahan Non-nanas</strong></span>
+            </div>
         </div>
     </div>
 
@@ -1003,18 +1007,23 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             <table class="location-table" id="locationTable">
                 <thead>
                     <tr style="background-color: #128241;">
-                        <th onclick="sortTable('no')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-hashtag"></i> No <span id="sortIndicator_no" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('wilayah')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-map-marker-alt"></i> Wilayah <span id="sortIndicator_wilayah" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('lokasi')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-map-pin"></i> Kode Lokasi <span id="sortIndicator_lokasi" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('status')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-seedling"></i> Status Gulma <span id="sortIndicator_status" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('tk')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-users"></i> Butuh TK <span id="sortIndicator_tk" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('aktivitas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-tasks"></i> Aktivitas <span id="sortIndicator_aktivitas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('luas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px;"><i class="fas fa-ruler-combined"></i> Luas Netto <span id="sortIndicator_luas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('no')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 50px;"> No <span id="sortIndicator_no" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('pg')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> PG <span id="sortIndicator_pg" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('fm')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> FM <span id="sortIndicator_fm" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('wilayah')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Wilayah <span id="sortIndicator_wilayah" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('seksi')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Lokasi <span id="sortIndicator_seksi" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('hasil')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Hasil <span id="sortIndicator_hasil" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('umur')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Umur <span id="sortIndicator_umur" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tnm_sts')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> TNM STS <span id="sortIndicator_tnm_sts" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('aktivitas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Aktivitas <span id="sortIndicator_aktivitas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('kategori')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Status Gulma <span id="sortIndicator_kategori" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tanggal')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Tanggal <span id="sortIndicator_tanggal" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tk')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Total TK <span id="sortIndicator_tk" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
                     </tr>
                 </thead>
                 <tbody id="locationTableBody">
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="12" style="text-align: center; padding: 40px; color: #999;">
                             <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i><br>
                             Pilih wilayah atau filter status untuk melihat data lokasi
                         </td>
@@ -1435,14 +1444,15 @@ function initMap() {
             sortDirection = 'asc';
         }
         
-        // Hide all sort icon indicators (reset to neutral)
-        document.getElementById('sortIndicator_no').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_wilayah').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_lokasi').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_status').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_tk').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_aktivitas').querySelector('i').className = 'fa-solid fa-sort';
-        document.getElementById('sortIndicator_luas').querySelector('i').className = 'fa-solid fa-sort';
+        // Reset all sort indicators safely (only update if element exists)
+        const sortIndicators = ['no', 'pg', 'fm', 'wilayah', 'seksi', 'hasil', 'umur', 'tnm_sts', 'aktivitas', 'kategori', 'tanggal', 'tk'];
+        sortIndicators.forEach(col => {
+            const elem = document.getElementById(`sortIndicator_${col}`);
+            if (elem) {
+                const icon = elem.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-sort';
+            }
+        });
         
         // Show sort indicator for current column
         const indicatorId = `sortIndicator_${column}`;
@@ -1450,14 +1460,17 @@ function initMap() {
         if (indicator) {
             // Change arrow icon based on sort direction
             const icon = indicator.querySelector('i');
-            if (sortDirection === 'asc') {
-                icon.className = 'fa-solid fa-sort-up';
-            } else {
-                icon.className = 'fa-solid fa-sort-down';
+            if (icon) {
+                if (sortDirection === 'asc') {
+                    icon.className = 'fa-solid fa-sort-up';
+                } else {
+                    icon.className = 'fa-solid fa-sort-down';
+                }
             }
         }
         
-        // Sort the rows
+        // Sort the rows - Updated cell indices for new 12-column structure:
+        // 0:No | 1:PG | 2:FM | 3:Wilayah | 4:SEKSI | 5:Hasil | 6:Umur Tanaman | 7:TNM STS | 8:Aktivitas | 9:Kategori Weeding | 10:Tanggal Rencana | 11:Total TK
         rows.sort((a, b) => {
             let aVal, bVal;
             
@@ -1465,29 +1478,40 @@ function initMap() {
                 aVal = parseInt(a.cells[0]?.textContent.trim()) || 0;
                 bVal = parseInt(b.cells[0]?.textContent.trim()) || 0;
                 return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-            } else if (column === 'wilayah') {
+            } else if (column === 'pg') {
                 aVal = a.cells[1]?.textContent.trim().toLowerCase() || '';
                 bVal = b.cells[1]?.textContent.trim().toLowerCase() || '';
-            } else if (column === 'lokasi') {
+            } else if (column === 'fm') {
                 aVal = a.cells[2]?.textContent.trim().toLowerCase() || '';
                 bVal = b.cells[2]?.textContent.trim().toLowerCase() || '';
-            } else if (column === 'status') {
+            } else if (column === 'wilayah') {
                 aVal = a.cells[3]?.textContent.trim().toLowerCase() || '';
                 bVal = b.cells[3]?.textContent.trim().toLowerCase() || '';
-            } else if (column === 'tk') {
-                aVal = a.cells[4]?.textContent.trim().toLowerCase() || 'null';
-                bVal = b.cells[4]?.textContent.trim().toLowerCase() || 'null';
-                // Handle numeric sorting for TK
-                const aNum = aVal === 'null' ? -1 : parseFloat(aVal);
-                const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
-                return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
-            } else if (column === 'aktivitas') {
+            } else if (column === 'seksi') {
+                aVal = a.cells[4]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[4]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'hasil') {
                 aVal = a.cells[5]?.textContent.trim().toLowerCase() || '';
                 bVal = b.cells[5]?.textContent.trim().toLowerCase() || '';
-            } else if (column === 'luas') {
-                aVal = a.cells[6]?.textContent.trim().toLowerCase() || 'null';
-                bVal = b.cells[6]?.textContent.trim().toLowerCase() || 'null';
-                // Handle numeric sorting for Luas Netto
+            } else if (column === 'umur') {
+                aVal = a.cells[6]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[6]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'tnm_sts') {
+                aVal = a.cells[7]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[7]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'aktivitas') {
+                aVal = a.cells[8]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[8]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'kategori') {
+                aVal = a.cells[9]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[9]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'tanggal') {
+                aVal = a.cells[10]?.textContent.trim().toLowerCase() || '';
+                bVal = b.cells[10]?.textContent.trim().toLowerCase() || '';
+            } else if (column === 'tk') {
+                aVal = a.cells[11]?.textContent.trim().toLowerCase() || 'null';
+                bVal = b.cells[11]?.textContent.trim().toLowerCase() || 'null';
+                // Handle numeric sorting for TK
                 const aNum = aVal === 'null' ? -1 : parseFloat(aVal);
                 const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
                 return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
@@ -1807,6 +1831,9 @@ function initMap() {
                                 // Return true jika status kosong ATAU tidak termasuk salah satu dari 4 kategori
                                 const hasValidStatus = status.includes('bersih') || status.includes('ringan') || status.includes('sedang') || status.includes('berat');
                                 return !hasValidStatus; // Show if NO valid status
+                            } else if (currentStatusFilter === 'non-nanas') {
+                                // Filter untuk Lahan Non-nanas (Pisang, Singkong, Riset - bukan Nanas)
+                                return status && !status.includes('nanas') && (status.includes('pisang') || status.includes('singkong') || status.includes('riset'));
                             }
                             
                             // Untuk filter lainnya (bersih, ringan, sedang, berat)
@@ -1945,6 +1972,10 @@ function initMap() {
             } else if (status.includes('berat')) {
                 fillColor = '#e74c3c'; // Merah
                 borderColor = '#e74c3c';
+            } else if (!status.includes('nanas') && (status.includes('pisang') || status.includes('singkong') || status.includes('riset'))) {
+                // Lahan Non-nanas: Pisang, Singkong, atau Riset
+                fillColor = '#9b59b6'; // Ungu
+                borderColor = '#9b59b6';
             }
         }
 
@@ -1959,12 +1990,35 @@ function initMap() {
 
     // Create tooltip content for hover (quick info)
     function createTooltipContent(props) {
+        // Deklarasi statusGulma di awal function untuk menghindari ReferenceError
         let statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '';
-        const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
         
-        // Normalize status - check if it's a valid category
+        // Get komoditas emoji berdasarkan Status field (dengan null-safe check)
+        let komoditasEmoji = '';
+        if (statusGulma && statusGulma.trim()) {
+            const komoditasLower = statusGulma.toLowerCase();
+            // Jika status adalah monitoring condition (bersih/ringan/sedang/berat), maka komoditas PASTI Nanas
+            if (komoditasLower.includes('bersih') || komoditasLower.includes('ringan') || komoditasLower.includes('sedang') || komoditasLower.includes('berat')) {
+                komoditasEmoji = '🍍';
+            } else if (komoditasLower.includes('nanas')) {
+                komoditasEmoji = '🍍';
+            } else if (komoditasLower.includes('pisang')) {
+                komoditasEmoji = '🍌';
+            } else if (komoditasLower.includes('singkong')) {
+                komoditasEmoji = '🍠';
+            } else if (komoditasLower.includes('riset')) {
+                komoditasEmoji = '👩🏻‍🔬';
+            } else if (!komoditasLower.includes('nanas') && (komoditasLower.includes('pisang') || komoditasLower.includes('singkong') || komoditasLower.includes('riset'))) {
+                // Lahan Non-nanas
+                komoditasEmoji = '🌾';
+            }
+        }
+        const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'null';
+        
+        // Normalize status - check if it's a valid category for monitoring
+        let displayStatus = statusGulma;
         if (!statusGulma || statusGulma === 'belum_dimonitoring' || statusGulma.trim() === '') {
-            statusGulma = 'Tidak Ada Data';
+            displayStatus = 'Tidak Ada Data';
         } else {
             // Check if status is one of the 4 valid categories
             const statusLower = statusGulma.toLowerCase();
@@ -1972,46 +2026,69 @@ function initMap() {
                                  statusLower.includes('sedang') || statusLower.includes('berat');
             if (!isValidStatus) {
                 // Invalid status (like "Nanas", etc.) - convert to "Tidak Ada Data"
-                statusGulma = 'Tidak Ada Data';
+                displayStatus = 'Tidak Ada Data';
             }
         }
         
         // Get color for status
         let statusColor = '#9ca3af';
-        if (statusGulma === 'Tidak Ada Data') {
+        if (displayStatus === 'Tidak Ada Data') {
             statusColor = '#95a5a6';
-        } else if (statusGulma.toLowerCase().includes('bersih')) {
+        } else if (displayStatus.toLowerCase().includes('bersih')) {
             statusColor = '#3498db';
-        } else if (statusGulma.toLowerCase().includes('ringan')) {
+        } else if (displayStatus.toLowerCase().includes('ringan')) {
             statusColor = '#57ce39ff';
-        } else if (statusGulma.toLowerCase().includes('sedang')) {
+        } else if (displayStatus.toLowerCase().includes('sedang')) {
             statusColor = '#f1c40f';
-        } else if (statusGulma.toLowerCase().includes('berat')) {
+        } else if (displayStatus.toLowerCase().includes('berat')) {
             statusColor = '#e74c3c';
         }
         
         return `<div style="font-family: 'Poppins'; font-size: 13px; padding: 5px;">
-            📍 Kode Lokasi:<strong> ${lokasi} </strong><br>
-            Status Gulma: <span style="color: ${statusColor}; font-weight: bold;"> <strong> ${statusGulma}</strong></span>
+            📍 Kode Lokasi:<strong> ${lokasi}</strong> ${komoditasEmoji}<br>
+            Status Gulma: <span style="color: ${statusColor}; font-weight: bold;"> <strong> ${displayStatus}</strong></span>
         </div>`;
     }
 
     function createPopupContent(props) {
         let html = '<div style="width: 250px; padding: 0;">';
         
+        // Get status dari semua possible field names - SATU kali deklarasi
+        let statusGulma = props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '';
+        
         // Foto - mulai dengan placeholder langsung, fetch foto asli di event listener
-        let statusGulma = props.kategori || 'belum_dimonitoring';
         html += '<div style="width: 100%; height: 140px; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0; background: #f0f0f0;">';
         html += `<img src="/image/foto.jpg" data-kategori="${statusGulma}" alt="Foto Lokasi" style="width: 100%; height: 100%; object-fit: cover; display: block;">`;
         html += '</div>';
         
         html += '<div style="padding: 10px;">';
         
+        // Get komoditas emoji berdasarkan Status field (dengan null-safe check)
+        let komoditasEmoji = '';
+        if (statusGulma && statusGulma.trim() && statusGulma !== 'belum_dimonitoring') {
+            const komoditasLower = statusGulma.toLowerCase();
+            // Jika status adalah monitoring condition (bersih/ringan/sedang/berat), maka komoditas PASTI Nanas
+            if (komoditasLower.includes('bersih') || komoditasLower.includes('ringan') || komoditasLower.includes('sedang') || komoditasLower.includes('berat')) {
+                komoditasEmoji = '🍍';
+            } else if (komoditasLower.includes('nanas')) {
+                komoditasEmoji = '🍍';
+            } else if (komoditasLower.includes('pisang')) {
+                komoditasEmoji = '🍌';
+            } else if (komoditasLower.includes('singkong')) {
+                komoditasEmoji = '🍠';
+            } else if (komoditasLower.includes('riset')) {
+                komoditasEmoji = '👩🏻‍🔬';
+            } else if (!komoditasLower.includes('nanas') && (komoditasLower.includes('pisang') || komoditasLower.includes('singkong') || komoditasLower.includes('riset'))) {
+                // Lahan Non-nanas
+                komoditasEmoji = '🌾';
+            }
+        }
+        
         // Header dengan Lokasi dan Wilayah (dari CSV atau GeoJSON)
-        const lokasi = props.Lokasi || props.LOKASI || props.lokasi || 'N/A';
-        const wilayah = props.Wilayah || props.gulma_Wilayah || props.wilayah || 'N/A';
+        const lokasi = props.Lokasi || props.LOKASI || props.lokasi || 'null';
+        const wilayah = props.Wilayah || props.gulma_Wilayah || props.wilayah || 'null';
         html += `<div style="margin-bottom: 8px;">`;
-        html += `<p style="margin: 0; color: #128241; font-size: 16px; font-weight: 700;">📍 wil. ${wilayah} - ${lokasi}</p>`;
+        html += `<p style="margin: 0; color: #128241; font-size: 16px; font-weight: 700;">📍 wil. ${wilayah} - ${lokasi} ${komoditasEmoji}</p>`;
         html += `</div>`;
 
         // Normalize status display - check if it's a valid category
@@ -2053,11 +2130,19 @@ function initMap() {
         html += '<div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">';
         html += '<div style="font-size: 10px; line-height: 1.6;">';
         
-        // Butuh TK - dari CSV tk_ha atau tk/ha
-        const tkHa = props.tk_ha || props.tkha || props['tk/ha'] || null;
-        const tkValue = tkHa ? (typeof tkHa === 'string' ? tkHa.replace(/\.00$/, '').trim() : tkHa) : '<span style="color: #999; font-style: italic;">null</span>';
-        const tkDisplay = tkHa ? `${tkValue} TK/Ha` : `${tkValue}`;
-        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Butuh Tenaga Kerja:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
+        // Butuh TK - dari CSV TOTAL_TK (bukan tk_ha/tk/ha, bukan Aktif)
+        const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || null;
+        let tkValue;
+        if (tkTotal) {
+            // Handle both comma and dot as decimal separator, then convert to number
+            const tkString = String(tkTotal).replace(/,/g, '.');
+            const tkNumber = parseFloat(tkString);
+            tkValue = !isNaN(tkNumber) ? Math.round(Math.round(parseFloat(tkNumber))) : '<span style="color: #999; font-style: italic;">null</span>';
+        } else {
+            tkValue = '<span style="color: #999; font-style: italic;">null</span>';
+        }
+        const tkDisplay = (typeof tkValue === 'number') ? `${tkValue} TK` : tkValue;
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Total TK:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
 
         // Aktivitas - dari CSV activitas (note: column name is "activitas" with 'c', not 'k')
         const aktivitas = props.activitas || props.Aktivitas || props.activity || props.Activity || props.aktivitas || null;
@@ -2199,16 +2284,28 @@ function initMap() {
                                 belum_dimonitoring: 0
                             };
 
-                            geojson.features.forEach(feature => {
+                            geojson.features.forEach((feature, idx) => {
                                 const props = feature.properties;
                                 
                                 // Sum Luas Netto (from CSV neto field)
                                 const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
                                 totalLuasNetto += parseFloat(neto) || 0;
 
-                                // Sum TK (from CSV tk_ha field)
-                                const tkHa = props.tk_ha || props.tkha || props['tk/ha'] || 0;
-                                totalTk += parseFloat(tkHa) || 0;
+                                // Sum TK (from CSV TOTAL_TK field)
+                                const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || 0;
+                                const tkNumber = parseFloat(String(tkTotal).replace(/,/g, '.')) || 0;
+                                totalTk += tkNumber;
+                                
+                                // DEBUG: Log first 3 features untuk lihat struktur
+                                if (wilayah.wilayah == 16 && idx < 3) {
+                                    console.log(`🔍 [WILAYAH 16 Feature ${idx}]`, {
+                                        lokasi: props.Lokasi || props.LOKASI,
+                                        TOTAL_TK: props.TOTAL_TK,
+                                        'TOTAL TK': props['TOTAL TK'],
+                                        total_tk: props.total_tk,
+                                        parsed_tkNumber: tkNumber
+                                    });
+                                }
 
                                 // Count status
                                 const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
@@ -2351,10 +2448,28 @@ function initMap() {
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-users"></i>
-                            <span>Total Kebutuhan Tenaga Kerja</span>
+                            <span>Total Tenaga Kerja Existing</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk)) : '0')} TK
+                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk))) : '0')} TK
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-clock"></i>
+                            <span>5 Hari Kerja</span>
+                        </span>
+                        <span class="info-value">
+                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk)) / 5) : '0')} TK/hari
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-clock"></i>
+                            <span>6 Hari Kerja</span>
+                        </span>
+                        <span class="info-value">
+                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk)) / 6) : '0')} TK/hari
                         </span>
                     </div>
                     <div>
@@ -2383,28 +2498,78 @@ function initMap() {
         tbody.innerHTML = '';
         
         if (!features || features.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
             return;
         }
         
         features.forEach((feature, index) => {
             const props = feature.properties;
-            const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.id_feature || 'N/A';
+            const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.SEKSI || props.id_feature || '-';
             const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
             const wilayah = wilayahNumber || props.Wilayah || props.gulma_Wilayah || '-';
-            const luasNetto = props.neto || props.Netto || props.netto || props.Luas_Netto || '-';
-            const tkRaw = props.tk_ha || props.tkha || props['tk/ha'] || '-';
-            const tkHa = tkRaw === '-' ? '-' : (typeof tkRaw === 'string' ? tkRaw.replace(/\.00$/, '').trim() : tkRaw);
-            const aktivitas = props.activitas || props.Aktivitas || props.activity || props.Activity || '-';
+            
+            // Extract all CSV fields
+            const pg = props.PG || props.pg || '-';
+            const fm = props.FM || props.fm || '-';
+            // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || '-';
+            const hasil = props.hasil || props.Hasil || '-';
+            const umurTanaman = props.umur_tanaman || props['Umur Tanaman'] || props.umur || '-';
+            const tnmSts = props.tnm_sts || props['TNM STS'] || props.tnm || props.status_tanaman || '-';
+            // const penanggungjawab = props.penanggungjawab || props.Penanggungjawab || props.nama || '-';
+            // const kodeAktf = props.kode_aktf || props['Kode Aktf'] || props.kode || '-';
+            const aktivitas = props.activitas || props.ACTIVITAS || props.activity || props.Activity || '-';
+            const kategori = props.kategori || props.KATEGORI || props.Kelas_weed || props.Status || '-';
+            const tanggalRencana = props.tanggal_rencana_aplikasi || props['Tanggal Rencana Aplikasi'] || props.tanggal_aplikasi || '-';
+            // const tkha = props.tk_ha || props['TK/HA'] || props.TK_HA || '-';
+            const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || '-';
+            let tkValue;
+            if (tkTotal === '-') {
+                tkValue = '-';
+            } else {
+                const tkString = String(tkTotal).replace(/,/g, '.');
+                const tkNumber = parseFloat(tkString);
+                tkValue = !isNaN(tkNumber) ? Math.round(tkNumber) : '-';
+            }
+            
+            // Get komoditas emoji dari Status field (dengan null-safe check)
+            let komoditasEmoji = '';
+            const komoditasLower = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+            if (komoditasLower && komoditasLower.trim()) {
+                // Jika status adalah monitoring condition (bersih/ringan/sedang/berat), maka komoditas PASTI Nanas
+                if (komoditasLower.includes('bersih') || komoditasLower.includes('ringan') || komoditasLower.includes('sedang') || komoditasLower.includes('berat')) {
+                    komoditasEmoji = '🍍';
+                } else if (komoditasLower.includes('nanas')) {
+                    komoditasEmoji = '🍍';
+                } else if (komoditasLower.includes('pisang')) {
+                    komoditasEmoji = '🍌';
+                } else if (komoditasLower.includes('singkong')) {
+                    komoditasEmoji = '🍠';
+                } else if (komoditasLower.includes('riset')) {
+                    komoditasEmoji = '👩🏻‍🔬';
+                } else if (!komoditasLower.includes('nanas') && (komoditasLower.includes('pisang') || komoditasLower.includes('singkong') || komoditasLower.includes('riset'))) {
+                    // Lahan Non-nanas
+                    komoditasEmoji = '🌾';
+                }
+            }
             
             // Store for filtering
             allLocationData.push({
                 wilayah,
                 lokasi,
                 status,
-                luasNetto,
-                tkHa,
+                pg,
+                fm,
+                // neto,
+                hasil,
+                umurTanaman,
+                tnmSts,
+                // penanggungjawab,
+                // kodeAktf,
                 aktivitas,
+                kategori,
+                tanggalRencana,
+                // tkha,
+                tkValue,
                 feature
             });
             
@@ -2428,12 +2593,17 @@ function initMap() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
+                <td>${pg}</td>
+                <td>${fm}</td>
                 <td>${wilayah}</td>
-                <td><strong>${lokasi}</strong></td>
+                <td>${komoditasEmoji} ${lokasi}</td>
+                <td>${hasil === '-' ? '<span style="color: #999;">-</span>' : hasil}</td>
+                <td>${umurTanaman === '-' ? '<span style="color: #999;">-</span>' : umurTanaman}</td>
+                <td>${tnmSts === '-' ? '<span style="color: #999;">-</span>' : tnmSts}</td>
+                <td>${aktivitas === '-' ? '<span style="color: #999;">-</span>' : aktivitas}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td><strong>${tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : tkHa + ' TK'}</strong></td>
-                <td>${aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : aktivitas}</td>
-                <td>${luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : luasNetto + ' Ha'}</td>
+                <td>${tanggalRencana === '-' ? '<span style="color: #999;">-</span>' : tanggalRencana}</td>
+                <td><strong>${tkValue === '-' ? '<span style="color: #999;">-</span>' : tkValue + ' TK'}</strong></td>
             `;
             tbody.appendChild(row);
         });
@@ -2472,6 +2642,12 @@ function initMap() {
                     const hasValidStatus = status.includes('bersih') || status.includes('ringan') || status.includes('sedang') || status.includes('berat');
                     return !hasValidStatus;
                 });
+            } else if (statusFilter === 'non-nanas') {
+                // Filter untuk Lahan Non-nanas (Pisang, Singkong, Riset - bukan Nanas)
+                filteredData = allLocationData.filter(loc => {
+                    const status = (loc.status || '').toLowerCase();
+                    return status && !status.includes('nanas') && (status.includes('pisang') || status.includes('singkong') || status.includes('riset'));
+                });
             } else {
                 // Filter untuk status tertentu (bersih, ringan, sedang, berat)
                 filteredData = allLocationData.filter(loc => {
@@ -2484,7 +2660,7 @@ function initMap() {
         }
         
         if (filteredData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">Tidak ada data dengan status ini</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 20px; color: #999;">Tidak ada data dengan status ini</td></tr>';
             return;
         }
         
@@ -2507,15 +2683,40 @@ function initMap() {
                 statusText = 'Berat';
             }
             
+            // Get komoditas emoji (dengan null-safe check)
+            let komoditasEmoji = '';
+            if (status && status.trim()) {
+                // Jika status adalah monitoring condition (bersih/ringan/sedang/berat), maka komoditas PASTI Nanas
+                if (status.includes('bersih') || status.includes('ringan') || status.includes('sedang') || status.includes('berat')) {
+                    komoditasEmoji = '🍍';
+                } else if (status.includes('nanas')) {
+                    komoditasEmoji = '🍍';
+                } else if (status.includes('pisang')) {
+                    komoditasEmoji = '🍌';
+                } else if (status.includes('singkong')) {
+                    komoditasEmoji = '🍠';
+                } else if (status.includes('riset')) {
+                    komoditasEmoji = '👩🏻‍🔬';
+                } else if (!status.includes('nanas') && (status.includes('pisang') || status.includes('singkong') || status.includes('riset'))) {
+                    // Lahan Non-nanas
+                    komoditasEmoji = '🌾';
+                }
+            }
+            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${index + 1}</td>
+                <td>${loc.pg}</td>
+                <td>${loc.fm}</td>
                 <td>${loc.wilayah}</td>
-                <td><strong>${loc.lokasi}</strong></td>
+                <td>${komoditasEmoji} ${loc.lokasi}</td>
+                <td>${loc.hasil === '-' ? '<span style="color: #999;">-</span>' : loc.hasil}</td>
+                <td>${loc.umurTanaman === '-' ? '<span style="color: #999;">-</span>' : loc.umurTanaman}</td>
+                <td>${loc.tnmSts === '-' ? '<span style="color: #999;">-</span>' : loc.tnmSts}</td>
+                <td>${loc.aktivitas === '-' ? '<span style="color: #999;">-</span>' : loc.aktivitas}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td><strong>${loc.tkHa === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.tkHa + ' TK'}</strong></td>
-                <td>${loc.aktivitas === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.aktivitas}</td>
-                <td>${loc.luasNetto === '-' ? '<span style="color: #999; font-style: italic;">null</span>' : loc.luasNetto + ' Ha'}</td>
+                <td>${loc.tanggalRencana === '-' ? '<span style="color: #999;">-</span>' : loc.tanggalRencana}</td>
+                <td><strong>${loc.tkValue === '-' ? '<span style="color: #999;">-</span>' : loc.tkValue + ' TK'}</strong></td>
             `;
             tbody.appendChild(row);
         });

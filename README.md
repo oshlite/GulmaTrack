@@ -83,7 +83,7 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
  database/            - Migrations, seeders, factories
  public/              - Assets publik (images, compiled CSS/JS)
  testing/             - Testing & development files (organized by purpose)
- data/ & dataya/      - GeoJSON polygon data untuk mapping
+ data/ & datala/      - GeoJSON polygon data untuk mapping
  storage/             - Logs, uploads, cache
 \\\
 

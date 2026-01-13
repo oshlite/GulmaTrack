@@ -25,7 +25,7 @@ class WilayahController extends Controller
             
             \Log::info("User type: " . ($isAdmin ? 'ADMIN' : 'PUBLIC'));
 
-            $filePath = base_path("dataya/Wil{$wilayah_number}.geojson");
+            $filePath = base_path("datala/Wil{$wilayah_number}.geojson");
             
             if (!file_exists($filePath)) {
                 return response()->json([
@@ -205,7 +205,7 @@ class WilayahController extends Controller
             $latestImportId = $latestPublication->import_log_id;
             \Log::info("✓ Using LATEST PUBLISHED import_id: {$latestImportId}");
             
-            $dataPath = base_path('dataya');
+            $dataPath = base_path('datala');
             $files = glob("{$dataPath}/Wil*.geojson");
             $wilayahSummary = [];
 
@@ -394,8 +394,8 @@ class WilayahController extends Controller
             $sedangCount = $data->where('kategori', 'Sedang')->count();
             $beratCount = $data->where('kategori', 'Berat')->count();
             
-            // Sum totals (all records contribute)
-            $totalTk = $data->sum('tk_ha');
+            // Sum totals (all records contribute) - PAKE TOTAL_TK BUKAN TK_HA
+            $totalTk = $data->sum('total_tk');
             $totalNeto = $data->sum('neto');
             
             $response = [
@@ -405,7 +405,7 @@ class WilayahController extends Controller
                 'ringan_count' => (int)$ringanCount,
                 'sedang_count' => (int)$sedangCount,
                 'berat_count' => (int)$beratCount,
-                'total_tk' => round($totalTk, 2),
+                'total_tk' => $totalTk,  // JANGAN round di backend, biarkan frontend yang round!
                 'total_neto' => round($totalNeto, 2),
                 'import_log_id' => $latestPublication->import_log_id
             ];

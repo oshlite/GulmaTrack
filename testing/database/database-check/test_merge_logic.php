@@ -11,7 +11,7 @@ $wilayahNum = 16;
 $importId = 12;
 
 // Load GeoJSON
-$filePath = base_path("dataya/Wil{$wilayahNum}.geojson");
+$filePath = base_path("datala/Wil{$wilayahNum}.geojson");
 $geojson = json_decode(file_get_contents($filePath), true);
 
 echo "GeoJSON loaded: " . count($geojson['features']) . " features\n\n";

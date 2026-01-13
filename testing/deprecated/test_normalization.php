@@ -38,7 +38,7 @@ foreach (array_slice(array_keys($gulmaMap), 0, 10) as $key) {
 }
 
 // Get GeoJSON
-$geojsonPath = base_path('dataya/Wil16.geojson');
+$geojsonPath = base_path('datala/Wil16.geojson');
 $geojson = json_decode(file_get_contents($geojsonPath), true);
 
 echo "\nSample Lokasi from GeoJSON:\n";

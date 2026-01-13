@@ -18,7 +18,7 @@ echo "Database seksi values (" . count($dbSeksi) . " total):\n";
 echo implode(', ', $dbSeksi) . "\n\n";
 
 // Get seksi from GeoJSON
-$geojson = json_decode(file_get_contents('dataya/Wil16.geojson'), true);
+$geojson = json_decode(file_get_contents('datala/Wil16.geojson'), true);
 $geoSeksi = [];
 foreach ($geojson['features'] as $feature) {
     if (isset($feature['properties']['Lokasi'])) {

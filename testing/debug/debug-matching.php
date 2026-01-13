@@ -15,7 +15,7 @@ if ($latest && $latest->import_log_id) {
     echo "Bersih in DB: " . $dbData->where('kategori', 'Bersih')->count() . "\n";
     
     // Load GeoJSON
-    $filePath = base_path() . '/dataya/Wil16.geojson';
+    $filePath = base_path() . '/datala/Wil16.geojson';
     $geojson = json_decode(file_get_contents($filePath), true);
     
     echo "\nGeoJSON features: " . count($geojson['features'] ?? []) . "\n";

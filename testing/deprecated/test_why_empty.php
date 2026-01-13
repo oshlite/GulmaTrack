@@ -50,7 +50,7 @@ foreach ($samples as $sample) {
 
 // Now check GeoJSON file
 echo "\n=== CHECKING GEOJSON FILE ===\n";
-$geojsonPath = base_path('dataya/Wil16.geojson');
+$geojsonPath = base_path('datala/Wil16.geojson');
 $geojsonContent = file_get_contents($geojsonPath);
 $geojson = json_decode($geojsonContent, true);
 

@@ -153,7 +153,7 @@ cp web-testing/test-*.html public/
 - Wilayah boundary files (Wil16.geojson - Wil23.geojson)
 - Backup/alternative versions
 
-**Catatan:** Main GeoJSON data ada di `dataya/` folder root
+**Catatan:** Main GeoJSON data ada di `datala/` folder root
 
 ---
 

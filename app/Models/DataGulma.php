@@ -18,21 +18,20 @@ class DataGulma extends Model
         'id_feature',
         'status_gulma',
         'persentase',
-        'tanggal',
         'import_log_id',
-        // Kolom CSV baru
+        // Kolom CSV sesuai format: PG,FM,WIL,SEKSI,NETO,HASIL,uMUR,TNM_STS,ACTIVITAS,KATEGORI,TANGGAL,TK/HA,TOTAL_TK
         'pg',
         'fm',
         'seksi',
         'neto',
         'hasil',
-        'umur_tanaman',
-        'penanggungjawab',
-        'kode_aktf',
-        'activitas',
-        'kategori',
-        'tk_ha',
-        'total_tk'
+        'umur', // uMUR di CSV
+        'tnm_sts', // TNM_STS di CSV
+        'activitas', // ACTIVITAS di CSV
+        'kategori', // KATEGORI di CSV
+        'tanggal', // TANGGAL di CSV (date)
+        'tk_ha', // TK/HA di CSV
+        'total_tk' // TOTAL_TK di CSV
     ];
 
     protected $casts = [
@@ -40,8 +39,8 @@ class DataGulma extends Model
         'neto' => 'decimal:2',
         'hasil' => 'decimal:2',
         'tk_ha' => 'decimal:2',
-        'umur_tanaman' => 'decimal:2',
-        'total_tk' => 'integer',
+        'umur' => 'decimal:2',
+        'total_tk' => 'decimal:2',
         'persentase' => 'integer',
         'wilayah_id' => 'integer'
     ];

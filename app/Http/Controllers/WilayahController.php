@@ -395,7 +395,7 @@ class WilayahController extends Controller
             $beratCount = $data->where('kategori', 'Berat')->count();
             
             // Sum totals (all records contribute) - PAKE TOTAL_TK BUKAN TK_HA
-            $totalTk = $data->sum('total_tk');
+            $totalTk = (float)$data->sum('total_tk');
             $totalNeto = $data->sum('neto');
             
             $response = [
@@ -405,7 +405,7 @@ class WilayahController extends Controller
                 'ringan_count' => (int)$ringanCount,
                 'sedang_count' => (int)$sedangCount,
                 'berat_count' => (int)$beratCount,
-                'total_tk' => $totalTk,  // JANGAN round di backend, biarkan frontend yang round!
+                'total_tk' => (float) round($totalTk, 2),  // Ensure FLOAT type in JSON
                 'total_neto' => round($totalNeto, 2),
                 'import_log_id' => $latestPublication->import_log_id
             ];

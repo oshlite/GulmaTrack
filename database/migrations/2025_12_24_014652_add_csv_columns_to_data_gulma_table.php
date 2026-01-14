@@ -44,7 +44,7 @@ return new class extends Migration
                 $table->decimal('tk_ha', 10, 2)->nullable();
             }
             if (!Schema::hasColumn('data_gulma', 'total_tk')) {
-                $table->integer('total_tk')->nullable();
+                $table->decimal('total_tk')->nullable();
             }
         });
     }

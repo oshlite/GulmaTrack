@@ -38,7 +38,7 @@ class GulmaController extends Controller
                     'kategori' => strtolower($record->kategori ?? ''),
                     'neto' => (float)$record->neto,
                     'hasil' => (float)$record->hasil,
-                    'umur_tanaman' => (float)$record->umur_tanaman,
+                    'umur' => (float)$record->umur,
                     'kategoriValue' => $kategoriValue[strtolower($record->kategori ?? 'berat')] ?? 5,
                     'count' => 1
                 ];
@@ -56,8 +56,8 @@ class GulmaController extends Controller
                 $existing->neto += (float)$record->neto;
                 $existing->hasil += (float)$record->hasil;
                 
-                // Average umur tanaman
-                $existing->umur_tanaman = (($existing->umur_tanaman * $existing->count) + (float)$record->umur_tanaman) / ($existing->count + 1);
+                // Average umur
+                $existing->umur = (($existing->umur * $existing->count) + (float)$record->umur) / ($existing->count + 1);
                 $existing->count++;
             }
         }
@@ -86,11 +86,31 @@ class GulmaController extends Controller
             
             \Log::info("Using latest published import_id: {$latestImportId}");
             
-            // Get ALL data from latest published import
+            // Get ALL data from latest published import with FILTERS
             $query = DataGulma::where('import_log_id', $latestImportId);
             
+            // Apply periode filters if provided
+            if ($request->has('tahun') && $request->tahun) {
+                \Log::info("Filter tahun: " . $request->tahun);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                \Log::info("Filter bulan: " . $request->bulan);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                \Log::info("Filter minggu: " . $request->minggu);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('minggu', $request->minggu);
+                });
+            }
+            
             $allData = $query->get();
-            \Log::info("Total raw records: " . $allData->count());
+            \Log::info("Total raw records after filtering: " . $allData->count());
             
             // Group by wilayah
             $wilayahGroups = $allData->groupBy('wilayah_id');
@@ -111,16 +131,16 @@ class GulmaController extends Controller
                 $totalNeto = $dedupedForMap->sum('neto');
                 $totalHasil = $dedupedForMap->sum('hasil');
                 $avgHasil = $dedupedForMap->avg('hasil');
-                $avgUmur = $dedupedForMap->avg('umur_tanaman');
+                $avgUmur = $dedupedForMap->avg('umur');
                 
                 $summaryData[] = [
                     'wilayah_id' => $wilayahId,
                     'total_features' => $dedupedForMap->count(),
-                    'total_neto' => round($totalNeto, 2),
-                    'total_hasil' => round($totalHasil, 2),
-                    'avg_hasil' => round($avgHasil, 2),
-                    'avg_umur' => round($avgUmur, 1),
-                    'total_tenaga_kerja' => (int)round($rawTotalTk), // DIRECT from CSV, rounded
+                    'total_neto' => (float) round($totalNeto, 2),
+                    'total_hasil' => (float) round($totalHasil, 2),
+                    'avg_hasil' => (float) round($avgHasil, 2),
+                    'avg_umur' => (float) round($avgUmur, 1),
+                    'total_tenaga_kerja' => (float) round($rawTotalTk, 2), // Ensure it's FLOAT not integer
                     'raw_count' => $records->count() // For debugging
                 ];
                 
@@ -172,8 +192,30 @@ class GulmaController extends Controller
             
             \Log::info("Using latest published import_id: {$latestImportId}");
             
-            // Get ALL data from latest published import
-            $allData = DataGulma::where('import_log_id', $latestImportId)->get();
+            // Get ALL data from latest published import with FILTERS
+            $query = DataGulma::where('import_log_id', $latestImportId);
+            
+            // Apply periode filters if provided
+            if ($request->has('tahun') && $request->tahun) {
+                \Log::info("Filter tahun: " . $request->tahun);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                \Log::info("Filter bulan: " . $request->bulan);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                \Log::info("Filter minggu: " . $request->minggu);
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('minggu', $request->minggu);
+                });
+            }
+            
+            $allData = $query->get();
             
             // Group by wilayah
             $wilayahGroups = $allData->groupBy('wilayah_id');
@@ -199,7 +241,7 @@ class GulmaController extends Controller
                     'avg_hasil' => round($avgHasil, 2),
                     'jumlah_features' => $dedupedForMap->count(),
                     'total_neto' => round($totalNeto, 2),
-                    'total_tenaga_kerja' => (int)round($rawTotalTk) // DIRECT from CSV
+                    'total_tenaga_kerja' => (float) round($rawTotalTk, 2) // Ensure FLOAT
                 ];
             }
             
@@ -243,8 +285,27 @@ class GulmaController extends Controller
                 ]);
             }
             
-            // Get ALL data from latest published import
-            $allData = DataGulma::where('import_log_id', $latestImportId)->get();
+            // Get ALL data from latest published import with FILTERS
+            $query = DataGulma::where('import_log_id', $latestImportId);
+            
+            // Apply periode filters if provided
+            if ($request->has('tahun') && $request->tahun) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('tahun', $request->tahun);
+                });
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('bulan', $request->bulan);
+                });
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                $query->whereHas('importLog', function($q) use ($request) {
+                    $q->where('minggu', $request->minggu);
+                });
+            }
+            
+            $allData = $query->get();
             
             // Deduplicate untuk peta (hasil analysis)
             $dedupedRecords = $this->deduplicateDataForMap($allData);

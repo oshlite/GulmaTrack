@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('activitas')->nullable();
             $table->string('kategori')->nullable(); // PENTING untuk warna peta
             $table->decimal('tk_ha', 10, 2)->nullable();
-            $table->integer('total_tk')->nullable();
+            $table->decimal('total_tk')->nullable();
             
             $table->timestamps();
 

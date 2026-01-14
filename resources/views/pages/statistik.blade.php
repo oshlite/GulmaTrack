@@ -314,10 +314,8 @@
                 <tr>
                     <th>No.</th>
                     <th>Wilayah</th>
-                    <th>Luas Wilayah (Ha)</th>
+                    <th>Luas Rencana Wilayah (Ha)</th>
                     <th>Total Neto</th>
-                    <th>Total Gulma (Ha)</th>
-                    <th>Rata-rata Umur Tanaman</th>
                     <th>Total Tenaga Kerja (Orang)</th>
                     <th>Tahun</th>
                 </tr>
@@ -383,11 +381,9 @@ async function loadAvailablePeriods() {
             console.log('✅ Available years:', availablePeriods.tahun_list);
             console.log('✅ Latest period:', availablePeriods.latest_period);
             
-            // Populate filters
             populateYearFilter();
             populateMonthFilter();
             
-            // Set default to latest period
             if (availablePeriods.latest_period) {
                 const latest = availablePeriods.latest_period;
                 currentPeriod = latest;
@@ -401,7 +397,6 @@ async function loadAvailablePeriods() {
                 console.log('✅ Default period set:', latest);
             }
             
-            // Load statistics
             await loadAllStatistics();
             
         } else {
@@ -411,19 +406,17 @@ async function loadAvailablePeriods() {
     } catch (error) {
         console.error('❌ Error loading periods:', error);
         
-        // Fallback: populate with current year
         const currentYear = new Date().getFullYear();
         availablePeriods.tahun_list = [currentYear];
         populateYearFilter();
         populateMonthFilter();
         
-        // Still try to load data
         await loadAllStatistics();
     }
 }
 
 /* ===============================
-   POPULATE YEAR FILTER
+   POPULATE FILTERS
 ================================ */
 function populateYearFilter() {
     const select = document.getElementById('filterTahun');
@@ -439,22 +432,15 @@ function populateYearFilter() {
             select.appendChild(option);
         });
         console.log('✅ Year filter populated:', availablePeriods.tahun_list.length, 'years');
-    } else {
-        console.warn('⚠️ No years available');
     }
 }
 
-/* ===============================
-   POPULATE MONTH FILTER
-================================ */
 function populateMonthFilter() {
     const select = document.getElementById('filterBulan');
     if (!select) return;
 
-    // Reset dropdown
     select.innerHTML = '<option value="">Semua Bulan</option>';
 
-    // Selalu tampilkan 12 bulan
     for (let i = 1; i <= 12; i++) {
         const option = document.createElement('option');
         option.value = i;
@@ -464,7 +450,6 @@ function populateMonthFilter() {
 
     console.log('✅ Month filter populated: all months (1–12)');
 }
-
 
 /* ===============================
    UPDATE PERIOD INFO DISPLAY
@@ -495,7 +480,7 @@ async function loadAllStatistics() {
     showLoading();
 
     try {
-        console.log('🚀 Loading statistics...');
+        console.log('🚀 Loading statistics with latest published data...');
         
         const tahun = document.getElementById('filterTahun')?.value;
         const bulan = document.getElementById('filterBulan')?.value;
@@ -508,7 +493,7 @@ async function loadAllStatistics() {
         
         const queryString = queryParams.toString() ? '?' + queryParams.toString() : '';
         
-        console.log('📡 Query:', queryString);
+        console.log('📡 Query:', queryString || '(using latest published)');
         
         const [summaryRes, rankingRes] = await Promise.all([
             fetch(`/api/statistik/summary${queryString}`),
@@ -521,27 +506,31 @@ async function loadAllStatistics() {
         const summary = await summaryRes.json();
         const ranking = await rankingRes.json();
 
-        console.log('📊 Summary:', summary);
-        console.log('🏆 Ranking:', ranking);
+        console.log('📊 Summary response:', summary);
+        console.log('🏆 Ranking response:', ranking);
 
         if (summary.success) {
             renderDetailStats(summary.data);
             renderComparison(summary.data);
+            
+            if (summary.import_log_id) {
+                console.log(`✅ Using import_log_id: ${summary.import_log_id}`);
+            }
         } else {
-            showEmptyState('detailStatsTable', 'Tidak ada data statistik');
+            showEmptyState('detailStatsTable', summary.message || 'Tidak ada data statistik');
         }
         
         if (ranking.success) {
             renderRanking(ranking.data);
         } else {
-            showEmptyState('bar-chart', 'Tidak ada data ranking');
+            showEmptyState('bar-chart', ranking.message || 'Tidak ada data ranking');
         }
 
         hideLoading();
-        console.log('✅ Statistics loaded!');
+        console.log('✅ Statistics loaded successfully!');
 
     } catch (err) {
-        console.error('❌ Error:', err);
+        console.error('❌ Error loading statistics:', err);
         alert('Gagal memuat statistik: ' + err.message);
         hideLoading();
     }
@@ -574,7 +563,7 @@ function renderDetailStats(data) {
     if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align:center; padding: 40px;">
+                <td colspan="6" style="text-align:center; padding: 40px;">
                     <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3;"></i><br>
                     <strong>Tidak ada data</strong><br>
                     <small>Pilih periode lain atau upload CSV di Admin</small>
@@ -586,17 +575,32 @@ function renderDetailStats(data) {
 
     data.forEach((item, i) => {
         const row = tbody.insertRow();
+        
+        // IMPORTANT: 
+        // - total_hasil = Luas Rencana (from CSV "hasil" column)
+        // - total_neto = Total Neto (from CSV "neto" column)
+        // - total_tenaga_kerja = Total TK (from CSV "total_tk" column)
+        
+        const luasRencana = parseFloat(item.total_hasil || 0).toFixed(2); // Luas Rencana
+        const totalNeto = parseFloat(item.total_neto || 0).toFixed(2); // Total Neto
+        const totalTk = parseInt(item.total_tenaga_kerja || 0); // Total TK (integer)
+        
         row.innerHTML = `
             <td><strong>${i + 1}</strong></td>
             <td><strong>Wilayah ${item.wilayah_id}</strong></td>
-            <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
-            <td class="stat-value">${parseFloat(item.total_neto || 0).toFixed(2)} Ha</td>
-            <td class="stat-value">${parseFloat(item.total_hasil || 0).toFixed(2)} Ha</td>
-            <td>${parseFloat(item.avg_umur || 0).toFixed(2)} bulan</td>
-            <td class="stat-value">${parseFloat(item.total_tenaga_kerja || 0).toFixed(2)}</td>
+            <td class="stat-value">${luasRencana} Ha</td>
+            <td class="stat-value">${totalNeto} Ha</td>
+            <td class="stat-value"><strong>${totalTk.toLocaleString('id-ID')}</strong> Orang</td>
             <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
         `;
+        
+        // Debug info
+        if (item.raw_count) {
+            row.cells[0].title = `Raw: ${item.raw_count} → Dedup: ${item.total_features}`;
+        }
     });
+    
+    console.log('✅ Detail stats rendered:', data.length, 'wilayah');
 }
 
 function renderComparison(data) {
@@ -615,36 +619,30 @@ function renderComparison(data) {
         return;
     }
 
-    // Calculate totals for all data
-    const totalLuas = data.reduce((sum, item) => sum + (parseFloat(item.total_neto) || 0), 0);
-    const totalNeto = data.reduce((sum, item) => sum + (parseFloat(item.total_neto) || 0), 0);
-    const totalHasil = data.reduce((sum, item) => sum + (parseFloat(item.total_hasil) || 0), 0);
-    const totalTenagaKerja = data.reduce((sum, item) => sum + (parseFloat(item.total_tenaga_kerja) || 0), 0);
+    // IMPORTANT: total_hasil = Luas Rencana (from CSV "hasil" column)
+    const totalLuasRencana = data.reduce((sum, item) => sum + (parseFloat(item.total_hasil) || 0), 0);
+    const totalTenagaKerja = data.reduce((sum, item) => sum + (parseInt(item.total_tenaga_kerja) || 0), 0);
 
-    // Create single card with aggregated data
     const card = document.createElement('div');
     card.className = 'comparison-card';
     card.innerHTML = `
         <div class="comparison-title"><i class="fa-solid fa-jar-wheat" style="color: #FBA919;"></i> Nanas</div>
         
         <div class="comparison-stat">
-            <span class="comparison-label">Luas Wilayah:</span>
-            <span class="comparison-value">${totalLuas.toFixed(2)} Ha</span>
-        </div>
-        <div class="comparison-stat">
-            <span class="comparison-label">Total Neto:</span>
-            <span class="comparison-value">${totalNeto.toFixed(2)} Ha</span>
-        </div>
-        <div class="comparison-stat">
-            <span class="comparison-label">Total Gulma:</span>
-            <span class="comparison-value">${totalHasil.toFixed(2)} Ha</span>
+            <span class="comparison-label">Luas Rencana Wilayah:</span>
+            <span class="comparison-value">${totalLuasRencana.toFixed(2)} Ha</span>
         </div>
         <div class="comparison-stat">
             <span class="comparison-label">Tenaga Kerja:</span>
-            <span class="comparison-value">${totalTenagaKerja.toFixed(0)} Orang</span>
+            <span class="comparison-value">${totalTenagaKerja.toLocaleString('id-ID')} Orang</span>
         </div>
     `;
     container.appendChild(card);
+    
+    console.log('✅ Comparison rendered:', {
+        totalLuasRencana: totalLuasRencana.toFixed(2),
+        totalTenagaKerja: totalTenagaKerja
+    });
 }
 
 function renderRanking(data) {
@@ -665,14 +663,20 @@ function renderRanking(data) {
 
     const max = Math.max(...data.map(d => parseFloat(d.total_hasil) || 0));
 
-    data.forEach(item => {
+    data.forEach((item, index) => {
         const hasil = parseFloat(item.total_hasil) || 0;
         const percent = max > 0 ? (hasil / max) * 100 : 0;
+        
+        // Medal icons for top 3
+        let medalIcon = '';
+        if (index === 0) medalIcon = '🥇';
+        else if (index === 1) medalIcon = '🥈';
+        else if (index === 2) medalIcon = '🥉';
 
         const barItem = document.createElement('div');
         barItem.className = 'bar-item';
         barItem.innerHTML = `
-            <div class="bar-label">Wilayah ${item.wilayah_id}</div>
+            <div class="bar-label">${medalIcon} Wilayah ${item.wilayah_id}</div>
             <div class="bar-container">
                 <div class="bar-fill" style="width:${percent}%">${hasil.toFixed(2)} Ha</div>
             </div>
@@ -680,6 +684,8 @@ function renderRanking(data) {
         `;
         container.appendChild(barItem);
     });
+    
+    console.log('✅ Ranking rendered:', data.length, 'wilayah');
 }
 
 function showEmptyState(elementId, message) {
@@ -720,6 +726,7 @@ function hideLoading() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.remove();
 }
+
 </script>
 
 @endsection

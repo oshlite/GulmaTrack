@@ -306,6 +306,47 @@
         </div>
     </div>
 
+
+    <!-- Tabel Data CSV Detail -->
+    <div class="stat-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;"><i class="fas fa-table"></i> Data Rekam Jelajah Detail</h3>
+            <button onclick="exportStatistikToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="stat-table" id="csvDataTable">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>PG</th>
+                        <th>FM</th>
+                        <th>Wilayah</th>
+                        <th>Lokasi</th>
+                        <th>Neto</th>
+                        <th>Hasil</th>
+                        <th>Umur (bulan)</th>
+                        <th>TNM STS</th>
+                        <th>Aktivitas</th>
+                        <th>Status Gulma</th>
+                        <th>Tanggal</th>
+                        <th>Total TK</th>
+                        <th>TK/HA</th>
+                    </tr>
+                </thead>
+                <tbody id="csvDataTableBody">
+                    <tr>
+                        <td colspan="14" style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                            Memuat data CSV...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
         <h3><i class="fas fa-list"></i> Tabel Statistik Detail Per Wilayah</h3>
@@ -583,7 +624,16 @@ function renderDetailStats(data) {
         
         const luasRencana = parseFloat(item.total_hasil || 0).toFixed(2); // Luas Rencana
         const totalNeto = parseFloat(item.total_neto || 0).toFixed(2); // Total Neto
-        const totalTk = parseInt(item.total_tenaga_kerja || 0); // Total TK (integer)
+        const totalTk = parseFloat(item.total_tenaga_kerja || 0).toFixed(2); // Total TK (dengan desimal)
+        
+        // DEBUG: Log first 3 items
+        if (i < 3 || item.wilayah_id == 16) {
+            console.log(`🔍 WILAYAH ${item.wilayah_id} - BEFORE FORMAT`, {
+                total_tenaga_kerja_raw: item.total_tenaga_kerja,
+                parseFloat_result: parseFloat(item.total_tenaga_kerja || 0),
+                afterToFixed: totalTk
+            });
+        }
         
         row.innerHTML = `
             <td><strong>${i + 1}</strong></td>
@@ -621,7 +671,15 @@ function renderComparison(data) {
 
     // IMPORTANT: total_hasil = Luas Rencana (from CSV "hasil" column)
     const totalLuasRencana = data.reduce((sum, item) => sum + (parseFloat(item.total_hasil) || 0), 0);
-    const totalTenagaKerja = data.reduce((sum, item) => sum + (parseInt(item.total_tenaga_kerja) || 0), 0);
+    const totalTenagaKerja = data.reduce((sum, item) => sum + (parseFloat(item.total_tenaga_kerja) || 0), 0);
+    
+    // DEBUG: Log raw values
+    console.log('🔍 RENDER COMPARISON - Raw Values:', {
+        dataLength: data.length,
+        firstItem: data[0],
+        totalTenagaKerjaRaw: totalTenagaKerja,
+        totalTenagaKerjaFormatted: totalTenagaKerja.toFixed(2)
+    });
 
     const card = document.createElement('div');
     card.className = 'comparison-card';
@@ -634,7 +692,7 @@ function renderComparison(data) {
         </div>
         <div class="comparison-stat">
             <span class="comparison-label">Tenaga Kerja:</span>
-            <span class="comparison-value">${totalTenagaKerja.toLocaleString('id-ID')} Orang</span>
+            <span class="comparison-value">${totalTenagaKerja.toFixed(2)} Orang</span>
         </div>
     `;
     container.appendChild(card);
@@ -726,6 +784,78 @@ function hideLoading() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.remove();
 }
+
+/* ===============================
+   CSV DATA LOADING
+================================ */
+async function loadCsvDataForStatistik() {
+    try {
+        const response = await fetch('/api/csv/data?per_page=100');
+        const result = await response.json();
+        
+        if (!result.success || !result.data) {
+            showEmptyState('csvDataTableBody', 'Tidak ada data CSV');
+            return;
+        }
+        
+        const tbody = document.getElementById('csvDataTableBody');
+        let html = '';
+        let no = 1;
+        
+        result.data.forEach(row => {
+            const kategoriColor = getKategoriColorStatistik(row.kategori);
+            html += `
+                <tr>
+                    <td style="text-align: center; font-weight: 600; color: #666;">${no++}</td>
+                    <td style="text-align: center; font-size: 13px;">${row.pg || '-'}</td>
+                    <td style="text-align: center; font-size: 13px;">${row.fm || '-'}</td>
+                    <td style="text-align: center; font-weight: 500; color: #128241;">${row.wilayah_id || '-'}</td>
+                    <td style="text-align: left; font-size: 13px;">${row.seksi || '-'}</td>
+                    <td style="text-align: right; font-size: 13px;">${row.neto ? parseFloat(row.neto).toFixed(2) : '-'}</td>
+                    <td style="text-align: right; font-size: 13px;">${row.hasil ? parseFloat(row.hasil).toFixed(2) : '-'}</td>
+                    <td style="text-align: center; font-size: 13px;">${row.umur ? parseInt(row.umur) : '-'}</td>
+                    <td style="text-align: center; font-size: 12px; color: #666;">${row.tnm_sts || '-'}</td>
+                    <td style="text-align: center; font-size: 12px;">${row.activitas || '-'}</td>
+                    <td style="text-align: center;">
+                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: white; background-color: ${kategoriColor};">
+                            ${row.kategori || 'N/A'}
+                        </span>
+                    </td>
+                    <td style="text-align: center; font-size: 12px;">${row.tanggal ? new Date(row.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}</td>
+                    <td style="text-align: right; font-size: 13px;">${row.total_tk ? parseInt(row.total_tk) : '-'}</td>
+                    <td style="text-align: right; font-size: 12px;">${row.tk_ha ? parseFloat(row.tk_ha).toFixed(2) : '-'}</td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+        console.log('✅ CSV data loaded:', result.data.length, 'records');
+        
+    } catch (error) {
+        console.error('Error loading CSV data:', error);
+        showEmptyState('csvDataTableBody', 'Gagal memuat data CSV');
+    }
+}
+
+function getKategoriColorStatistik(kategori) {
+    const colors = {
+        'Bersih': '#3498db',
+        'Ringan': '#27ae60',
+        'Sedang': '#f39c12',
+        'Berat': '#e74c3c',
+        'Weeding': '#9b59b6'
+    };
+    return colors[kategori] || '#95a5a6';
+}
+
+function exportStatistikToCsv() {
+    window.location.href = '/api/csv/export';
+}
+
+// Load CSV data after page load
+window.addEventListener('load', function() {
+    setTimeout(loadCsvDataForStatistik, 1000);
+});
 
 </script>
 

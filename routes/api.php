@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\ExcelDataController;
 use App\Http\Controllers\ImportLogController;
+use App\Http\Controllers\CsvController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +91,27 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/set-publication', [\App\Http\Controllers\AdminController::class, 'setPublication'])
         ->name('api.admin.set-publication');
 });
+
+// CSV Export & Data API - Public access
+Route::get('/csv/export', [CsvController::class, 'export'])
+    ->name('api.csv.export')
+    ->withoutMiddleware('api');
+
+Route::get('/csv/data', [CsvController::class, 'getData'])
+    ->name('api.csv.data')
+    ->withoutMiddleware('api');
+
+Route::get('/csv/statistik', [CsvController::class, 'getStatistik'])
+    ->name('api.csv.statistik')
+    ->withoutMiddleware('api');
+
+Route::get('/csv/kategori-list', [CsvController::class, 'getKategoriList'])
+    ->name('api.csv.kategori-list')
+    ->withoutMiddleware('api');
+
+Route::get('/csv/activitas-list', [CsvController::class, 'getActivitasList'])
+    ->name('api.csv.activitas-list')
+    ->withoutMiddleware('api');
 
 
 

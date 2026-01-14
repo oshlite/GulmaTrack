@@ -143,28 +143,103 @@ class AdminController extends Controller
                 'size' => $file->getSize(),
             ]);
             
-            $csv = array_map('str_getcsv', file($path));
+            // Read file content
+            $fileContent = file_get_contents($path);
             
-            // Validate headers
+            // Detect delimiter - check if first line has tabs or commas
+            $firstLine = strtok($fileContent, "\n");
+            $delimiter = (strpos($firstLine, "\t") !== false) ? "\t" : ",";
+            
+            Log::info('Detected delimiter', [
+                'delimiter' => $delimiter === "\t" ? 'TAB' : 'COMMA',
+                'first_line_sample' => substr($firstLine, 0, 100)
+            ]);
+            
+            // Parse CSV with detected delimiter
+            $csv = [];
+            $lines = explode("\n", $fileContent);
+            foreach ($lines as $line) {
+                if (!empty(trim($line))) {
+                    $csv[] = str_getcsv($line, $delimiter);
+                }
+            }
+            
+            // Validate headers - normalize to match expected format
             $headers = array_shift($csv);
             $headers = array_map('strtolower', $headers);
             $headers = array_map('trim', $headers);
             
-            $required = ['pg', 'fm', 'wilayah', 'seksi'];
-            $missing = array_diff($required, $headers);
-
-            if (!empty($missing)) {
+            // Log raw headers untuk debugging
+            Log::warning('CSV UPLOAD DEBUG - RAW HEADERS', [
+                'count' => count($headers),
+                'headers' => $headers,
+                'headers_json' => json_encode($headers),
+                'first_header_bytes' => bin2hex($headers[0] ?? ''),
+                'filename' => $file->getClientOriginalName()
+            ]);
+            
+            // Normalize header names untuk flexible matching
+            $headerMap = [];
+            foreach ($headers as $idx => $header) {
+                // Remove BOM if exists
+                $header = str_replace("\xEF\xBB\xBF", '', $header);
+                // Normalize header variations
+                $normalized = str_replace(['_', ' ', '/', '.', '-'], '', $header);
+                $headerMap[$idx] = $normalized;
+            }
+            
+            Log::warning('CSV UPLOAD DEBUG - NORMALIZED HEADERS', [
+                'headerMap' => $headerMap
+            ]);
+            
+            $required = ['pg', 'fm', 'wil', 'seksi'];
+            Log::info('Required headers:', $required);
+            Log::info('Normalized headers:', $headerMap);
+            
+            // Validate required headers exist
+            $hasAllRequired = true;
+            foreach ($required as $req) {
+                $found = false;
+                foreach ($headerMap as $normalized) {
+                    if (strpos($normalized, $req) !== false) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $hasAllRequired = false;
+                    break;
+                }
+            }
+            
+            if (!$hasAllRequired) {
+                Log::warning('Missing required columns. Headers: ' . json_encode($headers));
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: ' . implode(', ', $required)
+                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: PG, FM, WIL, SEKSI'
                 ], 400);
             }
 
-            // Collect all unique wilayah from CSV
-            $wilayahIndex = array_search('wilayah', $headers);
+            // Collect all unique wilayah from CSV - find WIL column
+            $wilayahIndex = null;
+            foreach ($headers as $idx => $header) {
+                $normalized = str_replace(['_', ' ', '/'], '', strtolower($header));
+                if ($normalized === 'wil') {
+                    $wilayahIndex = $idx;
+                    break;
+                }
+            }
+            
+            if ($wilayahIndex === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kolom WIL tidak ditemukan dalam CSV'
+                ], 400);
+            }
+            
             $allWilayah = [];
             foreach ($csv as $row) {
-                if (!empty($row[$wilayahIndex])) {
+                if (isset($row[$wilayahIndex]) && !empty($row[$wilayahIndex])) {
                     $wil = (int) trim($row[$wilayahIndex]);
                     if ($wil >= 16 && $wil <= 23) {
                         $allWilayah[$wil] = true;
@@ -203,59 +278,143 @@ class AdminController extends Controller
             $gagal = 0;
             $errors = [];
 
+            // Helper functions
+            $parseFloat = function($val) {
+                if (empty($val) || !is_numeric($val)) return null;
+                return (float) $val;
+            };
+            
+            $parseInt = function($val) {
+                if (empty($val) || !is_numeric($val)) return null;
+                return (int) $val;
+            };
+
+            $parseDate = function($val) {
+                if (empty($val)) return null;
+                try {
+                    $date = \DateTime::createFromFormat('Y-m-d', $val);
+                    if ($date === false) $date = \DateTime::createFromFormat('d-m-Y', $val);
+                    if ($date === false) $date = \DateTime::createFromFormat('d/m/Y', $val);
+                    return $date ? $date->format('Y-m-d') : null;
+                } catch (\Exception $e) {
+                    return null;
+                }
+            };
+
             // Process each row
             foreach ($csv as $index => $row) {
                 if (empty(array_filter($row))) continue;
 
                 try {
                     $data = array_combine($headers, $row);
+                    if ($data === false) {
+                        Log::warning("Row {$index}: array_combine failed", [
+                            'headers_count' => count($headers),
+                            'row_count' => count($row),
+                            'row' => $row
+                        ]);
+                        throw new \Exception('Kolom CSV tidak sesuai dengan header');
+                    }
+                    
                     $data = array_map('trim', $data);
+                    
+                    // Create flexible getter function
+                    $getField = function($fieldName) use ($data, $headers) {
+                        $fieldLower = strtolower($fieldName);
+                        foreach ($data as $key => $val) {
+                            $keyNorm = str_replace(['_', ' ', '/', '.', '-'], '', strtolower($key));
+                            $fieldNorm = str_replace(['_', ' ', '/', '.', '-'], '', $fieldLower);
+                            if ($keyNorm === $fieldNorm) {
+                                return $val;
+                            }
+                        }
+                        return null;
+                    };
 
-                    if (empty($data['seksi'])) {
+                    $seksi = $getField('seksi');
+                    if (empty($seksi)) {
                         throw new \Exception('SEKSI kosong');
                     }
 
-                    $rowWilayahId = !empty($data['wilayah']) ? (int) $data['wilayah'] : null;
+                    $wilayah = $getField('wil');
+                    $rowWilayahId = !empty($wilayah) ? (int) trim($wilayah) : null;
                     
                     if (!$rowWilayahId || $rowWilayahId < 16 || $rowWilayahId > 23) {
-                        throw new \Exception('Wilayah tidak valid: ' . ($data['wilayah'] ?? 'kosong'));
+                        throw new \Exception('Wilayah tidak valid: ' . ($wilayah ?? 'kosong'));
                     }
 
-                    $idFeature = $data['seksi'];
-
-                    $parseFloat = function($val) {
-                        if (empty($val) || !is_numeric($val)) return null;
-                        return (float) $val;
+                    $parseFloat2 = function($val) {
+                        if (empty($val)) return null;
+                        $val = str_replace(',', '.', trim($val));
+                        return is_numeric($val) ? (float) $val : null;
                     };
                     
-                    $parseInt = function($val) {
-                        if (empty($val) || !is_numeric($val)) return null;
-                        return (int) $val;
+                    $parseInt2 = function($val) {
+                        if (empty($val)) return null;
+                        return is_numeric($val) ? (int) trim($val) : null;
                     };
 
-                    DataGulma::create([
-                        'wilayah_id' => $rowWilayahId,
-                        'id_feature' => $idFeature,
-                        'import_log_id' => $importLog->id,
-                        'pg' => $data['pg'] ?? null,
-                        'fm' => $data['fm'] ?? null,
-                        'seksi' => $data['seksi'] ?? null,
-                        'neto' => $parseFloat($data['neto'] ?? null),
-                        'hasil' => $parseFloat($data['hasil'] ?? null),
-                        'umur_tanaman' => $parseFloat($data['umur tanaman'] ?? null),
-                        'penanggungjawab' => $data['penanggungjawab'] ?? null,
-                        'kode_aktf' => $data['kode aktf'] ?? null,
-                        'activitas' => $data['activitas'] ?? null,
-                        'kategori' => $data['kategori'] ?? null,
-                        'tk_ha' => $parseFloat($data['tk/ha'] ?? null),
-                        'total_tk' => $parseInt($data['total tk'] ?? null),
-                        'tanggal' => now()->toDateString(),
-                    ]);
+                    $parseDate2 = function($val) {
+                        if (empty($val)) return null;
+                        try {
+                            $val = trim($val);
+                            // Try multiple date formats
+                            $date = \DateTime::createFromFormat('Y-m-d', $val);
+                            if ($date === false) $date = \DateTime::createFromFormat('d-m-Y', $val);
+                            if ($date === false) $date = \DateTime::createFromFormat('d/m/Y', $val);
+                            if ($date === false) $date = \DateTime::createFromFormat('d-M-Y', $val); // 2-Nov-2025
+                            if ($date === false) $date = \DateTime::createFromFormat('d-M-y', $val); // 2-Nov-25
+                            if ($date === false) $date = \DateTime::createFromFormat('d M Y', $val);
+                            if ($date === false) $date = \DateTime::createFromFormat('d M y', $val);
+                            
+                            return $date ? $date->format('Y-m-d') : null;
+                        } catch (\Exception $e) {
+                            return null;
+                        }
+                    };
+
+                    DataGulma::updateOrCreate(
+                        [
+                            'wilayah_id' => $rowWilayahId,
+                            'id_feature' => $seksi,
+                            'import_log_id' => $importLog->id
+                        ],
+                        [
+                            'pg' => $getField('pg'),
+                            'fm' => $getField('fm'),
+                            'seksi' => $seksi,
+                            'neto' => $parseFloat2($getField('neto')),
+                            'hasil' => $parseFloat2($getField('hasil')),
+                            'umur' => $parseFloat2($getField('umur_tnm') ?? $getField('umur tanaman') ?? $getField('umur')),
+                            'tnm_sts' => $getField('tnm_sts') ?? $getField('tnm sts'),
+                            'activitas' => $getField('activitas') ?? $getField('aktivitas'),
+                            'kategori' => $getField('kategori'),
+                            'tanggal' => $parseDate2($getField('tanggal')) ?? now()->toDateString(),
+                            'tk_ha' => $parseFloat2($getField('tk/ha') ?? $getField('tkha')),
+                            'total_tk' => $parseFloat2($getField('total_tk') ?? $getField('total tk')),
+                        ]
+                    );
 
                     $berhasil++;
+                    
+                    // Log first few successful rows
+                    if ($berhasil <= 3) {
+                        Log::info("Row {$index} SUCCESS - Wilayah: {$rowWilayahId}, Seksi: {$seksi}");
+                    }
+                    
                 } catch (\Exception $e) {
                     $gagal++;
                     $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                    
+                    // Log detailed error for first few failures
+                    if ($gagal <= 5) {
+                        Log::error("Row {$index} FAILED", [
+                            'error' => $e->getMessage(),
+                            'row_data' => $row,
+                            'row_count' => count($row),
+                            'headers_count' => count($headers)
+                        ]);
+                    }
                 }
             }
 
@@ -805,7 +964,7 @@ class AdminController extends Controller
                 DB::raw('SUM(neto) as total_neto'),
                 DB::raw('SUM(hasil) as total_hasil'), // Total Gulma
                 DB::raw('AVG(hasil) as avg_hasil'),
-                DB::raw('AVG(umur_tanaman) as avg_umur'),
+                DB::raw('AVG(umur) as avg_umur'),
                 DB::raw('SUM(total_tk) as total_tenaga_kerja')
             )
             ->groupBy('wilayah_id')
@@ -997,7 +1156,7 @@ class AdminController extends Controller
                 'total_neto' => $query->sum('neto'),
                 'total_hasil' => $query->sum('hasil'),
                 'avg_hasil' => $query->avg('hasil'),
-                'avg_umur' => $query->avg('umur_tanaman'),
+                'avg_umur' => $query->avg('umur'),
                 'total_tk' => $query->sum('total_tk'),
                 'kategori_distribution' => DataGulma::where('wilayah_id', $wilayahId)
                     ->select('kategori', DB::raw('COUNT(*) as count'))

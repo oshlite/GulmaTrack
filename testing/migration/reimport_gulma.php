@@ -114,7 +114,7 @@ foreach ($csv as $index => $row) {
                 'activitas' => $data['activitas'] ?? null,
                 'kategori' => $data['kategori'] ?? null,
                 'tk_ha' => $parseFloat($data['tk/ha'] ?? null),
-                'total_tk' => $parseInt($data['total tk'] ?? null),
+                'total_tk' => $parseFloat($data['total tk'] ?? null),
                 'tanggal' => now()->toDateString(),
                 'import_log_id' => $importLog->id
             ]

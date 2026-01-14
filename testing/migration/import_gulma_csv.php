@@ -99,12 +99,12 @@ foreach ($csv as $index => $row) {
                 'neto' => $parseFloat($data['neto'] ?? null),
                 'hasil' => $parseFloat($data['hasil'] ?? null),
                 'umur_tanaman' => $parseInt($data['umur tanaman'] ?? null),
-                'penanggungjawab' => $data['penanggungjawab'] ?? null,
-                'kode_aktf' => $data['kode aktf'] ?? null,
+                'tnm_sts' => $data['tnm sts'] ?? null,
                 'activitas' => $data['activitas'] ?? null,
-                'kategori' => $data['kategori'] ?? null,
+                'kategori_weeding' => $data['kategori weeding'] ?? null,
+                'tanggal_rencana_aplikasi' => $data['tanggal rencana aplikasi'] ?? null,
                 'tk_ha' => $parseFloat($data['tk/ha'] ?? null),
-                'total_tk' => $parseInt($data['total tk'] ?? null),
+                'total_tk' => $parseFloat($data['total tk'] ?? null),
                 'tanggal' => date('Y-m-d'),
                 'import_log_id' => $importLog->id
             ]

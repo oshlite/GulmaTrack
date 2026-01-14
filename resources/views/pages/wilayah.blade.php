@@ -998,34 +998,40 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     <!-- Location Details Table -->
     <div class="location-details-container" id="locationDetailsTable">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; color: var(--primary-color); font-size: 18px;">
-                <i class="fas fa-list-alt"></i> Detail Lokasi per Wilayah
-            </h3>
-            <span id="tableInfoText" style="font-size: 12px; color: #666;"></span>
+            <div>
+                <h3 style="margin: 0 0 8px 0; color: var(--primary-color); font-size: 18px;">
+                    <i class="fas fa-list-alt"></i> Detail Lokasi per Wilayah
+                </h3>
+                <span id="tableInfoText" style="font-size: 12px; color: #666;"></span>
+            </div>
+            <button onclick="exportToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
         </div>
         <div style="overflow-x: auto;">
             <table class="location-table" id="locationTable">
                 <thead>
                     <tr style="background-color: #128241;">
-                        <th onclick="sortTable('no')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 50px;"> No <span id="sortIndicator_no" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('pg')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> PG <span id="sortIndicator_pg" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('fm')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> FM <span id="sortIndicator_fm" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('wilayah')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Wilayah <span id="sortIndicator_wilayah" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('seksi')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Lokasi <span id="sortIndicator_seksi" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('hasil')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Hasil <span id="sortIndicator_hasil" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('umur')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Umur <span id="sortIndicator_umur" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('tnm_sts')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> TNM STS <span id="sortIndicator_tnm_sts" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('aktivitas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Aktivitas <span id="sortIndicator_aktivitas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('kategori')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Status Gulma <span id="sortIndicator_kategori" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('tanggal')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Tanggal <span id="sortIndicator_tanggal" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
-                        <th onclick="sortTable('tk')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Total TK <span id="sortIndicator_tk" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 50px;"> No</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 60px;"> PG</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 60px;"> FM</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Wilayah</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Lokasi</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Hasil</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Umur</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> TNM STS</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Aktivitas</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Status Gulma</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Tanggal</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Total TK</th>
+                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 70px;"> TK/HA</th>
                     </tr>
                 </thead>
                 <tbody id="locationTableBody">
                     <tr>
-                        <td colspan="12" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="13" style="text-align: center; padding: 40px; color: #999;">
                             <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i><br>
-                            Pilih wilayah atau filter status untuk melihat data lokasi
+                            Memuat data lokasi...
                         </td>
                     </tr>
                 </tbody>
@@ -2137,11 +2143,11 @@ function initMap() {
             // Handle both comma and dot as decimal separator, then convert to number
             const tkString = String(tkTotal).replace(/,/g, '.');
             const tkNumber = parseFloat(tkString);
-            tkValue = !isNaN(tkNumber) ? Math.round(Math.round(parseFloat(tkNumber))) : '<span style="color: #999; font-style: italic;">null</span>';
+            tkValue = !isNaN(tkNumber) ? parseFloat(tkNumber).toFixed(2) : '<span style="color: #999; font-style: italic;">null</span>';
         } else {
             tkValue = '<span style="color: #999; font-style: italic;">null</span>';
         }
-        const tkDisplay = (typeof tkValue === 'number') ? `${tkValue} TK` : tkValue;
+        const tkDisplay = (typeof tkValue === 'string' && tkValue.includes('span')) ? tkValue : `${tkValue} TK`;
         html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Total TK:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
 
         // Aktivitas - dari CSV activitas (note: column name is "activitas" with 'c', not 'k')
@@ -2451,7 +2457,7 @@ function initMap() {
                             <span>Total Tenaga Kerja Existing</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk))) : '0')} TK
+                            ${(wilayah.total_tk ? parseFloat(wilayah.total_tk).toFixed(2) : '0.00')} TK
                         </span>
                     </div>
                     <div class="info-row">
@@ -2460,7 +2466,7 @@ function initMap() {
                             <span>5 Hari Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk)) / 5) : '0')} TK/hari
+                            ${(wilayah.total_tk ? (parseFloat(wilayah.total_tk) / 5).toFixed(2) : '0.00')} TK/hari
                         </span>
                     </div>
                     <div class="info-row">
@@ -2469,7 +2475,7 @@ function initMap() {
                             <span>6 Hari Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? Math.round(Math.round(parseFloat(wilayah.total_tk)) / 6) : '0')} TK/hari
+                            ${(wilayah.total_tk ? (parseFloat(wilayah.total_tk) / 6).toFixed(2) : '0.00')} TK/hari
                         </span>
                     </div>
                     <div>
@@ -3209,7 +3215,8 @@ function initMap() {
             loadAvailablePeriods(); // Load periods and then auto-load map
         }
     });
-    </script>
-</div>
+</script>
 
-@endsection
+<!-- CSV Handler Script -->
+<script src="{{ asset('js/csv-handler.js') }}"></script>
+

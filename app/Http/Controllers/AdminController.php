@@ -373,6 +373,17 @@ class AdminController extends Controller
                         }
                     };
 
+                    $pg = $getField('pg');
+                    $fm = $getField('fm');
+                    $hasil = $parseFloat2($getField('hasil'));
+                    $umur = $parseFloat2($getField('umur_tnm') ?? $getField('umur tanaman') ?? $getField('umur'));
+                    $tnm_sts = $getField('tnm_sts') ?? $getField('tnm sts');
+                    $activitas = $getField('activitas') ?? $getField('aktivitas');
+                    $kategori = $getField('kategori');
+                    $tanggal = $parseDate2($getField('tanggal')) ?? now()->toDateString();
+                    $tk_ha = $parseFloat2($getField('tk/ha') ?? $getField('tkha'));
+                    $total_tk = $parseFloat2($getField('total_tk') ?? $getField('total tk'));
+
                     DataGulma::updateOrCreate(
                         [
                             'wilayah_id' => $rowWilayahId,
@@ -380,26 +391,39 @@ class AdminController extends Controller
                             'import_log_id' => $importLog->id
                         ],
                         [
-                            'pg' => $getField('pg'),
-                            'fm' => $getField('fm'),
+                            'pg' => $pg,
+                            'fm' => $fm,
                             'seksi' => $seksi,
                             'neto' => $parseFloat2($getField('neto')),
-                            'hasil' => $parseFloat2($getField('hasil')),
-                            'umur' => $parseFloat2($getField('umur_tnm') ?? $getField('umur tanaman') ?? $getField('umur')),
-                            'tnm_sts' => $getField('tnm_sts') ?? $getField('tnm sts'),
-                            'activitas' => $getField('activitas') ?? $getField('aktivitas'),
-                            'kategori' => $getField('kategori'),
-                            'tanggal' => $parseDate2($getField('tanggal')) ?? now()->toDateString(),
-                            'tk_ha' => $parseFloat2($getField('tk/ha') ?? $getField('tkha')),
-                            'total_tk' => $parseFloat2($getField('total_tk') ?? $getField('total tk')),
+                            'hasil' => $hasil,
+                            'umur' => $umur,
+                            'tnm_sts' => $tnm_sts,
+                            'activitas' => $activitas,
+                            'kategori' => $kategori,
+                            'tanggal' => $tanggal,
+                            'tk_ha' => $tk_ha,
+                            'total_tk' => $total_tk,
                         ]
                     );
 
                     $berhasil++;
                     
-                    // Log first few successful rows
+                    // Log first few successful rows dengan detail
                     if ($berhasil <= 3) {
-                        Log::info("Row {$index} SUCCESS - Wilayah: {$rowWilayahId}, Seksi: {$seksi}");
+                        Log::info("✅ Row {$index} IMPORT SUCCESS", [
+                            'seksi' => $seksi,
+                            'wilayah' => $rowWilayahId,
+                            'pg' => $pg,
+                            'fm' => $fm,
+                            'hasil' => $hasil,
+                            'umur' => $umur,
+                            'tnm_sts' => $tnm_sts,
+                            'activitas' => $activitas,
+                            'kategori' => $kategori,
+                            'tanggal' => $tanggal,
+                            'tk_ha' => $tk_ha,
+                            'total_tk' => $total_tk
+                        ]);
                     }
                     
                 } catch (\Exception $e) {

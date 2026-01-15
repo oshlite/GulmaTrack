@@ -137,19 +137,23 @@ class WilayahController extends Controller
                             }
                             
                             // Use first record's data, but override with best kategori and summed values
-                            $feature['properties']['seksi'] = $firstRecord->seksi;
-                            $feature['properties']['pg'] = $firstRecord->pg;
-                            $feature['properties']['fm'] = $firstRecord->fm;
-                            $feature['properties']['neto'] = $totalNeto;
-                            $feature['properties']['hasil'] = $firstRecord->hasil;
-                            $feature['properties']['umur_tanaman'] = $firstRecord->umur_tanaman;
-                            $feature['properties']['penanggungjawab'] = $firstRecord->penanggungjawab;
-                            $feature['properties']['kode_aktf'] = $firstRecord->kode_aktf;
-                            $feature['properties']['activitas'] = $firstRecord->activitas;
-                            $feature['properties']['kategori'] = $bestKategori ?? '';
-                            $feature['properties']['tk_ha'] = $totalTk;
-                            $feature['properties']['total_tk'] = $firstRecord->total_tk;
-                            $feature['properties']['tanggal'] = $firstRecord->tanggal;
+                            // SEMUA FIELD SESUAI CSV FORMAT
+                            $feature['properties']['seksi'] = (string)$firstRecord->seksi;
+                            $feature['properties']['pg'] = (string)$firstRecord->pg;
+                            $feature['properties']['fm'] = (string)$firstRecord->fm;
+                            $feature['properties']['neto'] = (string)$totalNeto;
+                            $feature['properties']['hasil'] = (string)$firstRecord->hasil;
+                            $feature['properties']['umur'] = (string)$firstRecord->umur;  // CSV = UMUR_TNM, DB = umur
+                            $feature['properties']['tnm_sts'] = (string)$firstRecord->tnm_sts;  // TNM Status
+                            $feature['properties']['activitas'] = (string)$firstRecord->activitas;
+                            $feature['properties']['penanggungjawab'] = (string)($firstRecord->penanggungjawab ?? '-');
+                            $feature['properties']['kode_aktf'] = (string)($firstRecord->kode_aktf ?? '-');
+                            $feature['properties']['kategori'] = (string)($bestKategori ?? '');
+                            $feature['properties']['tk_ha'] = (string)$totalTk;
+                            $feature['properties']['total_tk'] = (string)$firstRecord->total_tk;
+                            // Format tanggal sesuai CSV: "2-Nov" bukan ISO timestamp
+                            $tanggalFormatted = $firstRecord->tanggal ? \Carbon\Carbon::parse($firstRecord->tanggal)->format('d-M') : '';
+                            $feature['properties']['tanggal'] = $tanggalFormatted;
                             
                             $mergedCount++;
                         } else {
@@ -452,6 +456,22 @@ class WilayahController extends Controller
             
             \Log::info("Total records for Wilayah {$wilayah_number}: " . $records->count());
             
+            // Debug: Log first 3 records
+            if ($records->count() > 0) {
+                $firstRecord = $records->first();
+                \Log::info("✅ First record details:", [
+                    'seksi' => $firstRecord->seksi,
+                    'hasil' => $firstRecord->hasil,
+                    'umur' => $firstRecord->umur,
+                    'tnm_sts' => $firstRecord->tnm_sts,
+                    'activitas' => $firstRecord->activitas,
+                    'tanggal' => $firstRecord->tanggal,
+                    'total_tk' => $firstRecord->total_tk,
+                    'pg' => $firstRecord->pg,
+                    'fm' => $firstRecord->fm
+                ]);
+            }
+            
             // Convert to features-like format for frontend compatibility
             $features = [];
             foreach ($records as $record) {
@@ -462,19 +482,70 @@ class WilayahController extends Controller
                         'wilayah' => $wilayah_number,
                         'Lokasi' => $record->seksi,
                         'seksi' => $record->seksi,
+                        'SEKSI' => $record->seksi,
                         'kategori' => $record->kategori,
+                        'KATEGORI' => $record->kategori,
                         'status_gulma' => $record->status_gulma,
                         'tk_ha' => $record->tk_ha,
+                        'TK/HA' => $record->tk_ha,
+                        'TKHA' => $record->tk_ha,
                         'neto' => $record->neto,
-                        'hasil' => $record->hasil,
+                        'NETO' => $record->neto,
+                        'Hasil' => $record->hasil,
+                        'HASIL' => $record->hasil,
+                        // Aktivitas field variations
                         'activitas' => $record->activitas,
-                        'umur_tanaman' => $record->umur_tanaman,
-                        'penanggungjawab' => $record->penanggungjawab,
-                        'kode_aktf' => $record->kode_aktf,
+                        'aktivitas' => $record->activitas,
+                        'ACTIVITAS' => $record->activitas,
+                        'AKTIVITAS' => $record->activitas,
+                        'activity' => $record->activitas,
+                        'Activity' => $record->activitas,
+                        'ACTIVITY' => $record->activitas,
+                        'Weeding' => $record->activitas,
+                        'weeding' => $record->activitas,
+                        'WEEDING' => $record->activitas,
+                        // Umur field variations
+                        'umur_tanaman' => $record->umur,
+                        'umur' => $record->umur,
+                        'UMUR_TNM' => $record->umur,
+                        'Umur Tanaman' => $record->umur,
+                        'Umur TNM' => $record->umur,
+                        'UMUR' => $record->umur,
+                        'Umur' => $record->umur,
+                        // TNM_STS field variations
+                        'tnm_sts' => $record->tnm_sts,
+                        'TNM_STS' => $record->tnm_sts,
+                        'TNM STS' => $record->tnm_sts,
+                        'tnm' => $record->tnm_sts,
+                        'TNM' => $record->tnm_sts,
+                        'status_tanaman' => $record->tnm_sts,
+                        'STATUS_TANAMAN' => $record->tnm_sts,
+                        // Other fields
+                        'penanggungjawab' => $record->penanggungjawab ?? '-',
+                        'Penanggungjawab' => $record->penanggungjawab ?? '-',
+                        'nama' => $record->penanggungjawab ?? '-',
+                        'kode_aktf' => $record->kode_aktf ?? '-',
+                        'Kode Aktf' => $record->kode_aktf ?? '-',
+                        'kode' => $record->kode_aktf ?? '-',
+                        // Tanggal field variations
                         'tanggal' => $record->tanggal,
+                        'tanggal_rencana_aplikasi' => $record->tanggal,
+                        'TANGGAL' => $record->tanggal,
+                        'Tanggal' => $record->tanggal,
+                        'Tanggal Rencana Aplikasi' => $record->tanggal,
+                        'tanggal_aplikasi' => $record->tanggal,
+                        'TANGGAL_APLIKASI' => $record->tanggal,
+                        // PG and FM
                         'pg' => $record->pg,
+                        'PG' => $record->pg,
                         'fm' => $record->fm,
-                        'total_tk' => $record->total_tk
+                        'FM' => $record->fm,
+                        // Total TK field variations
+                        'total_tk' => $record->total_tk,
+                        'TOTAL_TK' => $record->total_tk,
+                        'TOTAL TK' => $record->total_tk,
+                        'totalTk' => $record->total_tk,
+                        'WIL' => $wilayah_number
                     ]
                 ];
             }

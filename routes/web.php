@@ -31,17 +31,9 @@ Route::get('/data/excel', [ExcelDataController::class, 'getExcelData'])
 
 /*
 |--------------------------------------------------------------------------
-| API - WILAYAH 
+| API routes have been moved to routes/api.php
 |--------------------------------------------------------------------------
 */
-Route::prefix('api/wilayah')
-    ->name('api.wilayah.')
-    ->group(function () {
-        Route::get('/data', [WilayahController::class, 'getData'])->name('data');
-        Route::get('/geojson/{wilayah}', [WilayahController::class, 'getGeojson'])->name('geojson');
-        Route::get('/periods', [WilayahController::class, 'getPeriods'])->name('periods');
-        Route::get('/data-by-period', [WilayahController::class, 'getDataByPeriod'])->name('data-by-period');
-    });
 
 /*
 |--------------------------------------------------------------------------

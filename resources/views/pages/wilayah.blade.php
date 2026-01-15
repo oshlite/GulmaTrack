@@ -1012,19 +1012,19 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             <table class="location-table" id="locationTable">
                 <thead>
                     <tr style="background-color: #128241;">
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 50px;"> No</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 60px;"> PG</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 60px;"> FM</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Wilayah</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Lokasi</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Hasil</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Umur</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> TNM STS</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Aktivitas</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Status Gulma</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Tanggal</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Total TK</th>
-                        <th style="cursor: default; user-select: none; color: white; padding: 12px 8px; width: 70px;"> TK/HA</th>
+                        <th onclick="sortTable('no')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 50px;"> No <span id="sortIndicator_no" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('pg')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> PG <span id="sortIndicator_pg" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('fm')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 60px;"> FM <span id="sortIndicator_fm" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('wilayah')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Wilayah <span id="sortIndicator_wilayah" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('seksi')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 90px;"> Lokasi <span id="sortIndicator_seksi" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('hasil')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Hasil <span id="sortIndicator_hasil" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('umur')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Umur TNM <span id="sortIndicator_umur" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tnm_sts')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> TNM STS <span id="sortIndicator_tnm_sts" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('aktivitas')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Aktivitas <span id="sortIndicator_aktivitas" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('kategori')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 100px;"> Status Gulma <span id="sortIndicator_kategori" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tanggal')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 120px;"> Tanggal <span id="sortIndicator_tanggal" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <th onclick="sortTable('tk')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 80px;"> Total TK <span id="sortIndicator_tk" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th>
+                        <!-- <th onclick="sortTable('tk_ha')" style="cursor: pointer; user-select: none; color: white; padding: 12px 8px; width: 70px;"> TK/HA <span id="sortIndicator_tk_ha" style="color: #D6DF20; font-size: 20px; margin-left: 5px;"><i class="fa-solid fa-sort"></i></span></th> -->
                     </tr>
                 </thead>
                 <tbody id="locationTableBody">
@@ -1451,7 +1451,7 @@ function initMap() {
         }
         
         // Reset all sort indicators safely (only update if element exists)
-        const sortIndicators = ['no', 'pg', 'fm', 'wilayah', 'seksi', 'hasil', 'umur', 'tnm_sts', 'aktivitas', 'kategori', 'tanggal', 'tk'];
+        const sortIndicators = ['no', 'pg', 'fm', 'wilayah', 'seksi', 'hasil', 'umur', 'tnm_sts', 'aktivitas', 'kategori', 'tanggal', 'tk']; // 'tk_ha' commented out
         sortIndicators.forEach(col => {
             const elem = document.getElementById(`sortIndicator_${col}`);
             if (elem) {
@@ -1475,8 +1475,8 @@ function initMap() {
             }
         }
         
-        // Sort the rows - Updated cell indices for new 12-column structure:
-        // 0:No | 1:PG | 2:FM | 3:Wilayah | 4:SEKSI | 5:Hasil | 6:Umur Tanaman | 7:TNM STS | 8:Aktivitas | 9:Kategori Weeding | 10:Tanggal Rencana | 11:Total TK
+        // Sort the rows - Updated cell indices for new 13-column structure:
+        // 0:No | 1:PG | 2:FM | 3:Wilayah | 4:SEKSI | 5:Hasil | 6:Umur Tanaman | 7:TNM STS | 8:Aktivitas | 9:Kategori Weeding | 10:Tanggal Rencana | 11:Total TK | 12:TK/HA
         rows.sort((a, b) => {
             let aVal, bVal;
             
@@ -1522,6 +1522,14 @@ function initMap() {
                 const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
                 return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
             }
+            // } else if (column === 'tk_ha') {
+            //     aVal = a.cells[12]?.textContent.trim().toLowerCase() || 'null';
+            //     bVal = b.cells[12]?.textContent.trim().toLowerCase() || 'null';
+            //     // Handle numeric sorting for TK/HA
+            //     const aNum = aVal === 'null' ? -1 : parseFloat(aVal);
+            //     const bNum = bVal === 'null' ? -1 : parseFloat(bVal);
+            //     return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
+            // }
             
             // String comparison
             if (sortDirection === 'asc') {
@@ -2156,10 +2164,10 @@ function initMap() {
         html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Aktivitas:</strong></span><span style="color: #128241; font-weight: 600;">${aktivitasDisplay}</span></div>`;
 
         // Luas Netto Gulma - dari CSV neto
-        const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || props.luas_netto || null;
-        const netoValue = neto ? (typeof neto === 'string' ? neto.replace(',', '.') : neto) : '<span style="color: #999; font-style: italic;">null</span>';
-        const netoDisplay = neto ? `${netoValue} Ha` : `${netoValue}`;
-        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Luas Netto:</strong></span><span style="color: #128241; font-weight: 600;">${netoDisplay}</span></div>`;
+        // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || props.luas_netto || null;
+        // const netoValue = neto ? (typeof neto === 'string' ? neto.replace(',', '.') : neto) : '<span style="color: #999; font-style: italic;">null</span>';
+        // const netoDisplay = neto ? `${netoValue} Ha` : `${netoValue}`;
+        // html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Luas Netto:</strong></span><span style="color: #128241; font-weight: 600;">${netoDisplay}</span></div>`;
 
         // Luas Bruto Lokasi - HANYA dari GeoJSON
         const bruto = props.Luas_Bruto || props.luas_bruto || props.Bruto || props.bruto || null;
@@ -2294,8 +2302,8 @@ function initMap() {
                                 const props = feature.properties;
                                 
                                 // Sum Luas Netto (from CSV neto field)
-                                const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
-                                totalLuasNetto += parseFloat(neto) || 0;
+                                // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
+                                // totalLuasNetto += parseFloat(neto) || 0;
 
                                 // Sum TK (from CSV TOTAL_TK field)
                                 const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || 0;
@@ -2510,32 +2518,41 @@ function initMap() {
         
         features.forEach((feature, index) => {
             const props = feature.properties;
-            const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.SEKSI || props.id_feature || '-';
-            const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
-            const wilayah = wilayahNumber || props.Wilayah || props.gulma_Wilayah || '-';
             
-            // Extract all CSV fields
-            const pg = props.PG || props.pg || '-';
-            const fm = props.FM || props.fm || '-';
-            // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || '-';
-            const hasil = props.hasil || props.Hasil || '-';
-            const umurTanaman = props.umur_tanaman || props['Umur Tanaman'] || props.umur || '-';
-            const tnmSts = props.tnm_sts || props['TNM STS'] || props.tnm || props.status_tanaman || '-';
-            // const penanggungjawab = props.penanggungjawab || props.Penanggungjawab || props.nama || '-';
-            // const kodeAktf = props.kode_aktf || props['Kode Aktf'] || props.kode || '-';
-            const aktivitas = props.activitas || props.ACTIVITAS || props.activity || props.Activity || '-';
-            const kategori = props.kategori || props.KATEGORI || props.Kelas_weed || props.Status || '-';
-            const tanggalRencana = props.tanggal_rencana_aplikasi || props['Tanggal Rencana Aplikasi'] || props.tanggal_aplikasi || '-';
-            // const tkha = props.tk_ha || props['TK/HA'] || props.TK_HA || '-';
-            const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || '-';
-            let tkValue;
-            if (tkTotal === '-') {
-                tkValue = '-';
-            } else {
-                const tkString = String(tkTotal).replace(/,/g, '.');
-                const tkNumber = parseFloat(tkString);
-                tkValue = !isNaN(tkNumber) ? Math.round(tkNumber) : '-';
+            // Debug logging untuk 3 baris pertama - SHOW ALL DETAILS
+            if (index < 3) {
+                console.log(`📍 Feature ${index}:`);
+                console.log('  ALL KEYS:', Object.keys(props));
+                console.log('  hasil:', props.hasil);
+                console.log('  umur:', props.umur);
+                console.log('  tnm_sts:', props.tnm_sts);
+                console.log('  activitas:', props.activitas);
+                console.log('  tanggal:', props.tanggal);
+                console.log('  total_tk:', props.total_tk);
+                console.log('  kategori:', props.kategori);
+                console.log('  pg:', props.pg);
+                console.log('  fm:', props.fm);
+                console.log('  Full Props:', props);
             }
+            
+            const lokasi = props.Lokasi || props.LOKASI || props.seksi || props.SEKSI || props.id_feature || '-';
+            const status = (props.KATEGORI || props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || 'Tidak Ada Data').toLowerCase();
+            const wilayah = wilayahNumber || props.Wilayah || props.gulma_Wilayah || props.WIL || '-';
+            
+            // Extract all CSV fields - SIMPLE STRING FORMAT
+            // API now returns lowercase field names from database
+            const pg = props.pg || props.PG || '-';
+            const fm = props.fm || props.FM || '-';
+            const hasil = String(props.hasil || props.HASIL || '').trim() || '-';
+            const umurTanaman = String(props.umur || props.UMUR_TNM || props.umur_tanaman || '').trim() || '-';
+            const tnmSts = String(props.tnm_sts || props.TNM_STS || '').trim() || '-';
+            const aktivitas = String(props.activitas || props.ACTIVITAS || props.aktivitas || '').trim() || '-';
+            const kategori = props.kategori || props.KATEGORI || '-';
+            // Tanggal sudah dalam format CSV "2-Nov" bukan ISO timestamp
+            const tanggalRaw = String(props.tanggal || props.TANGGAL || '').trim();
+            const tanggalRencana = tanggalRaw || '-';
+            const tkTotal = String(props.total_tk || props.TOTAL_TK || '').trim();
+            let tkValue = (tkTotal && tkTotal !== '') ? Math.round(parseFloat(tkTotal)) + ' TK' : '-';
             
             // Get komoditas emoji dari Status field (dengan null-safe check)
             let komoditasEmoji = '';
@@ -2603,13 +2620,13 @@ function initMap() {
                 <td>${fm}</td>
                 <td>${wilayah}</td>
                 <td>${komoditasEmoji} ${lokasi}</td>
-                <td>${hasil === '-' ? '<span style="color: #999;">-</span>' : hasil}</td>
-                <td>${umurTanaman === '-' ? '<span style="color: #999;">-</span>' : umurTanaman}</td>
-                <td>${tnmSts === '-' ? '<span style="color: #999;">-</span>' : tnmSts}</td>
-                <td>${aktivitas === '-' ? '<span style="color: #999;">-</span>' : aktivitas}</td>
+                <td>${hasil}</td>
+                <td>${umurTanaman}</td>
+                <td>${tnmSts}</td>
+                <td>${aktivitas}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>${tanggalRencana === '-' ? '<span style="color: #999;">-</span>' : tanggalRencana}</td>
-                <td><strong>${tkValue === '-' ? '<span style="color: #999;">-</span>' : tkValue + ' TK'}</strong></td>
+                <td>${tanggalRencana}</td>
+                <td><strong>${tkValue}</strong></td>
             `;
             tbody.appendChild(row);
         });

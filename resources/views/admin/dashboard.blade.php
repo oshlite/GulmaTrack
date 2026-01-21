@@ -1059,7 +1059,7 @@
                 <!-- Periode Selection -->
                 <div class="form-group" style="margin-top: 15px; margin-bottom: 20px; position: relative; z-index: 100;">
                     <label for="tahun" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; font-family: 'Poppins'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
-                        <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Pilih Tahun:
+                        <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Pilih Tahun:
                     </label>
                     <input 
                         type="text" 
@@ -1078,7 +1078,7 @@
 
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #2c3e50; font-family: 'Poppins'; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;">
-                        <i class="fas fa-calendar" style="color: var(--accent-color);"></i> Pilih Bulan:
+                        <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Pilih Bulan:
                     </label>
                     <input type="hidden" id="bulan" name="bulan" required>
                     <div id="bulanGrid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
@@ -1235,6 +1235,10 @@
                     <div class="legend-color" style="background: #ecf0f1; border-color: #c4c4c4;"></div>
                     <span><strong>Belum Dimonitoring</strong></span>
                 </div>
+                <div class="legend-item" onclick="filterByStatus('non-nanas')" title="Klik untuk filter - Pisang, Singkong, Riset">
+                    <div class="legend-color" style="background: #9b59b6;"></div>
+                    <span><strong>Lahan Non-nanas</strong></span>
+                </div>
                 
                 <!-- Wilayah Filter -->
                 <div style="margin-top: 8px; padding-top: 8px;">
@@ -1276,7 +1280,7 @@
     <div class="card full-width" id="publikasiTableSection">
         <h2><i class="fas fa-globe"></i> Tampilkan Tabel Peta Publikasi</h2>
         <p style="color: #666; font-size: 13px; margin-bottom: 20px;">
-            📋 Kelola file CSV mana yang dipublikasi untuk setiap periode. Setiap periode hanya bisa memiliki 1 file yang dipublikasi.
+            File CSV yang telah dipublikasikan dapat dilihat di halaman wilayah publik <a href="{{ route('wilayah') }}" style="color: #128241; font-weight: 600;" >Klik untuk Lihat Peta Publik</a>.
         </p>
         
         @php
@@ -1308,7 +1312,6 @@
                             <th style="width: 100px;"><i class="fas fa-database"></i> Records</th>
                             <th style="width: 150px;"><i class="fas fa-clock"></i> Upload</th>
                             <th style="width: 150px;"><i class="fas fa-check-circle"></i> Publikasi</th>
-                            <th style="width: 100px;"><i class="fas fa-cog"></i> Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1347,12 +1350,6 @@
                                 <td style="font-size: 12px;">
                                     {{ $published?->published_at?->format('d M Y H:i') ?? '-' }}
                                 </td>
-                                <td style="text-align: center;">
-                                    <button onclick="openPublicationModal('{{ $periodKey }}', '{{ $tahun }}', '{{ $bulan }}', '{{ $minggu }}')" 
-                                        class="btn-small" style="padding: 6px 12px; font-size: 11px; background: #128241; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        <i class="fas fa-pencil"></i> Kelola
-                                    </button>
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -1366,27 +1363,6 @@
         @endif
     </div><br><br>
 
-    <!-- Modal untuk Kelola Publikasi -->
-    <div id="publicationModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h3 id="modalTitle">Kelola Publikasi</h3>
-            <p id="modalPeriod" style="color: #666; margin-bottom: 20px;"></p>
-            
-            <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
-                <label style="font-weight: 600; margin-bottom: 10px; display: block;">Pilih File untuk Dipublikasi:</label>
-                <div id="filesList"></div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="closePublicationModal()" style="padding: 10px 20px; background: #E74C3C; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    Batal
-                </button>
-                <button onclick="updatePublication()" style="padding: 10px 20px; background: #128241; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    <i class="fas fa-save"></i> Simpan
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Recent Uploads -->
     <div class="card full-width" id="riwayatUploadSection">
@@ -1703,11 +1679,59 @@
         if (kat === 'sedang') return '#f1c40f'; // Kuning
         if (kat === 'berat') return '#e74c3c'; // Merah
         
+        // Lahan Non-nanas: Pisang, Singkong, atau Riset
+        if (!kat.includes('nanas') && (kat.includes('pisang') || kat.includes('singkong') || kat.includes('riset'))) {
+            return '#9b59b6'; // Ungu
+        }
+        
         return '#ffffff'; // Putih - Tidak dikenali
+    }
+    
+    // Helper function to check if feature is non-nanas based on Status field
+    function isNonNanas(props) {
+        // Check Status field from original geojson (Pisang, Singkong, Riset)
+        const status = (props.Status || props.status || '').toLowerCase().trim();
+        return status && !status.includes('nanas') && (status.includes('pisang') || status.includes('singkong') || status.includes('riset'));
     }
 
     let map;
     let geoJsonLayers = {};
+    let isLoadingData = false; // Flag to prevent multiple simultaneous loads
+
+    // Helper function to completely clear all map layers
+    function clearAllMapLayers() {
+        console.log('🧹 Clearing ALL map layers...');
+        
+        // Remove all geoJson layers
+        Object.keys(geoJsonLayers).forEach(key => {
+            if (geoJsonLayers[key]) {
+                try {
+                    map.removeLayer(geoJsonLayers[key]);
+                } catch (e) {
+                    console.warn('Warning removing layer:', e);
+                }
+            }
+        });
+        geoJsonLayers = {};
+        
+        // Also remove any other layers (in case there are orphaned layers)
+        if (map && map.eachLayer) {
+            map.eachLayer(function(layer) {
+                // Don't remove tile layers (base map)
+                if (layer instanceof L.TileLayer) {
+                    return;
+                }
+                // Remove all other layers (GeoJSON, markers, etc.)
+                try {
+                    map.removeLayer(layer);
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+        }
+        
+        console.log('✅ All map layers cleared');
+    }
 
     // Helper to show map error
     function showMapError(message) {
@@ -2004,6 +2028,13 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
     // Generic function to load data for any import ID
     async function loadDataForImport(importId, tahun, bulan, minggu) {
+        // ✅ PREVENT multiple simultaneous loads
+        if (isLoadingData) {
+            console.log('⚠️  Already loading data, ignoring new request...');
+            return;
+        }
+        
+        isLoadingData = true;
         const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         
         console.log(`🚀 Loading data for import ${importId}: ${tahun}/${bulan}/w${minggu}`);
@@ -2044,13 +2075,8 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 byWilayah[wilayahId].push(record);
             });
 
-            // Clear existing layers
-            Object.keys(geoJsonLayers).forEach(key => {
-                if (geoJsonLayers[key]) {
-                    map.removeLayer(geoJsonLayers[key]);
-                }
-            });
-            geoJsonLayers = {};
+            // Clear existing layers using new helper
+            clearAllMapLayers();
 
             // Load each wilayah's geojson and merge with data
             const allBounds = [];
@@ -2146,12 +2172,18 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             const loadingDiv = document.getElementById('mapLoadingIndicator');
             if (loadingDiv) loadingDiv.style.display = 'none';
             hideMapError();
+            
+            // ✅ RELEASE loading flag
+            isLoadingData = false;
         } catch (error) {
             console.error('Error loading data:', error);
             showMapError('Error: ' + error.message);
             const loadingDiv = document.getElementById('mapLoadingIndicator');
             if (loadingDiv) loadingDiv.style.display = 'none';
             loadAllWilayah();
+            
+            // ✅ RELEASE loading flag even on error
+            isLoadingData = false;
         }
     }
 
@@ -2297,20 +2329,33 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         
         // Log untuk debug
         if (props.kategori) {
-            console.log(`Feature ${props.seksi || props.SEKSI || 'unknown'} - kategori="${props.kategori}"`);
+            console.log(`Feature ${props.seksi || props.SEKSI || 'unknown'} - kategori="${props.kategori}", Status="${props.Status || props.status || ''}"`);
         }
         
-        // Prioritas: kategori > status_gulma > activitas
+        // ✅ PRIORITAS PERTAMA: kategori (Bersih/Ringan/Sedang/Berat)
+        // Jika ada kategori, gunakan warna kategori terlepas dari Status field
         if (props.kategori) {
             const kat = (props.kategori || '').toLowerCase().trim();
             fillColor = getColorByKategori(props.kategori);
             borderColor = fillColor;
             opacity = 1.0;
             fillOpacity = 0.7;
-        } else if (props.status_gulma) {
+        }
+        // ✅ PRIORITAS KEDUA: Non-nanas (hanya jika TIDAK ada kategori)
+        // Cek Status field untuk Pisang/Singkong/Riset
+        else if (isNonNanas(props)) {
+            fillColor = '#9b59b6'; // Ungu untuk non-nanas
+            borderColor = '#9b59b6';
+            opacity = 1.0;
+            fillOpacity = 0.7;
+        }
+        // ✅ PRIORITAS KETIGA: status_gulma
+        else if (props.status_gulma) {
             fillColor = statusColors[props.status_gulma] || fillColor;
             borderColor = fillColor;
-        } else if (props.activitas) {
+        }
+        // ✅ PRIORITAS KEEMPAT: activitas
+        else if (props.activitas) {
             const act = (props.activitas || '').toLowerCase();
             if (act.includes('pemupukan')) {
                 fillColor = '#128241';
@@ -2855,7 +2900,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             
             // Update status
             const statusDiv = document.getElementById('publishStatus');
-            statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ✅ ${data.message}`;
+            statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #128241;"></i> ${data.message}`;
             
             btn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dipublikasi!';
             btn.style.background = 'linear-gradient(135deg, #128241 0%, #2ecc71 100%)';
@@ -2878,22 +2923,6 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         btn.disabled = false;
     }
 }
-
-// Initialize on page load
-setTimeout(() => {
-    if (typeof L === 'undefined') {
-        console.error('Leaflet library not loaded!');
-        return;
-    }
-    console.log('🗺️ Initializing map...');
-    
-    initMap();
-    loadPublicationStatus();
-    
-    // ✅ Load latest published data
-    console.log('📥 Loading latest published data...');
-    loadPublishedMapOrLatestUpload();
-}, 200);
 
     // Load all wilayah with specific import_id
     function loadAllWilayahWithImportId(importId) {
@@ -3070,16 +3099,25 @@ setTimeout(() => {
     function filterCurrentMapLayers(status) {
         console.log('🔍 [FILTER] Applying filter to current layers:', status);
         
+        let matchCount = 0;
+        let totalCount = 0;
+        const matchedBounds = [];
+        
         Object.keys(geoJsonLayers).forEach(wilayahKey => {
             const layer = geoJsonLayers[wilayahKey];
             if (!layer) return;
             
             layer.eachLayer(featureLayer => {
                 const props = featureLayer.feature.properties;
+                totalCount++;
                 
                 if (!status) {
-                    // Show all
-                    featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
+                    // Show all - restore original style and make visible
+                    const originalStyle = getFeatureStyle(featureLayer.feature);
+                    featureLayer.setStyle(originalStyle);
+                    if (!map.hasLayer(featureLayer)) {
+                        featureLayer.addTo(map);
+                    }
                     return;
                 }
                 
@@ -3089,6 +3127,13 @@ setTimeout(() => {
                 if (status === 'belum_dimonitoring') {
                     // Belum dimonitoring = tidak punya kategori dan status_gulma
                     matches = !props.kategori && !props.status_gulma;
+                } else if (status === 'non-nanas') {
+                    // ✅ Filter untuk Lahan Non-nanas (HANYA jika TIDAK ada kategori)
+                    // Jika ada kategori (Bersih/Ringan/Sedang/Berat), dia masuk kategori, bukan non-nanas
+                    matches = !props.kategori && isNonNanas(props);
+                    if (matches) {
+                        console.log(`✅ Match Non-nanas: ${props.seksi}, Status="${props.Status || props.status}"`);
+                    }
                 } else {
                     // Check multiple possible status field names (exact match, case-insensitive)
                     const kategori = (props.kategori || '').toLowerCase().trim();
@@ -3099,23 +3144,84 @@ setTimeout(() => {
                     matches = kategori === filterLower || 
                              statusGulma === filterLower ||
                              activitas === filterLower;
+                    
+                    if (matches) {
+                        console.log(`✅ Match ${status}: ${props.seksi}, kategori="${kategori}"`);
+                    }
                 }
                 
                 if (matches) {
-                    // Show matching features
-                    featureLayer.setStyle({ fillOpacity: 0.8, opacity: 1 });
+                    matchCount++;
+                    // Show matching features - keep original color, increase opacity
+                    const originalStyle = getFeatureStyle(featureLayer.feature);
+                    featureLayer.setStyle({
+                        ...originalStyle,
+                        fillOpacity: 0.8,
+                        opacity: 1,
+                        weight: 3
+                    });
+                    
+                    // Make sure it's visible on map
+                    if (!map.hasLayer(featureLayer)) {
+                        featureLayer.addTo(map);
+                    }
+                    
+                    // Collect bounds for auto zoom
+                    const bounds = featureLayer.getBounds();
+                    if (bounds && bounds.isValid && bounds.isValid()) {
+                        matchedBounds.push(bounds);
+                    }
                 } else {
-                    // Hide non-matching features
-                    featureLayer.setStyle({ fillOpacity: 0.1, opacity: 0.2 });
+                    // HIDE non-matching features completely
+                    featureLayer.setStyle({ 
+                        fillOpacity: 0, 
+                        opacity: 0
+                    });
                 }
             });
         });
         
-        console.log('✅ [FILTER] Filter applied to', Object.keys(geoJsonLayers).length, 'wilayah layers');
+        console.log(`✅ [FILTER] Filter applied: ${matchCount}/${totalCount} features match "${status}"`);
+        
+        // Auto zoom to matched features
+        if (status && matchedBounds.length > 0) {
+            console.log(`📍 [FILTER] Auto zooming to ${matchedBounds.length} matched features...`);
+            const combinedBounds = matchedBounds[0];
+            matchedBounds.forEach(bounds => {
+                combinedBounds.extend(bounds);
+            });
+            map.fitBounds(combinedBounds, { padding: [50, 50], maxZoom: 14 });
+        } else if (!status) {
+            // Reset zoom - fit to all layers
+            const allBounds = [];
+            Object.keys(geoJsonLayers).forEach(wilayahKey => {
+                const layer = geoJsonLayers[wilayahKey];
+                if (layer) {
+                    const bounds = layer.getBounds();
+                    if (bounds && bounds.isValid && bounds.isValid()) {
+                        allBounds.push(bounds);
+                    }
+                }
+            });
+            if (allBounds.length > 0) {
+                const combinedBounds = allBounds[0];
+                allBounds.forEach(bounds => {
+                    combinedBounds.extend(bounds);
+                });
+                map.fitBounds(combinedBounds, { padding: [50, 50] });
+            }
+        }
     }
 
     // Load import data on map
     async function loadImportDataOnMap(importId, wilayahIds, tahun, bulan, minggu) {
+        // ✅ PREVENT multiple simultaneous loads
+        if (isLoadingData) {
+            console.log('⚠️  Already loading data, ignoring new request...');
+            return;
+        }
+        
+        isLoadingData = true;
         console.log(`🗺️ Loading import data: ID=${importId}, Wilayah=${wilayahIds}, Period=${tahun}/${bulan}/${minggu}`);
         
         // Show loading indicator
@@ -3140,13 +3246,8 @@ setTimeout(() => {
         // Update period display with import ID
         updatePeriodDisplay(tahun, bulan, minggu, importId);
         
-        // Clear existing layers
-        Object.keys(geoJsonLayers).forEach(key => {
-            if (geoJsonLayers[key]) {
-                map.removeLayer(geoJsonLayers[key]);
-            }
-        });
-        geoJsonLayers = {};
+        // ✅ COMPLETELY CLEAR ALL EXISTING LAYERS
+        clearAllMapLayers();
         
         try {
             // Fetch data from import to get actual wilayah IDs
@@ -3161,6 +3262,7 @@ setTimeout(() => {
             });
             
             if (!dataResponse.ok) {
+                isLoadingData = false;
                 throw new Error(`Failed to fetch data from import: ${dataResponse.status}`);
             }
             
@@ -3281,6 +3383,17 @@ setTimeout(() => {
                             return !props.kategori && !props.status_gulma;
                         }
                         
+                        if (currentStatusFilter === 'non-nanas') {
+                            // Filter untuk Lahan Non-nanas (Pisang, Singkong, Riset - bukan Nanas)
+                            const match = isNonNanas(props);
+                            
+                            if (match) {
+                                console.log(`✅ Match Non-nanas: seksi=${props.seksi}, Status="${props.Status || props.status}"`);
+                            }
+                            
+                            return match;
+                        }
+                        
                         // For other statuses, check exact match (case-insensitive)
                         const kategori = (props.kategori || '').toLowerCase().trim();
                         const statusGulma = (props.status_gulma || '').toLowerCase().trim();
@@ -3361,6 +3474,9 @@ setTimeout(() => {
             
             // Scroll to map
             document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // ✅ RELEASE loading flag
+            isLoadingData = false;
         } catch (error) {
             console.error('❌ Error in loadImportDataOnMap:', error);
             console.error('Error details:', error.message);
@@ -3369,6 +3485,9 @@ setTimeout(() => {
             if (loadingDiv) {
                 loadingDiv.style.display = 'none';
             }
+            
+            // ✅ RELEASE loading flag even on error
+            isLoadingData = false;
         }
     }
 
@@ -3417,6 +3536,8 @@ setTimeout(() => {
             });
         }
         
+        const visibleBounds = [];
+        
         Object.keys(geoJsonLayers).forEach(wilayahKey => {
             const layer = geoJsonLayers[wilayahKey];
             if (!layer) return;
@@ -3425,29 +3546,64 @@ setTimeout(() => {
             
             if (selectedWilayah.length === 0) {
                 // Show all if nothing selected
-                map.addLayer(layer);
-                layer.eachLayer(featureLayer => {
-                    featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
-                });
-            } else {
-                // Show only selected wilayah
-                if (selectedWilayah.includes(wilayahNum)) {
+                if (!map.hasLayer(layer)) {
                     map.addLayer(layer);
+                }
+                layer.eachLayer(featureLayer => {
+                    const originalStyle = getFeatureStyle(featureLayer.feature);
+                    featureLayer.setStyle(originalStyle);
+                });
+                
+                // Collect bounds for zoom
+                const bounds = layer.getBounds();
+                if (bounds && bounds.isValid && bounds.isValid()) {
+                    visibleBounds.push(bounds);
+                }
+            } else {
+                // Show only selected wilayah, HIDE others completely
+                if (selectedWilayah.includes(wilayahNum)) {
+                    if (!map.hasLayer(layer)) {
+                        map.addLayer(layer);
+                    }
                     layer.eachLayer(featureLayer => {
-                        featureLayer.setStyle({ fillOpacity: 0.6, opacity: 0.9 });
+                        const originalStyle = getFeatureStyle(featureLayer.feature);
+                        featureLayer.setStyle({
+                            ...originalStyle,
+                            fillOpacity: 0.7,
+                            opacity: 1
+                        });
                     });
+                    
+                    // Collect bounds for zoom
+                    const bounds = layer.getBounds();
+                    if (bounds && bounds.isValid && bounds.isValid()) {
+                        visibleBounds.push(bounds);
+                    }
                 } else {
-                    map.removeLayer(layer);
+                    // HIDE non-selected wilayah completely
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
                 }
             }
         });
         
         console.log('Filtered wilayah:', selectedWilayah.length === 0 ? 'All' : selectedWilayah.join(', '));
+        
+        // Auto zoom to visible wilayah
+        if (visibleBounds.length > 0) {
+            const combinedBounds = visibleBounds[0];
+            visibleBounds.forEach(bounds => {
+                combinedBounds.extend(bounds);
+            });
+            map.fitBounds(combinedBounds, { padding: [50, 50], maxZoom: 13 });
+            console.log(`📍 Auto zooming to ${visibleBounds.length} visible wilayah...`);
+        }
     }
 
     // Initialize map when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded');
+        console.log('✅ DOM loaded - Executing initialization');
         
         // Show all data by default
         updatePeriodDisplay(null, null, null);
@@ -3472,25 +3628,15 @@ setTimeout(() => {
         // Setup table search - Only when user types and clicks search or presses Enter
         const searchInput = document.getElementById('tableSearchInput');
         if (searchInput) {
-            // Remove keyup listener - now only searches when button clicked
-            // Instead, add keypress to support Enter key
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    // Trigger form submission
                     document.getElementById('filterForm').submit();
                 }
             });
         }
         
-        // REMOVED: Real-time search on keyup
-        // Search now only happens when "Cari" button is clicked via form submission
-    });
-</script>
-
-<script>
-    // Add hover effects to select elements
-    document.addEventListener('DOMContentLoaded', function() {
+        // ===== ADD HOVER EFFECTS TO SELECT ELEMENTS =====
         const selects = document.querySelectorAll('select');
         selects.forEach(select => {
             select.addEventListener('mouseenter', function() {
@@ -3519,7 +3665,7 @@ setTimeout(() => {
             });
         });
         
-        // Add hover effect to publish button
+        // ===== ADD HOVER EFFECT TO PUBLISH BUTTON =====
         const publishBtn = document.getElementById('publishMapBtn');
         if (publishBtn) {
             publishBtn.addEventListener('mouseenter', function() {
@@ -3534,169 +3680,6 @@ setTimeout(() => {
                 }
             });
         }
-
-        // ===== PUBLICATION MANAGEMENT =====
-        window.currentPeriod = null;
-        window.selectedPublicationId = null;
-
-        // Fetch all available files for a period
-        async function fetchFilesForPeriod(tahun, bulan, minggu) {
-            try {
-                const response = await fetch(`/api/admin/files-by-period?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`);
-                const data = await response.json();
-                return data.files || [];
-            } catch (error) {
-                console.error('Error fetching files:', error);
-                return [];
-            }
-        }
-
-        window.openPublicationModal = async function(periodKey, tahun, bulan, minggu) {
-            window.currentPeriod = { key: periodKey, tahun, bulan, minggu };
-            
-            const monthNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            
-            document.getElementById('modalTitle').textContent = 'Kelola Publikasi Periode';
-            document.getElementById('modalPeriod').textContent = `Tahun ${tahun} • ${monthNames[parseInt(bulan)]} • Minggu ${minggu}`;
-            
-            // Fetch files for this period
-            const files = await fetchFilesForPeriod(tahun, bulan, minggu);
-            
-            let filesList = document.getElementById('filesList');
-            filesList.innerHTML = '';
-            
-            if (files.length === 0) {
-                filesList.innerHTML = '<p style="color: #E74C3C; text-align: center;">❌ Belum ada file yang berhasil untuk periode ini</p>';
-                document.getElementById('publicationModal').style.display = 'flex';
-                return;
-            }
-            
-            files.forEach(file => {
-                const isCurrentlyPublished = file.is_published;
-                const fileOption = document.createElement('div');
-                fileOption.style.cssText = `
-                    padding: 12px;
-                    margin-bottom: 8px;
-                    border: 2px solid ${isCurrentlyPublished ? '#128241' : '#ddd'};
-                    border-radius: 6px;
-                    cursor: pointer;
-                    background: ${isCurrentlyPublished ? '#e8f5e9' : '#fff'};
-                    transition: all 0.2s;
-                `;
-                fileOption.className = 'file-option';
-                
-                fileOption.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="radio" name="publication_file" value="${file.id}" 
-                            ${isCurrentlyPublished ? 'checked' : ''} 
-                            style="width: 18px; height: 18px; cursor: pointer;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: ${isCurrentlyPublished ? '#128241' : '#333'};">
-                                ${file.name} 
-                                ${isCurrentlyPublished ? '<span style="background: #128241; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold;">● AKTIF</span>' : ''}
-                            </div>
-                            <small style="color: #666;">
-                                📊 ${file.records} records • 📅 ${file.uploaded_at}
-                            </small>
-                        </div>
-                    </div>
-                `;
-                
-                fileOption.addEventListener('click', function() {
-                    document.querySelectorAll('.file-option').forEach(opt => {
-                        opt.style.borderColor = '#ddd';
-                        opt.style.background = '#fff';
-                    });
-                    fileOption.style.borderColor = '#128241';
-                    fileOption.style.background = '#e8f5e9';
-                    document.querySelector(`input[value="${file.id}"]`).checked = true;
-                    window.selectedPublicationId = file.id;
-                });
-                
-                if (isCurrentlyPublished) {
-                    window.selectedPublicationId = file.id;
-                }
-                
-                filesList.appendChild(fileOption);
-            });
-            
-            document.getElementById('publicationModal').style.display = 'flex';
-        };
-
-        window.closePublicationModal = function() {
-            document.getElementById('publicationModal').style.display = 'none';
-            window.currentPeriod = null;
-            window.selectedPublicationId = null;
-        };
-
-        window.updatePublication = async function() {
-            if (!window.selectedPublicationId) {
-                alert('❌ Silakan pilih file untuk dipublikasi');
-                return;
-            }
-            
-            if (!window.currentPeriod) {
-                alert('❌ Periode tidak valid');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/admin/set-publication', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
-                    },
-                    body: JSON.stringify({
-                        import_log_id: window.selectedPublicationId,
-                        tahun: window.currentPeriod.tahun,
-                        bulan: window.currentPeriod.bulan,
-                        minggu: window.currentPeriod.minggu
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    console.log('✅ Publikasi berhasil diperbarui');
-                    console.log('   File:', result.nama_file);
-                    console.log('   Period:', result.tahun + '/' + result.bulan + '/W' + result.minggu);
-                    console.log('   Import ID:', result.import_id);
-                    
-                    alert('✅ Publikasi berhasil diperbarui untuk ' + result.nama_file);
-                    window.closePublicationModal();
-                    
-                    // Reload map dengan data yang baru dipublikasi (tanpa reload halaman)
-                    console.log('🔄 Reloading map with new publication data...');
-                    
-                    // Clear all existing layers
-                    Object.keys(geoJsonLayers).forEach(key => {
-                        if (geoJsonLayers[key]) {
-                            map.removeLayer(geoJsonLayers[key]);
-                        }
-                    });
-                    geoJsonLayers = {};
-                    
-                    // Load dengan import_id yang baru dipublikasi
-                    loadAllWilayahWithImportId(result.import_id);
-                    
-                    // Update publikasi table jika terlihat
-                    location.reload();
-                } else {
-                    alert('❌ Error: ' + (result.message || 'Gagal memperbarui publikasi'));
-                }
-            } catch (error) {
-                console.error('Error updating publication:', error);
-                alert('❌ Terjadi kesalahan: ' + error.message);
-            }
-        };
-
-        // Close modal saat klik di luar modal
-        document.getElementById('publicationModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                window.closePublicationModal();
-            }
-        });
     });
 </script>
 

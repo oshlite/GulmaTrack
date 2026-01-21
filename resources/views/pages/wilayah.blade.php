@@ -1444,6 +1444,42 @@ function initMap() {
     });
 
     console.log('✅ [WILAYAH] Map initialized successfully with popup photo loader');
+    
+    // ✅ SCROLL PREVENTION: Block SEMUA scroll saat klik map (klik 1, 2, 3... semua!)
+    const mapContainer = document.getElementById('map');
+    if (mapContainer) {
+        console.log('🔒 [WILAYAH] Adding NO-SCROLL prevention to ALL map clicks...');
+        
+        let savedScrollY = window.scrollY;
+        let savedScrollX = window.scrollX;
+        
+        // passive: false = bisa block browser default behavior
+        mapContainer.addEventListener('mousedown', function(e) {
+            savedScrollY = window.scrollY;
+            savedScrollX = window.scrollX;
+            console.log('🔒 [Click] Saving scroll position:', savedScrollY);
+        }, { passive: false });
+        
+        // Restore scroll IMMEDIATELY after mouseup (tanpa conditional check!)
+        mapContainer.addEventListener('mouseup', function(e) {
+            console.log('🔓 [Click] Restoring scroll to', savedScrollY);
+            e.preventDefault(); // Block browser scroll behavior
+            window.scrollTo(savedScrollX, savedScrollY);
+            
+            // Triple restore untuk memastikan (10ms, 50ms, 100ms)
+            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 10);
+            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 50);
+            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 100);
+        }, { passive: false });
+        
+        // ALSO block click event
+        mapContainer.addEventListener('click', function(e) {
+            console.log('🔓 [Click Event] Force scroll back to', savedScrollY);
+            window.scrollTo(savedScrollX, savedScrollY);
+        }, { passive: false });
+        
+        console.log('✅ [WILAYAH] NO-SCROLL protection active for ALL map clicks!');
+    }
 }
 
     // Error handling functions
@@ -1678,11 +1714,53 @@ function initMap() {
                     },
                     onEachFeature: function(feature, layer) {
                         if (feature.properties) {
-                            layer.bindPopup(createPopupContent(feature.properties), {
-                                maxWidth: 300,
-                                minWidth: 150,
-                                maxHeight: 600,
-                                autoPan: false
+                            // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
+                            layer.on('click', function(e) {
+                                L.DomEvent.stopPropagation(e);
+                                
+                                const existingPopup = document.getElementById('customMapPopup');
+                                if (existingPopup) existingPopup.remove();
+                                
+                                const popup = document.createElement('div');
+                                popup.id = 'customMapPopup';
+                                popup.style.cssText = `
+                                    position: fixed;
+                                    top: 50%;
+                                    left: 50%;
+                                    transform: translate(-50%, -50%);
+                                    background: white;
+                                    border-radius: 8px;
+                                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                                    z-index: 10000;
+                                    max-width: 300px;
+                                    max-height: 80vh;
+                                    overflow-y: auto;
+                                `;
+                                
+                                popup.innerHTML = `
+                                    <div style="position: relative;">
+                                        <button onclick="document.getElementById('customMapPopup').remove()" 
+                                                style="position: absolute; top: 8px; right: 8px; z-index: 10001;
+                                                       background: rgba(255,255,255,0.9); border: none; 
+                                                       width: 28px; height: 28px; border-radius: 50%; 
+                                                       cursor: pointer; font-size: 16px; font-weight: bold;
+                                                       box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                            ×
+                                        </button>
+                                        ${createPopupContent(feature.properties)}
+                                    </div>
+                                `;
+                                
+                                document.body.appendChild(popup);
+                                
+                                setTimeout(() => {
+                                    document.addEventListener('click', function closePopup(ev) {
+                                        if (!popup.contains(ev.target)) {
+                                            popup.remove();
+                                            document.removeEventListener('click', closePopup);
+                                        }
+                                    });
+                                }, 100);
                             });
                             
                             layer.bindTooltip(createTooltipContent(feature.properties), {
@@ -1842,11 +1920,53 @@ function initMap() {
                     },
                     onEachFeature: function(feature, layer) {
                         if (feature.properties) {
-                            layer.bindPopup(createPopupContent(feature.properties), {
-                                maxWidth: 300,
-                                minWidth: 150,
-                                maxHeight: 600,
-                                autoPan: false
+                            // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
+                            layer.on('click', function(e) {
+                                L.DomEvent.stopPropagation(e);
+                                
+                                const existingPopup = document.getElementById('customMapPopup');
+                                if (existingPopup) existingPopup.remove();
+                                
+                                const popup = document.createElement('div');
+                                popup.id = 'customMapPopup';
+                                popup.style.cssText = `
+                                    position: fixed;
+                                    top: 50%;
+                                    left: 50%;
+                                    transform: translate(-50%, -50%);
+                                    background: white;
+                                    border-radius: 8px;
+                                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                                    z-index: 10000;
+                                    max-width: 300px;
+                                    max-height: 80vh;
+                                    overflow-y: auto;
+                                `;
+                                
+                                popup.innerHTML = `
+                                    <div style="position: relative;">
+                                        <button onclick="document.getElementById('customMapPopup').remove()" 
+                                                style="position: absolute; top: 8px; right: 8px; z-index: 10001;
+                                                       background: rgba(255,255,255,0.9); border: none; 
+                                                       width: 28px; height: 28px; border-radius: 50%; 
+                                                       cursor: pointer; font-size: 16px; font-weight: bold;
+                                                       box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                            ×
+                                        </button>
+                                        ${createPopupContent(feature.properties)}
+                                    </div>
+                                `;
+                                
+                                document.body.appendChild(popup);
+                                
+                                setTimeout(() => {
+                                    document.addEventListener('click', function closePopup(ev) {
+                                        if (!popup.contains(ev.target)) {
+                                            popup.remove();
+                                            document.removeEventListener('click', closePopup);
+                                        }
+                                    });
+                                }, 100);
                             });
                             
                             // Add tooltip for hover (quick info)
@@ -2237,11 +2357,53 @@ function initMap() {
                         },
                         onEachFeature: function(feature, layer) {
                             if (feature.properties) {
-                                layer.bindPopup(createPopupContent(feature.properties), {
-                                    maxWidth: 300,
-                                    minWidth: 150,
-                                    maxHeight: 600,
-                                    autoPan: false
+                                // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
+                                layer.on('click', function(e) {
+                                    L.DomEvent.stopPropagation(e);
+                                    
+                                    const existingPopup = document.getElementById('customMapPopup');
+                                    if (existingPopup) existingPopup.remove();
+                                    
+                                    const popup = document.createElement('div');
+                                    popup.id = 'customMapPopup';
+                                    popup.style.cssText = `
+                                        position: fixed;
+                                        top: 50%;
+                                        left: 50%;
+                                        transform: translate(-50%, -50%);
+                                        background: white;
+                                        border-radius: 8px;
+                                        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                                        z-index: 10000;
+                                        max-width: 300px;
+                                        max-height: 80vh;
+                                        overflow-y: auto;
+                                    `;
+                                    
+                                    popup.innerHTML = `
+                                        <div style="position: relative;">
+                                            <button onclick="document.getElementById('customMapPopup').remove()" 
+                                                    style="position: absolute; top: 8px; right: 8px; z-index: 10001;
+                                                           background: rgba(255,255,255,0.9); border: none; 
+                                                           width: 28px; height: 28px; border-radius: 50%; 
+                                                           cursor: pointer; font-size: 16px; font-weight: bold;
+                                                           box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                                ×
+                                            </button>
+                                            ${createPopupContent(feature.properties)}
+                                        </div>
+                                    `;
+                                    
+                                    document.body.appendChild(popup);
+                                    
+                                    setTimeout(() => {
+                                        document.addEventListener('click', function closePopup(ev) {
+                                            if (!popup.contains(ev.target)) {
+                                                popup.remove();
+                                                document.removeEventListener('click', closePopup);
+                                            }
+                                        });
+                                    }, 100);
                                 });
                                 
                                 // Add tooltip for hover (quick info)

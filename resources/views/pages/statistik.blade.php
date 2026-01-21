@@ -699,47 +699,6 @@
         </div>
     </div>
 
-
-    <!-- Tabel Data CSV Detail -->
-    <div class="stat-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;"><i class="fas fa-table"></i> Data Rekam Jelajah Detail</h3>
-            <button onclick="exportStatistikToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
-                <i class="fas fa-download"></i> Export CSV
-            </button>
-        </div>
-        <div style="overflow-x: auto;">
-            <table class="stat-table" id="csvDataTable">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>PG</th>
-                        <th>FM</th>
-                        <th>Wilayah</th>
-                        <th>Lokasi</th>
-                        <th>Neto</th>
-                        <th>Hasil</th>
-                        <th>Umur (bulan)</th>
-                        <th>TNM STS</th>
-                        <th>Aktivitas</th>
-                        <th>Status Gulma</th>
-                        <th>Tanggal</th>
-                        <th>Total TK</th>
-                        <th>TK/HA</th>
-                    </tr>
-                </thead>
-                <tbody id="csvDataTableBody">
-                    <tr>
-                        <td colspan="14" style="text-align: center; padding: 40px; color: #999;">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
-                            Memuat data CSV...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
         <h3><i class="fas fa-list"></i> Tabel Statistik Detail Per Wilayah</h3>

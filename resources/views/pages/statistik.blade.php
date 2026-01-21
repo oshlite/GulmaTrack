@@ -258,35 +258,428 @@
             color: #666;
             margin-top: 8px;
         }
+
+        .wilayah-controls {
+        background: linear-gradient(135deg, #ffffff 0%, #f7faf8 100%);
+        padding: 32px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(18, 130, 65, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(18, 130, 65, 0.1);
+        border-left: 4px solid #128241;
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        overflow: visible;
+    }
+
+    .wilayah-controls::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0%, 100% { background-position: 0% 0%; }
+        50% { background-position: 100% 0%; }
+    }
+
+    .controls-wrapper {
+        max-width: 100%;
+        font-family: 'Poppins', sans-serif;
+        overflow: visible;
+        position: relative;
+        z-index: 1;
+    }
+
+    .controls-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: nowrap;
+        margin-bottom: 16px;
+        overflow: visible;
+        position: relative;
+    }
+
+    .control-item {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        z-index: 100;
+        overflow: visible;
+    }
+
+    .control-item.compact {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .controls-buttons-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        z-index: 1;
+    }
+
+    .control-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-family: 'Poppins', sans-serif;
+        transition: color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .control-item:hover .control-label {
+        color: #128241;
+    }
+
+    .control-label i {
+        font-size: 13px;
+        color: #FBA919;
+        width: 16px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .control-item:hover .control-label i {
+        transform: scale(1.15);
+    }
+
+    /* Button Grid Trigger */
+    .button-grid-trigger {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 11px 14px;
+        border: 2px solid #e3eae8;
+        border-radius: 10px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #2c3e50;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        user-select: none;
+        white-space: nowrap;
+    }
+
+    .button-grid-trigger:hover {
+        border-color: #128241;
+        box-shadow: 0 6px 16px rgba(18, 130, 65, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+        background-color: #fafdfb;
+    }
+
+    .button-grid-trigger.active {
+        border-color: #128241;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        background-color: #fafdfb;
+    }
+
+    .grid-selected-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .grid-arrow {
+        font-size: 11px;
+        color: #128241;
+        transition: transform 0.3s ease;
+        margin-left: 8px;
+        flex-shrink: 0;
+    }
+
+    .button-grid-trigger.active .grid-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Button Grid */
+    .button-grid {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid #128241;
+        border-radius: 10px;
+        padding: 12px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        z-index: 999999;
+        box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
+        animation: slideDown 0.3s ease;
+        min-width: max-content;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Khusus untuk Bulan - 6 kolom */
+    #bulanGrid.button-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .grid-btn {
+        padding: 13px 12px;
+        border: 2px solid #e3eae8;
+        border-radius: 8px;
+        background: white;
+        color: #2c3e50;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        white-space: normal;
+        min-width: 80px;
+        line-height: 1.3;
+        position: relative;
+    }
+
+    .grid-btn:hover {
+        border-color: #128241;
+        background: #f0f8f5;
+        color: #128241;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.15);
+    }
+
+    .grid-btn.selected {
+        background: linear-gradient(135deg, #128241 0%, #0d5c2e 100%);
+        color: white;
+        border-color: #128241;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
+    }
+
+    .grid-btn.selected:hover {
+        background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
+        transform: translateY(-2px);
+    }
+
+    /* Disabled state untuk buttons yang tidak ada data */
+    .grid-btn[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: #f5f5f5;
+        color: #999;
+        border-color: #ddd;
+    }
+
+    .grid-btn[disabled]:hover {
+        border-color: #ddd;
+        background: #f5f5f5;
+        color: #999;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Action Button */
+    .btn-secondary {
+        flex: 1;
+        padding: 13px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        letter-spacing: 0.6px;
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        background: white;
+        border: 2px solid #d8e1dd;
+        color: #FBA919;
+        box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+        background: #FBA919;
+        border-color: #FBA919;
+        color: white;
+        box-shadow: none;
+        outline: none;
+    }
+
+    @media (max-width: 1024px) {
+        .controls-row {
+            flex-wrap: wrap;
+        }
+
+        .control-item.compact {
+            flex: 1 1 calc(50% - 6px);
+            min-width: 0;
+        }
+
+        .wilayah-controls {
+            padding: 24px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .wilayah-controls {
+            padding: 20px;
+        }
+
+        .controls-row {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-item.compact {
+            flex: 1 1 100%;
+        }
+
+        .controls-buttons-row {
+            flex-direction: column;
+        }
+
+        .control-label {
+            font-size: 10px;
+        }
+
+        .button-grid-trigger {
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+
+        .button-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 12px;
+        }
+
+        #bulanGrid.button-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .grid-btn {
+            padding: 11px 8px;
+            font-size: 12px;
+        }
+    }
     </style>
 
     <!-- Filter & Kontrol -->
-    <div class="stats-controls">
-        <select id="filterTahun">
-            <option value="">Memuat tahun...</option>
-        </select>
+    <div class="wilayah-controls">
+        <div class="controls-wrapper">
+            <!-- Baris 1: Filter Fields -->
+            <div class="controls-row">
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar"></i> Tahun <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
+                    </label>
+                    <input type="hidden" id="tahunSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('tahun')">
+                        <span id="tahunSelected" class="grid-selected-text">Pilih Tahun...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="tahunGrid" class="button-grid" style="display: none;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
 
-        <select id="filterBulan">
-            <option value="">Memuat bulan...</option>
-        </select>
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar-alt"></i> Bulan <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
+                    </label>
+                    <input type="hidden" id="bulanSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('bulan')">
+                        <span id="bulanSelected" class="grid-selected-text">Pilih Bulan...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="bulanGrid" class="button-grid" style="display: none;">
+                        <button class="grid-btn" data-value="1" onclick="selectGridOption('bulan', '1', 'Januari')">Januari</button>
+                        <button class="grid-btn" data-value="2" onclick="selectGridOption('bulan', '2', 'Februari')">Februari</button>
+                        <button class="grid-btn" data-value="3" onclick="selectGridOption('bulan', '3', 'Maret')">Maret</button>
+                        <button class="grid-btn" data-value="4" onclick="selectGridOption('bulan', '4', 'April')">April</button>
+                        <button class="grid-btn" data-value="5" onclick="selectGridOption('bulan', '5', 'Mei')">Mei</button>
+                        <button class="grid-btn" data-value="6" onclick="selectGridOption('bulan', '6', 'Juni')">Juni</button>
+                        <button class="grid-btn" data-value="7" onclick="selectGridOption('bulan', '7', 'Juli')">Juli</button>
+                        <button class="grid-btn" data-value="8" onclick="selectGridOption('bulan', '8', 'Agustus')">Agustus</button>
+                        <button class="grid-btn" data-value="9" onclick="selectGridOption('bulan', '9', 'September')">September</button>
+                        <button class="grid-btn" data-value="10" onclick="selectGridOption('bulan', '10', 'Oktober')">Oktober</button>
+                        <button class="grid-btn" data-value="11" onclick="selectGridOption('bulan', '11', 'November')">November</button>
+                        <button class="grid-btn" data-value="12" onclick="selectGridOption('bulan', '12', 'Desember')">Desember</button>
+                    </div>
+                </div>
 
-        <select id="filterMinggu">
-            <option value="">Semua Minggu</option>
-            <option value="1">Minggu 1</option>
-            <option value="2">Minggu 2</option>
-            <option value="3">Minggu 3</option>
-            <option value="4">Minggu 4</option>
-        </select>
+                <div class="control-item compact">
+                    <label class="control-label">
+                        <i class="fas fa-calendar-week"></i> Minggu <span style="font-size: 11px; font-weight: 400; color: #e74c3c;">*</span>
+                    </label>
+                    <input type="hidden" id="mingguSelect" value="">
+                    <div class="button-grid-trigger" onclick="toggleButtonGrid('minggu')">
+                        <span id="mingguSelected" class="grid-selected-text">Pilih Minggu ke-...</span>
+                        <i class="fas fa-chevron-down grid-arrow"></i>
+                    </div>
+                    <div id="mingguGrid" class="button-grid" style="display: none;">
+                        <button class="grid-btn" data-value="1" onclick="selectGridOption('minggu', '1', 'Minggu ke-1')">Ke-1</button>
+                        <button class="grid-btn" data-value="2" onclick="selectGridOption('minggu', '2', 'Minggu ke-2')">Ke-2</button>
+                        <button class="grid-btn" data-value="3" onclick="selectGridOption('minggu', '3', 'Minggu ke-3')">Ke-3</button>
+                        <button class="grid-btn" data-value="4" onclick="selectGridOption('minggu', '4', 'Minggu ke-4')">Ke-4</button>
+                    </div>
+                </div>
+            </div>
 
-        <button onclick="updateStats()">
-            <i class="fas fa-search"></i> Update Statistik
-        </button>
+            <!-- Baris 2: Action Button -->
+            <div class="controls-buttons-row">
+                <button onclick="updateStats()" class="btn-secondary" title="Tampilkan statistik berdasarkan periode yang dipilih">
+                    <i class="fas fa-chart-bar"></i> Tampilkan Statistik
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Period Info Display -->
-    <div class="period-info" id="periodInfoDisplay" style="display: none;">
-        <i class="fas fa-info-circle"></i> 
-        <span id="periodInfoText">Menampilkan data terbaru</span>
+    <!-- Status Info (Data Terpilih) -->
+    <div id="periodInfo" style="background: #f4f6f8; padding: 12px 20px; border-radius: 8px; margin-bottom: 18px; border-left: 4px solid #128241; display: none; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="display: flex; align-items: center; font-size: 18px; color: #e67e22; flex-shrink: 0; gap: 6px;">
+                <i class="fas fa-info-circle"></i>
+                <span style="font-size: 18px;">⭐</span>
+            </div>
+            <div>
+                <span id="periodInfoText" style="font-size: 14px; color: #e67e22; font-weight: 600;">
+                    Data Terpilih - <strong>Memuat...</strong> • records tersedia
+                </span>
+            </div>
+        </div>
     </div>
 
      <!-- Perbandingan Produksi -->
@@ -307,45 +700,7 @@
     </div>
 
 
-    <!-- Tabel Data CSV Detail -->
-    <div class="stat-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;"><i class="fas fa-table"></i> Data Rekam Jelajah Detail</h3>
-            <button onclick="exportStatistikToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
-                <i class="fas fa-download"></i> Export CSV
-            </button>
-        </div>
-        <div style="overflow-x: auto;">
-            <table class="stat-table" id="csvDataTable">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>PG</th>
-                        <th>FM</th>
-                        <th>Wilayah</th>
-                        <th>Lokasi</th>
-                        <th>Neto</th>
-                        <th>Hasil</th>
-                        <th>Umur (bulan)</th>
-                        <th>TNM STS</th>
-                        <th>Aktivitas</th>
-                        <th>Status Gulma</th>
-                        <th>Tanggal</th>
-                        <th>Total TK</th>
-                        <th>TK/HA</th>
-                    </tr>
-                </thead>
-                <tbody id="csvDataTableBody">
-                    <tr>
-                        <td colspan="14" style="text-align: center; padding: 40px; color: #999;">
-                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
-                            Memuat data CSV...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+   
 
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
@@ -422,19 +777,18 @@ async function loadAvailablePeriods() {
             console.log('✅ Available years:', availablePeriods.tahun_list);
             console.log('✅ Latest period:', availablePeriods.latest_period);
             
-            populateYearFilter();
-            populateMonthFilter();
+            populateTahunDropdown();
             
             if (availablePeriods.latest_period) {
                 const latest = availablePeriods.latest_period;
-                currentPeriod = latest;
+                currentPeriod = { tahun: latest.tahun, bulan: latest.bulan, minggu: latest.minggu };
                 
-                document.getElementById('filterTahun').value = latest.tahun;
-                document.getElementById('filterBulan').value = latest.bulan;
-                document.getElementById('filterMinggu').value = latest.minggu || '';
+                // Set grid button selections
+                selectGridOption('tahun', latest.tahun, latest.tahun);
+                selectGridOption('bulan', latest.bulan, monthNames[latest.bulan] || `Bulan ${latest.bulan}`);
+                selectGridOption('minggu', latest.minggu, `Minggu ke-${latest.minggu}`);
                 
                 updatePeriodInfoDisplay();
-                
                 console.log('✅ Default period set:', latest);
             }
             
@@ -449,8 +803,7 @@ async function loadAvailablePeriods() {
         
         const currentYear = new Date().getFullYear();
         availablePeriods.tahun_list = [currentYear];
-        populateYearFilter();
-        populateMonthFilter();
+        populateTahunDropdown();
         
         await loadAllStatistics();
     }
@@ -459,45 +812,55 @@ async function loadAvailablePeriods() {
 /* ===============================
    POPULATE FILTERS
 ================================ */
-function populateYearFilter() {
-    const select = document.getElementById('filterTahun');
-    if (!select) return;
+/* ===============================
+   POPULATE FILTERS
+================================ */
+function populateTahunDropdown() {
+    const grid = document.getElementById('tahunGrid');
+    if (!grid) return;
     
-    select.innerHTML = '<option value="">Semua Tahun</option>';
+    grid.innerHTML = '';
     
-    if (availablePeriods.tahun_list && availablePeriods.tahun_list.length > 0) {
-        availablePeriods.tahun_list.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            select.appendChild(option);
-        });
-        console.log('✅ Year filter populated:', availablePeriods.tahun_list.length, 'years');
+    // Get all years from 2020 to current year
+    const currentYear = new Date().getFullYear();
+    const allYears = [];
+    for (let i = 2020; i <= currentYear; i++) {
+        allYears.push(i);
     }
-}
-
-function populateMonthFilter() {
-    const select = document.getElementById('filterBulan');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">Semua Bulan</option>';
-
-    for (let i = 1; i <= 12; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = monthNames[i];
-        select.appendChild(option);
-    }
-
-    console.log('✅ Month filter populated: all months (1–12)');
+    
+    const activeYears = availablePeriods.tahun_list || [];
+    
+    allYears.forEach(year => {
+        const btn = document.createElement('button');
+        btn.className = 'grid-btn';
+        btn.setAttribute('data-value', year);
+        btn.textContent = year;
+        
+        const isActive = activeYears.includes(year);
+        
+        if (!isActive) {
+            btn.setAttribute('disabled', 'disabled');
+        } else {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                selectGridOption('tahun', year, year);
+            };
+        }
+        
+        grid.appendChild(btn);
+    });
+    
+    console.log('✅ Tahun grid populated. Active years:', activeYears.length);
 }
 
 /* ===============================
    UPDATE PERIOD INFO DISPLAY
 ================================ */
 function updatePeriodInfoDisplay() {
-    const display = document.getElementById('periodInfoDisplay');
+    const display = document.getElementById('periodInfo');
     const textEl = document.getElementById('periodInfoText');
+    
+    if (!display || !textEl) return;
     
     if (!currentPeriod.tahun) {
         display.style.display = 'none';
@@ -505,13 +868,25 @@ function updatePeriodInfoDisplay() {
     }
     
     const tahun = currentPeriod.tahun;
-    const bulan = currentPeriod.bulan ? monthNames[currentPeriod.bulan] : 'Semua Bulan';
-    const minggu = currentPeriod.minggu ? `Minggu ke-${currentPeriod.minggu}` : 'Semua Minggu';
+    const bulan = monthNames[currentPeriod.bulan] || 'Bulan ' + currentPeriod.bulan;
+    const minggu = currentPeriod.minggu ? `Minggu ke-${currentPeriod.minggu}` : 'Minggu';
+    const recordCount = document.getElementById('recordCount')?.textContent || '0';
     
-    textEl.innerHTML = `Menampilkan data: <strong>Tahun ${tahun}, ${bulan}, ${minggu}</strong>`;
+    textEl.innerHTML = `Data Terpilih - <strong>Tahun ${tahun}, ${bulan}, ${minggu}</strong> • records tersedia`;
     display.style.display = 'block';
     
     console.log('📍 Period display updated:', currentPeriod);
+}
+
+/* ===============================
+   UPDATE RECORD COUNT
+================================ */
+function updateRecordCount(count) {
+    const recordCountEl = document.getElementById('recordCount');
+    if (recordCountEl) {
+        recordCountEl.textContent = count;
+        updatePeriodInfoDisplay();
+    }
 }
 
 /* ===============================
@@ -523,9 +898,9 @@ async function loadAllStatistics() {
     try {
         console.log('🚀 Loading statistics with latest published data...');
         
-        const tahun = document.getElementById('filterTahun')?.value;
-        const bulan = document.getElementById('filterBulan')?.value;
-        const minggu = document.getElementById('filterMinggu')?.value;
+        const tahun = document.getElementById('tahunSelect')?.value;
+        const bulan = document.getElementById('bulanSelect')?.value;
+        const minggu = document.getElementById('mingguSelect')?.value;
         
         let queryParams = new URLSearchParams();
         if (tahun) queryParams.append('tahun', tahun);
@@ -600,6 +975,7 @@ function renderDetailStats(data) {
     if (!tbody) return;
     
     tbody.innerHTML = '';
+    updateRecordCount(data.length);
 
     if (!data || data.length === 0) {
         tbody.innerHTML = `
@@ -847,6 +1223,69 @@ function getKategoriColorStatistik(kategori) {
     };
     return colors[kategori] || '#95a5a6';
 }
+
+/* ===============================
+   SELECT GRID OPTION
+================================ */
+function selectGridOption(type, value, label) {
+    // set hidden input
+    document.getElementById(type + 'Select').value = value;
+
+    // set label text
+    document.getElementById(type + 'Selected').textContent = label;
+
+    // update current period
+    currentPeriod[type] = value;
+
+    // highlight selected button
+    const grid = document.getElementById(type + 'Grid');
+    grid.querySelectorAll('.grid-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.dataset.value == value) {
+            btn.classList.add('selected');
+        }
+    });
+
+    // close dropdown
+    grid.style.display = 'none';
+
+    console.log(`✅ ${type} selected:`, value);
+}
+
+
+/* ===============================
+   TOGGLE BUTTON GRID
+================================ */
+function toggleButtonGrid(type) {
+    const grid = document.getElementById(type + 'Grid');
+    const trigger = event.currentTarget;
+    
+    if (!grid || !trigger) return;
+    
+    document.querySelectorAll('.button-grid').forEach(g => {
+        if (g !== grid) g.style.display = 'none';
+        document.querySelectorAll('.button-grid-trigger').forEach(t => {
+            if (t !== trigger) t.classList.remove('active');
+        });
+    });
+    
+    const isOpen = grid.style.display !== 'none';
+    grid.style.display = isOpen ? 'none' : 'grid';
+    trigger.classList.toggle('active');
+}
+
+/* Close grids when clicking outside */
+document.addEventListener('click', function(event) {
+    const controls = document.querySelector('.wilayah-controls');
+    if (controls && !controls.contains(event.target)) {
+        document.querySelectorAll('.button-grid').forEach(grid => {
+            grid.style.display = 'none';
+        });
+        document.querySelectorAll('.button-grid-trigger').forEach(trigger => {
+            trigger.classList.remove('active');
+        });
+    }
+});
 
 function exportStatistikToCsv() {
     window.location.href = '/api/csv/export';

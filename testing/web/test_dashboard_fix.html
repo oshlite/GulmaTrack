@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dashboard Fix</title>
+</head>
+<body>
+    <h1>Test Dashboard Fixes</h1>
+    <div id="results"></div>
+    
+    <script>
+    const results = document.getElementById('results');
+    
+    // Test 1: Load Wilayah 16 API
+    results.innerHTML += '<h2>Test 1: API Wilayah 16</h2>';
+    fetch('/api/wilayah/geojson/16?admin=1', {
+        headers: {
+            'X-Admin-Request': '1'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const features = data.features || [];
+        const withKategori = features.filter(f => f.properties && f.properties.kategori).length;
+        results.innerHTML += `<p>✅ Total Features: ${features.length}</p>`;
+        results.innerHTML += `<p>✅ With Kategori: ${withKategori}</p>`;
+        
+        if (features.length > 0 && withKategori > 0) {
+            results.innerHTML += '<p style="color: green;">✅ API WORKS!</p>';
+        } else {
+            results.innerHTML += '<p style="color: red;">❌ No data merged</p>';
+        }
+    })
+    .catch(e => {
+        results.innerHTML += `<p style="color: red;">❌ Error: ${e.message}</p>`;
+    });
+    
+    // Test 2: Check all wilayah
+    results.innerHTML += '<h2>Test 2: All Wilayah</h2>';
+    const wilayahNumbers = [16, 17, 18, 19, 20, 21, 22, 23];
+    Promise.all(
+        wilayahNumbers.map(num => 
+            fetch(`/api/wilayah/geojson/${num}?admin=1`, {
+                headers: { 'X-Admin-Request': '1' }
+            })
+            .then(r => r.json())
+            .then(data => ({ wilayah: num, count: data.features?.length || 0 }))
+        )
+    )
+    .then(allResults => {
+        results.innerHTML += '<ul>';
+        allResults.forEach(r => {
+            results.innerHTML += `<li>Wilayah ${r.wilayah}: ${r.count} features</li>`;
+        });
+        results.innerHTML += '</ul>';
+    });
+    </script>
+</body>
+</html>

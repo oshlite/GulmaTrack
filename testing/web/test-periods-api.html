@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Periods API</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        pre { background: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Test Periods API</h1>
+    <button onclick="testAPI()">Test /api/wilayah/periods</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const response = await fetch('/api/wilayah/periods');
+                const data = await response.json();
+                
+                let html = '<h3 class="success">✅ Success</h3>';
+                html += '<h4>Response Data:</h4>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Parse and show filter structure
+                if (data.filter_structure) {
+                    html += '<h4>Filter Structure Analysis:</h4>';
+                    html += '<p><strong>Tahun List:</strong> ' + data.tahun_list.join(', ') + '</p>';
+                    
+                    for (let tahun of data.tahun_list) {
+                        const bulanMap = data.filter_structure[tahun];
+                        html += '<div style="margin: 10px 0; padding: 10px; background: #e8f4f8; border-radius: 4px;">';
+                        html += `<strong>Tahun ${tahun}:</strong><br>`;
+                        for (let bulan in bulanMap) {
+                            const mingguArray = bulanMap[bulan];
+                            html += `&nbsp;&nbsp;Bulan ${bulan}: Minggu ${mingguArray.join(', ')}<br>`;
+                        }
+                        html += '</div>';
+                    }
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

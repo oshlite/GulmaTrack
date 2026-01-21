@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Fetch</title>
+</head>
+<body>
+    <h1>Test API dengan Header</h1>
+    <button onclick="testAPI()">Test Fetch Wilayah 16</button>
+    <div id="result"></div>
+    
+    <script>
+    async function testAPI() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '<p>Loading...</p>';
+        
+        try {
+            const response = await fetch('/api/wilayah/geojson/16?admin=1', {
+                headers: {
+                    'X-Admin-Request': '1'
+                }
+            });
+            
+            const data = await response.json();
+            const features = data.features || [];
+            const withKategori = features.filter(f => f.properties && f.properties.kategori).length;
+            
+            resultDiv.innerHTML = `
+                <h2>✅ Success!</h2>
+                <p>Total Features: ${features.length}</p>
+                <p>With Kategori: ${withKategori}</p>
+                <pre>${JSON.stringify(data.features[0]?.properties || {}, null, 2)}</pre>
+            `;
+        } catch (e) {
+            resultDiv.innerHTML = `<p style="color: red;">❌ Error: ${e.message}</p>`;
+        }
+    }
+    </script>
+</body>
+</html>

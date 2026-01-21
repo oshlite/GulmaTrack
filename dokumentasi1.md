@@ -1,6 +1,7 @@
-# 📚 DOKUMENTASI LENGKAP GULMATRACK v1.0
+# 📚 DOKUMENTASI LENGKAP GULMATRACK v2.0 (UPDATED)
 
 > **Panduan Komprehensif untuk Developers & Non-Technical Users**
+> **Last Updated: 15 Januari 2026**
 
 ---
 
@@ -16,6 +17,7 @@
 8. [Cara Menggunakan](#cara-menggunakan)
 9. [Troubleshooting](#troubleshooting)
 10. [Tips & Trik Development](#tips--trik-development)
+11. [Fitur Baru - Drone Management](#fitur-baru---drone-management)
 
 ---
 
@@ -241,14 +243,19 @@ app/
 │   ├── Controllers/        # Semua controller aplikasi
 │   │   ├── AdminController.php
 │   │   ├── AuthController.php
+│   │   ├── CsvController.php
+│   │   ├── DebugController.php
+│   │   ├── DroneController.php
 │   │   ├── ExcelDataController.php
 │   │   ├── GalleryController.php
 │   │   ├── GulmaController.php
+│   │   ├── ImportLogController.php
 │   │   └── WilayahController.php
 │   ├── Kernel.php          # HTTP middleware configuration
 │   └── Middleware/         # Custom middleware
 ├── Models/                 # Database models
 │   ├── DataGulma.php
+│   ├── Drone.php
 │   ├── GulmaPhoto.php
 │   ├── ImportLog.php
 │   ├── MapPublication.php
@@ -609,23 +616,65 @@ class GulmaPhoto extends Model {
 }
 ```
 
+#### Table 7: drones
+```
+┌──────────────────┬──────────┬────────────────────────┐
+│ Column           │ Type     │ Notes                  │
+├──────────────────┼──────────┼────────────────────────┤
+│ id               │ INT(PK)  │ Auto increment         │
+│ judul            │ VARCHAR  │ Drone mission title    │
+│ lokasi           │ VARCHAR  │ Location/area          │
+│ tanggal_perencanaan │ DATE  │ Planning date          │
+│ pdf_path         │ VARCHAR  │ Path to PDF file       │
+│ pdf_filename     │ VARCHAR  │ Original filename      │
+│ persen_gulma     │ DECIMAL  │ Weed percentage (%)    │
+│ user_id          │ INT(FK)  │ Admin who uploaded     │
+│ created_at       │ TIMESTAMP│                        │
+│ updated_at       │ TIMESTAMP│                        │
+└──────────────────┴──────────┴────────────────────────┘
+```
+
+ Tabel ini menyimpan data laporan drone survey (PDF hasil dokumentasi drone).
+
+
+```php
+class Drone extends Model {
+    protected $fillable = [
+        'judul', 'lokasi', 'tanggal_perencanaan',
+        'pdf_path', 'pdf_filename', 'persen_gulma', 'user_id'
+    ];
+    
+    protected $casts = [
+        'tanggal_perencanaan' => 'date',
+        'persen_gulma' => 'decimal:2'
+    ];
+    
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
 ### Model Relationships
 
 ```
 User
-  └── (is_admin: boolean)
+  ├── (is_admin: boolean)
+  ├── (has many) ImportLog
+  ├── (has many) GulmaPhoto
+  └── (has many) Drone
 
 Wilayah
-  └── (has many) DataGulma
-  └── (has many) MapPublication
+  ├── (has many) DataGulma
+  ├── (has many) MapPublication
   └── (has many) GulmaPhoto
 
 ImportLog
-  └── (has many) DataGulma
-  └── (has one/many) MapPublication
+  ├── (has many) DataGulma
+  └── (has many) MapPublication
 
 DataGulma
-  └── (belongs to) ImportLog
+  ├── (belongs to) ImportLog
   └── (belongs to) Wilayah (implicit via wilayah_id)
 
 MapPublication
@@ -633,6 +682,9 @@ MapPublication
 
 GulmaPhoto
   └── (belongs to) Wilayah (implicit via wilayah_id)
+
+Drone
+  └── (belongs to) User (uploaded_by)
 ```
 
 
@@ -643,6 +695,9 @@ $dataGulma = $importLog->dataGulma; // Get all data
 
 $wilayah = Wilayah::find('16.01.01');
 $allData = $wilayah->dataGulma; // Get data untuk wilayah ini
+
+$user = User::find(1);
+$drones = $user->drone; // Get all drone records dari user ini
 ```
 
 ---
@@ -659,8 +714,18 @@ $allData = $wilayah->dataGulma; // Get data untuk wilayah ini
 | GET | `/statistik` | GulmaController | statistik (view) |
 | GET | `/tentang` | AuthController | about (view) |
 | GET | `/wilayah` | WilayahController | index |
+| GET | `/drone` | DroneController | userIndex |
 
  Halaman publik yang bisa diakses siapa saja tanpa login.
+
+#### 2. PUBLIC DRONE ROUTES
+
+| METHOD | URL | Controller | Method | Notes |
+|--------|-----|-----------|--------|-------|
+| GET | `/drone/download/{id}` | DroneController | download | Download drone PDF |
+| GET | `/drone/view/{id}` | DroneController | view | View drone PDF inline |
+
+ Routes publik untuk mengakses file drone PDF (bisa diakses siapa saja)
 
 #### 2. PUBLIC API ENDPOINTS
 
@@ -849,6 +914,36 @@ PUT /admin/gallery/{id}
 
 DELETE /admin/gallery/{id}
 ├─ Delete photo
+```
+
+**Drone Management**
+
+```
+GET /admin/drone
+├─ Drone management page
+├─ Auth: Required (admin)
+└─ Show: List drone surveys, upload form
+
+POST /admin/drone/store
+├─ Upload drone PDF
+├─ Auth: Required (admin)
+├─ Parameters:
+│  ├─ judul: string (required)
+│  ├─ lokasi: string (required)
+│  ├─ tanggal_perencanaan: date (required)
+│  ├─ file: PDF file (required)
+│  └─ persen_gulma: decimal (optional)
+└─ Response:
+   {
+     "success": true,
+     "message": "Drone data uploaded successfully",
+     "drone_id": 42
+   }
+
+DELETE /admin/drone/{id}
+├─ Delete drone record
+├─ Auth: Required (admin)
+└─ Response: Success message
 ```
 
 ---
@@ -1982,6 +2077,247 @@ TESTING:
 
 ---
 
+## 📌 FITUR BARU - DRONE MANAGEMENT
+
+### Deskripsi Fitur
+
+Fitur Drone Management adalah sistem untuk mengelola dan menyimpan laporan survey drone dalam format PDF. Admin dapat:
+- Upload laporan survey drone (format PDF)
+- Menentukan lokasi dan tanggal perencanaan
+- Mencatat persentase gulma dari hasil drone
+- User publik dapat mengakses dan download laporan drone
+
+### Teknologi
+
+- **File Format**: PDF
+- **Storage**: Local filesystem (storage/app/drones)
+- **Database**: Drone model dengan relasi ke User
+
+### Model & Database
+
+**Drone Model:**
+```php
+class Drone extends Model {
+    protected $fillable = [
+        'judul', 'lokasi', 'tanggal_perencanaan',
+        'pdf_path', 'pdf_filename', 'persen_gulma', 'user_id'
+    ];
+    
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+**Drone Table:**
+```
+- id (PK)
+- judul (VARCHAR) - Judul survey drone
+- lokasi (VARCHAR) - Lokasi survey
+- tanggal_perencanaan (DATE) - Tanggal perencanaan
+- pdf_path (VARCHAR) - Path file PDF
+- pdf_filename (VARCHAR) - Nama file asli
+- persen_gulma (DECIMAL) - Persentase gulma (%)
+- user_id (INT FK) - Admin pembuat
+- created_at, updated_at
+```
+
+### Fitur Admin
+
+**1. Halaman Admin Drone (/admin/drone)**
+
+Menampilkan:
+```
+┌─────────────────────────────────┐
+│     DRONE MANAGEMENT PAGE       │
+├─────────────────────────────────┤
+│ Total PDF Uploads: 15           │
+│ Latest Upload: 2026-01-14       │
+│                                 │
+│ [Upload New Drone Survey] Btn   │
+├─────────────────────────────────┤
+│ LIST DRONE SURVEYS              │
+├─────────────────────────────────┤
+│ No | Judul | Lokasi | Tanggal   │
+│    | Action (View/Delete)       │
+└─────────────────────────────────┘
+```
+
+**2. Upload Drone Survey**
+
+Form untuk upload:
+- Judul Survey (required)
+- Lokasi (required)
+- Tanggal Perencanaan (required)
+- File PDF (required, max 100MB)
+- Persentase Gulma (optional)
+
+```php
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'judul' => 'required|string|max:255',
+        'lokasi' => 'required|string|max:255',
+        'tanggal_perencanaan' => 'required|date',
+        'file' => 'required|file|mimes:pdf|max:102400', // 100MB
+        'persen_gulma' => 'nullable|numeric|between:0,100'
+    ]);
+    
+    $file = $request->file('file');
+    $filename = time() . '_' . $file->getClientOriginalName();
+    
+    // Store file
+    $path = $file->storeAs('drones', $filename, 'private');
+    
+    // Save to database
+    Drone::create([
+        'judul' => $validated['judul'],
+        'lokasi' => $validated['lokasi'],
+        'tanggal_perencanaan' => $validated['tanggal_perencanaan'],
+        'pdf_path' => $path,
+        'pdf_filename' => $filename,
+        'persen_gulma' => $validated['persen_gulma'],
+        'user_id' => auth()->id()
+    ]);
+    
+    return redirect()->back()->with('success', 'Drone data uploaded successfully');
+}
+```
+
+**3. Delete Drone Record**
+
+Admin dapat menghapus record drone:
+```php
+public function destroy($id)
+{
+    $drone = Drone::findOrFail($id);
+    Storage::disk('private')->delete($drone->pdf_path);
+    $drone->delete();
+    
+    return response()->json(['success' => true]);
+}
+```
+
+### Fitur Public
+
+**1. Halaman Drone Publik (/drone)**
+
+User publik dapat:
+- Melihat list semua survey drone
+- Filter by lokasi/tanggal
+- Download PDF
+
+**2. Download Drone PDF**
+
+```
+GET /drone/download/{id}
+├─ Download PDF file
+├─ Public access (tidak perlu login)
+└─ Response: File download
+```
+
+**3. View Drone PDF Inline**
+
+```
+GET /drone/view/{id}
+├─ View PDF di browser
+├─ Public access (tidak perlu login)
+└─ Response: PDF inline viewer
+```
+
+### Routes
+
+```php
+// Public routes
+Route::get('/drone', [DroneController::class, 'userIndex'])->name('drone');
+Route::get('/drone/download/{id}', [DroneController::class, 'download'])->name('drone.download');
+Route::get('/drone/view/{id}', [DroneController::class, 'view'])->name('drone.view');
+
+// Admin routes
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/drone', [DroneController::class, 'adminIndex'])->name('admin.drone.index');
+    Route::post('/admin/drone/store', [DroneController::class, 'store'])->name('admin.drone.store');
+    Route::delete('/admin/drone/{id}', [DroneController::class, 'destroy'])->name('admin.drone.destroy');
+});
+```
+
+### Implementasi Fitur
+
+**Langkah-Langkah Admin Upload Drone:**
+
+1. Login sebagai admin
+2. Klik menu "Drone" di sidebar
+3. Klik tombol "Upload New Drone Survey"
+4. Isi form:
+   - Judul: "Survey Lampung Tengah 2026-01"
+   - Lokasi: "Kecamatan X, Kabupaten Lampung Tengah"
+   - Tanggal: 2026-01-14
+   - File: Pilih PDF
+   - % Gulma: 25.5
+5. Klik "Upload"
+6. File akan tersimpan & bisa diakses publik
+
+**User Publik Mengakses Drone:**
+
+1. Buka /drone
+2. Lihat list survey
+3. Klik "Download" atau "View" untuk buka PDF
+4. File bisa di-view di browser atau di-download
+
+### Catatan & Best Practices
+
+```
+✓ PDF files disimpan di storage/app/drones (private)
+✓ User perlu akses melalui Laravel routing (tidak direct access)
+✓ File naming menggunakan timestamp untuk unikeness
+✓ Maximum file size 100MB (bisa disesuaikan di validasi)
+✓ Support untuk filename special characters
+✓ Delete otomatis hapus file dari storage
+```
+
+### Troubleshooting Drone
+
+**Problem: Upload gagal, file tidak tersimpan**
+
+Solusi:
+```bash
+# Cek permission folder storage
+chmod -R 755 storage/app/drones
+chmod -R 755 storage
+
+# Create drones folder jika belum ada
+mkdir -p storage/app/drones
+
+# Clear cache
+php artisan cache:clear
+```
+
+**Problem: PDF tidak bisa di-download**
+
+Solusi:
+```bash
+# Pastikan storage symbolic link exist
+php artisan storage:link
+
+# Jika belum ada, buat manual:
+# Windows: mklink /D public\storage storage\app\public
+```
+
+**Problem: Persentase gulma tidak tersimpan**
+
+Solusi:
+```php
+// Pastikan di form value numeric:
+<input type="number" name="persen_gulma" step="0.1" min="0" max="100">
+
+// Di controller, pastikan di-cast:
+protected $casts = [
+    'persen_gulma' => 'decimal:2'
+];
+```
+
+---
+
 ## 📝 CATATAN
 
 Dokumentasi ini dirancang agar:
@@ -1997,7 +2333,32 @@ Jika ada yang kurang jelas atau pertanyaan, seluruh informasi yang diperlukan su
 
 ##  VALIDASI DOKUMENTASI & CATATAN REVISI
 
-**Tanggal Revisi:** 30 Desember 2025  
-**Status:**  VALID - Diverifikasi terhadap actual GulmaTrack codebase  
-**Metode:** Direct file verification - 27 source files checked
+**Tanggal Revisi Awal:** 30 Desember 2025  
+**Tanggal Update Terbaru:** 15 Januari 2026  
+**Version:** 2.0 (Updated dengan Drone Management Feature)
+**Status:**  VALID - Diverifikasi terhadap actual GulmaTrack codebase v2.0  
+**Metode:** Direct file verification - 11 Controllers checked
+
+### Perubahan di Version 2.0:
+1. ✅ Tambah DroneController dalam dokumentasi Controllers
+2. ✅ Tambah Drone Model & Table pada Database Schema
+3. ✅ Tambah Drone dalam Model Relationships
+4. ✅ Tambah Public Drone Routes
+5. ✅ Tambah Admin Drone Management Routes
+6. ✅ Tambah Section Fitur Baru - Drone Management (lengkap)
+7. ✅ Update daftar isi dengan link ke Drone Management
+8. ✅ Tambah contoh implementasi & troubleshooting Drone
+9. ✅ Update DAFTAR ISI dengan poin ke Drone Management
+
+### Controllers yang Didokumentasikan:
+- ✅ AdminController
+- ✅ AuthController
+- ✅ CsvController
+- ✅ DebugController
+- ✅ DroneController (NEW)
+- ✅ ExcelDataController
+- ✅ GalleryController
+- ✅ GulmaController
+- ✅ ImportLogController
+- ✅ WilayahController
 

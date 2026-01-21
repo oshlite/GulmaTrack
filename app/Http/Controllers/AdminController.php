@@ -216,14 +216,14 @@ class AdminController extends Controller
                 Log::warning('Missing required columns. Headers: ' . json_encode($headers));
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: PG, FM, WIL, SEKSI'
+                    'message' => 'Kolom CSV tidak lengkap. Kolom wajib: PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,TANGGAL,TK/HA,TOTAL_TK'
                 ], 400);
             }
 
             // Collect all unique wilayah from CSV - find WIL column
             $wilayahIndex = null;
             foreach ($headers as $idx => $header) {
-                $normalized = str_replace(['_', ' ', '/'], '', strtolower($header));
+                $normalized = str_replace([' ', '/', '.', '-'], '', strtolower($header));
                 if ($normalized === 'wil') {
                     $wilayahIndex = $idx;
                     break;
@@ -387,10 +387,10 @@ class AdminController extends Controller
                     DataGulma::updateOrCreate(
                         [
                             'wilayah_id' => $rowWilayahId,
-                            'id_feature' => $seksi,
-                            'import_log_id' => $importLog->id
+                            'id_feature' => $seksi
                         ],
                         [
+                            'import_log_id' => $importLog->id,
                             'pg' => $pg,
                             'fm' => $fm,
                             'seksi' => $seksi,
@@ -451,11 +451,14 @@ class AdminController extends Controller
                 'error_log' => !empty($errors) ? json_encode($errors) : null
             ]);
 
-            // ✅ FIX 1: AUTO-PUBLISH UPLOAD TERBARU
-            Log::info('🚀 AUTO-PUBLISHING latest upload...');
+            // ✅ FIX 1: AUTO-PUBLISH UPLOAD TERBARU (HANYA untuk periode yg sama)
+            Log::info('🚀 AUTO-PUBLISHING latest upload for period ' . $importLog->tahun . '/' . $importLog->bulan . '/W' . $importLog->minggu . '...');
             
-            // Unpublish semua publikasi lama
+            // Unpublish HANYA untuk periode yang sama, jangan unpublish periode lain!
             MapPublication::where('status', 'published')
+                ->where('tahun', $importLog->tahun)
+                ->where('bulan', $importLog->bulan)
+                ->where('minggu', $importLog->minggu)
                 ->update(['status' => 'draft']);
             
             // Publish upload yang baru saja berhasil
@@ -474,7 +477,7 @@ class AdminController extends Controller
                     ]
                 );
                 
-                Log::info('✅ Auto-published import_log_id: ' . $importLog->id);
+                Log::info('✅ Auto-published import_log_id: ' . $importLog->id . ' for period ' . $importLog->tahun . '/' . $importLog->bulan . '/W' . $importLog->minggu);
             }
 
             // ✅ FIX 2: CLEAR ALL CACHE (Critical!)
@@ -603,11 +606,22 @@ class AdminController extends Controller
 
             Log::info("📤 Publishing import_log_id: {$importLogId}");
 
-            // Unpublish old publications
-            MapPublication::where('status', 'published')
-                ->update(['status' => 'draft']);
+            // ✅ FIX: Unpublish ONLY old publications for same period (tahun/bulan/minggu)
+            // Do NOT unpublish publications from OTHER periods!
+            $oldPublications = MapPublication::where('status', 'published')
+                ->where('tahun', $importToDeploy->tahun)
+                ->where('bulan', $importToDeploy->bulan)
+                ->where('minggu', $importToDeploy->minggu)
+                ->get();
+            
+            Log::info("Found " . $oldPublications->count() . " old publications for this period");
+            
+            foreach ($oldPublications as $old) {
+                $old->update(['status' => 'draft']);
+                Log::info("  Unpublished: {$old->id} ({$old->tahun}/{$old->bulan}/W{$old->minggu})");
+            }
 
-            // Create new publication
+            // Create new publication for this period
             $publication = MapPublication::updateOrCreate(
                 [
                     'tahun' => $importToDeploy->tahun,

@@ -13,10 +13,14 @@ class WilayahController extends Controller
      * Get GeoJSON data for specific wilayah with coordinate conversion
      * and merge with status_gulma data from database
      */
-    public function getGeojson($wilayah_number, Request $request = null): JsonResponse
+    public function getGeojson($wilayah_number, Request $request): JsonResponse
     {
         try {
             \Log::info("🗺️ === Getting GeoJSON for Wilayah {$wilayah_number} ===");
+            
+            // ✅ DEBUG: Log ALL request parameters
+            \Log::info("📝 [getGeojson] Request params: " . json_encode($request->all()));
+            \Log::info("📝 [getGeojson] Query params: " . json_encode($request->query()));
             
             // Check if admin (sama untuk dashboard & wilayah page)
             $hasAdminHeader = $request && $request->header('X-Admin-Request') === '1';
@@ -35,11 +39,16 @@ class WilayahController extends Controller
             }
 
             // Get import_id dari parameter (for specific imports)
-            $importId = $request ? $request->query('import_id') : null;
+            $importId = $request->query('import_id');
+            
+            // NEW: Get tahun/bulan/minggu parameters untuk periode-specific data
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
             
             // ✅ FIX: Consistent caching logic
-            $timestamp = $request ? $request->query('_t') : null;
-            $shouldCache = !$importId && !$timestamp && !$isAdmin;
+            $timestamp = $request->query('_t');
+            $shouldCache = !$importId && !$timestamp && !$tahun && !$bulan && !$minggu && !$isAdmin;
             
             $cacheKey = "geojson_wgs84_wil_{$wilayah_number}";
             $geojson = null;
@@ -62,12 +71,33 @@ class WilayahController extends Controller
                 }
             }
 
-            // ✅ FIX: Get data from LATEST PUBLISHED
+            // ✅ FIX: Get data from LATEST PUBLISHED OR SPECIFIC PERIOD
             $query = DataGulma::where('wilayah_id', $wilayah_number);
 
             if ($importId) {
                 \Log::info("Using specific import_id from parameter: {$importId}");
                 $query->where('import_log_id', $importId);
+            } elseif ($tahun && $bulan && $minggu) {
+                // Look up publication by period
+                \Log::info("🔍 [getGeojson] Looking up publication for period: {$tahun}/{$bulan}/W{$minggu}");
+                \Log::info("🔍 [getGeojson] Query params: tahun={$tahun}, bulan={$bulan}, minggu={$minggu}");
+                
+                $publication = \App\Models\MapPublication::where('status', 'published')
+                    ->where('tahun', $tahun)
+                    ->where('bulan', $bulan)
+                    ->where('minggu', $minggu)
+                    ->first();
+                
+                \Log::info("🔍 [getGeojson] Publication found: " . ($publication ? "YES (ID: {$publication->id}, import_log_id: {$publication->import_log_id})" : "NO"));
+                
+                if ($publication && $publication->import_log_id) {
+                    \Log::info("✅ [getGeojson] Using import_id from period: {$publication->import_log_id}");
+                    $query->where('import_log_id', $publication->import_log_id);
+                } else {
+                    \Log::warning("⚠️ [getGeojson] No published data found for period {$tahun}/{$bulan}/W{$minggu}!");
+                    $geojson['features'] = [];
+                    return response()->json($geojson);
+                }
             } else {
                 $latestPublication = \App\Models\MapPublication::where('status', 'published')
                     ->orderBy('published_at', 'desc')
@@ -151,9 +181,10 @@ class WilayahController extends Controller
                             $feature['properties']['kategori'] = (string)($bestKategori ?? '');
                             $feature['properties']['tk_ha'] = (string)$totalTk;
                             $feature['properties']['total_tk'] = (string)$firstRecord->total_tk;
+                            $feature['properties']['tanggal'] = (string)$firstRecord->tanggal;
                             // Format tanggal sesuai CSV: "2-Nov" bukan ISO timestamp
-                            $tanggalFormatted = $firstRecord->tanggal ? \Carbon\Carbon::parse($firstRecord->tanggal)->format('d-M') : '';
-                            $feature['properties']['tanggal'] = $tanggalFormatted;
+                            // $tanggalFormatted = $firstRecord->tanggal ? \Carbon\Carbon::parse($firstRecord->tanggal)->format('d-M') : '';
+                            // $feature['properties']['tanggal'] = $tanggalFormatted;
                             
                             $mergedCount++;
                         } else {
@@ -186,16 +217,52 @@ class WilayahController extends Controller
 
     /**
      * Get summary data for all wilayah
+     * ✅ NEW: Support periode parameter (tahun, bulan, minggu)
      */
-    public function getData(): JsonResponse
+    public function getData(Request $request): JsonResponse
     {
         try {
             \Log::info("🔍 === getData() - Loading wilayah summary with CSV stats ===");
             
-            // ✅ CRITICAL FIX: Get LATEST PUBLISHED import_log_id
-            $latestPublication = \App\Models\MapPublication::where('status', 'published')
-                ->orderBy('published_at', 'desc')
-                ->first();
+            // ✅ DEBUG: Log ALL request details
+            \Log::info("📝 [getData] Full URL: " . $request->fullUrl());
+            \Log::info("📝 [getData] All query params: " . json_encode($request->query()));
+            \Log::info("📝 [getData] All input: " . json_encode($request->all()));
+            
+            // Get periode parameters from request (with null safety)
+            $tahun = $request ? $request->query('tahun') : null;
+            $bulan = $request ? $request->query('bulan') : null;
+            $minggu = $request ? $request->query('minggu') : null;
+            
+            \Log::info("📝 [getData] Extracted params: tahun={$tahun}, bulan={$bulan}, minggu={$minggu}");
+            
+            // Determine which publication to use
+            $latestPublication = null;
+            
+            if ($tahun && $bulan && $minggu) {
+                // ✅ NEW: Use specific period if provided
+                \Log::info("📅 getData() - Looking for period: {$tahun}/{$bulan}/W{$minggu}");
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->where('tahun', $tahun)
+                    ->where('bulan', $bulan)
+                    ->where('minggu', $minggu)
+                    ->first();
+                
+                // ✅ FIXED: NO FALLBACK! If period not found, return error
+                if (!$latestPublication) {
+                    \Log::warning("⚠️ No published data found for period {$tahun}/{$bulan}/W{$minggu}!");
+                    return response()->json([
+                        'data' => [],
+                        'total_wilayah' => 0,
+                        'error' => "No published data found for period {$tahun}/{$bulan}/W{$minggu}"
+                    ], 404);
+                }
+            } else {
+                // ✅ DEFAULT: Use latest published
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->orderBy('published_at', 'desc')
+                    ->first();
+            }
             
             if (!$latestPublication) {
                 \Log::warning("No published data found!");
@@ -207,7 +274,7 @@ class WilayahController extends Controller
             }
             
             $latestImportId = $latestPublication->import_log_id;
-            \Log::info("✓ Using LATEST PUBLISHED import_id: {$latestImportId}");
+            \Log::info("✓ Using import_id: {$latestImportId} for period {$latestPublication->tahun}/{$latestPublication->bulan}/W{$latestPublication->minggu}");
             
             $dataPath = base_path('datala');
             $files = glob("{$dataPath}/Wil*.geojson");
@@ -250,7 +317,7 @@ class WilayahController extends Controller
                         $deduped[$normalizedSeksi] = (object)[
                             'kategori' => strtolower($data->kategori ?? ''),
                             'neto' => (float)$data->neto,
-                            'tk_ha' => (float)$data->tk_ha,
+                            'total_tk' => (float)$data->total_tk,  // ✅ FIXED: Use TOTAL_TK not tk_ha
                             'kategoriValue' => $kategoriValue[strtolower($data->kategori ?? 'berat')] ?? 5
                         ];
                     } else {
@@ -263,7 +330,7 @@ class WilayahController extends Controller
                             $existing->kategoriValue = $dataValue;
                         }
                         
-                        $existing->tk_ha += (float)$data->tk_ha;
+                        $existing->total_tk += (float)$data->total_tk;  // ✅ FIXED: Use TOTAL_TK not tk_ha
                         $existing->neto += (float)$data->neto;
                     }
                 }
@@ -281,7 +348,7 @@ class WilayahController extends Controller
                 
                 foreach ($deduped as $data) {
                     $totalLuasNetto += $data->neto;
-                    $totalTk += $data->tk_ha;
+                    $totalTk += $data->total_tk;  // ✅ FIXED: Use TOTAL_TK not tk_ha
                     
                     $kategori = $data->kategori;
                     if (!$kategori || (!str_contains($kategori, 'bersih') && !str_contains($kategori, 'ringan') && !str_contains($kategori, 'sedang') && !str_contains($kategori, 'berat'))) {
@@ -364,16 +431,57 @@ class WilayahController extends Controller
     /**
      * Get aggregated statistics for specific wilayah directly from database
      * This returns the correct counts and totals for the wilayah cards
+     * ✅ NEW: Support periode parameter (tahun, bulan, minggu)
      */
-    public function getWilayahStats($wilayah_number, Request $request = null): JsonResponse
+    public function getWilayahStats($wilayah_number, Request $request): JsonResponse
     {
         try {
             \Log::info("📊 === Getting stats for Wilayah {$wilayah_number} ===");
             
-            // Get latest published data
-            $latestPublication = \App\Models\MapPublication::where('status', 'published')
-                ->orderBy('published_at', 'desc')
-                ->first();
+            // ✅ DEBUG: Log request details
+            \Log::info("📝 [getWilayahStats] Full URL: " . $request->fullUrl());
+            \Log::info("📝 [getWilayahStats] All query params: " . json_encode($request->query()));
+            
+            // Get periode parameters from request
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
+            
+            \Log::info("📝 [getWilayahStats] Extracted params: tahun={$tahun}, bulan={$bulan}, minggu={$minggu}");
+            
+            // Determine which publication to use
+            $latestPublication = null;
+            
+            if ($tahun && $bulan && $minggu) {
+                // ✅ NEW: Use specific period if provided
+                \Log::info("📅 getWilayahStats() - Looking for period: {$tahun}/{$bulan}/W{$minggu}");
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->where('tahun', $tahun)
+                    ->where('bulan', $bulan)
+                    ->where('minggu', $minggu)
+                    ->first();
+                
+                // ✅ FIXED: NO FALLBACK! If period not found, return error
+                if (!$latestPublication) {
+                    \Log::warning("⚠️ No published data found for period {$tahun}/{$bulan}/W{$minggu}!");
+                    return response()->json([
+                        'error' => "No published data found for period {$tahun}/{$bulan}/W{$minggu}",
+                        'wilayah_id' => $wilayah_number,
+                        'total_records' => 0,
+                        'bersih_count' => 0,
+                        'ringan_count' => 0,
+                        'sedang_count' => 0,
+                        'berat_count' => 0,
+                        'total_tk' => 0,
+                        'total_neto' => 0
+                    ], 404);
+                }
+            } else {
+                // ✅ DEFAULT: Use latest published
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->orderBy('published_at', 'desc')
+                    ->first();
+            }
             
             if (!$latestPublication) {
                 return response()->json([
@@ -430,16 +538,44 @@ class WilayahController extends Controller
     /**
      * Get all records for specific wilayah directly from database
      * This returns all CSV records (not deduplicated) for location table display
+     * ✅ NEW: Support periode parameter (tahun, bulan, minggu)
      */
-    public function getWilayahRecords($wilayah_number, Request $request = null): JsonResponse
+    public function getWilayahRecords($wilayah_number, Request $request): JsonResponse
     {
         try {
             \Log::info("📋 === Getting all records for Wilayah {$wilayah_number} ===");
             
-            // Get latest published data
-            $latestPublication = \App\Models\MapPublication::where('status', 'published')
-                ->orderBy('published_at', 'desc')
-                ->first();
+            // Get periode parameters from request
+            $tahun = $request->query('tahun');
+            $bulan = $request->query('bulan');
+            $minggu = $request->query('minggu');
+            
+            // Determine which publication to use
+            $latestPublication = null;
+            
+            if ($tahun && $bulan && $minggu) {
+                // ✅ NEW: Use specific period if provided
+                \Log::info("📅 getWilayahRecords() - Looking for period: {$tahun}/{$bulan}/W{$minggu}");
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->where('tahun', $tahun)
+                    ->where('bulan', $bulan)
+                    ->where('minggu', $minggu)
+                    ->first();
+                
+                // ✅ FIXED: NO FALLBACK! If period not found, return error
+                if (!$latestPublication) {
+                    \Log::warning("⚠️ No published data found for period {$tahun}/{$bulan}/W{$minggu}!");
+                    return response()->json([
+                        'error' => "No published data found for period {$tahun}/{$bulan}/W{$minggu}",
+                        'records' => []
+                    ], 404);
+                }
+            } else {
+                // ✅ DEFAULT: Use latest published
+                $latestPublication = \App\Models\MapPublication::where('status', 'published')
+                    ->orderBy('published_at', 'desc')
+                    ->first();
+            }
             
             if (!$latestPublication) {
                 return response()->json([
@@ -577,16 +713,32 @@ class WilayahController extends Controller
 
     /**
      * Get available periods (tahun, bulan, minggu) from publications
+     * Return structure for SMART FILTERING of dropdown buttons
+     * ✅ LOGIC: Only show last 2 years for public user (guest)
      */
     public function getPeriods(): JsonResponse
     {
         try {
+            // ✅ NEW: Get current year
+            $currentYear = now()->year;
+            $maxYears = 2;  // Only show last 2 years
+            $minYear = $currentYear - ($maxYears - 1);  // e.g., if 2026: 2026 - 1 = 2025 (min)
+            
+            \Log::info("🔍 getPeriods() - Current year: {$currentYear}, Min year for display: {$minYear}");
+            
+            // ✅ NEW: Filter publications untuk hanya 2 tahun terakhir
             $publications = \App\Models\MapPublication::where('status', 'published')
+                ->where('tahun', '>=', $minYear)  // Only last 2 years
                 ->with('importLog')
                 ->orderBy('tahun', 'desc')
                 ->orderBy('bulan', 'desc')
                 ->orderBy('minggu', 'desc')
                 ->get();
+            
+            \Log::info("🔍 getPeriods() - Found " . $publications->count() . " published records");
+            foreach ($publications as $pub) {
+                \Log::info("  ID: {$pub->id} | {$pub->tahun}/{$pub->bulan}/W{$pub->minggu} | Import: {$pub->import_log_id}");
+            }
             
             $periods = $publications->map(function($pub) {
                 return [
@@ -594,11 +746,47 @@ class WilayahController extends Controller
                     'bulan' => $pub->bulan,
                     'minggu' => $pub->minggu,
                     'import_log_id' => $pub->import_log_id,
-                    'published_at' => $pub->published_at
+                    'published_at' => $pub->published_at,
+                    'periode_key' => $pub->tahun . '-' . $pub->bulan . '-' . $pub->minggu
                 ];
             });
 
-            $tahun_list = $periods->pluck('tahun')->unique()->values();
+            // Build nested structure for smart filtering
+            // Structure: { tahun: { bulan: { minggu: true } } }
+            $filterStructure = [];
+            $tahun_list = [];
+            $tahun_bulan_list = [];
+            
+            foreach ($publications as $pub) {
+                // Add to tahun list
+                if (!in_array($pub->tahun, $tahun_list)) {
+                    $tahun_list[] = $pub->tahun;
+                }
+                
+                // Build nested structure
+                if (!isset($filterStructure[$pub->tahun])) {
+                    $filterStructure[$pub->tahun] = [];
+                }
+                if (!isset($filterStructure[$pub->tahun][$pub->bulan])) {
+                    $filterStructure[$pub->tahun][$pub->bulan] = [];
+                }
+                if (!in_array($pub->minggu, $filterStructure[$pub->tahun][$pub->bulan])) {
+                    $filterStructure[$pub->tahun][$pub->bulan][] = $pub->minggu;
+                }
+                
+                // Track tahun-bulan pairs for secondary filtering
+                $key = $pub->tahun . '-' . $pub->bulan;
+                if (!in_array($key, $tahun_bulan_list)) {
+                    $tahun_bulan_list[] = $key;
+                }
+            }
+            
+            // Sort arrays
+            sort($tahun_list);
+            rsort($tahun_list); // Descending (newest first)
+            
+            \Log::info("📊 getPeriods() - Filter Structure: " . json_encode($filterStructure));
+            \Log::info("📅 getPeriods() - Tahun List: " . json_encode($tahun_list));
             
             $latest = $publications->first();
             $latestPeriod = $latest ? [
@@ -611,7 +799,13 @@ class WilayahController extends Controller
                 'success' => true,
                 'periods' => $periods,
                 'tahun_list' => $tahun_list,
-                'latest_period' => $latestPeriod
+                'filter_structure' => $filterStructure,  // NEW: Nested structure for smart filtering
+                'latest_period' => $latestPeriod,
+                'year_range' => [
+                    'current_year' => $currentYear,
+                    'min_year' => $minYear,
+                    'max_years' => $maxYears
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -631,19 +825,20 @@ class WilayahController extends Controller
             $bulan = $request->query('bulan');
             $minggu = $request->query('minggu');
 
-            $importLog = \App\Models\ImportLog::where('status', 'success')
-                ->where('tahun', $tahun)
+            // ✅ FIX: Check MapPublication (published data) instead of ImportLog
+            // This ensures we validate against data yang sudah dipublikasi dari dashboard
+            $publication = \App\Models\MapPublication::where('tahun', $tahun)
                 ->where('bulan', $bulan)
                 ->where('minggu', $minggu)
                 ->first();
 
-            if (!$importLog) {
-                $latestImport = \App\Models\ImportLog::where('status', 'success')
-                    ->whereNotNull('tahun')
+            if (!$publication) {
+                // Periode yang dipilih belum dipublikasi, cari latest published period
+                $latestPublication = \App\Models\MapPublication::whereNotNull('tahun')
                     ->latest('created_at')
                     ->first();
 
-                if (!$latestImport) {
+                if (!$latestPublication) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Tidak ada data yang tersedia',
@@ -653,15 +848,15 @@ class WilayahController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Data untuk periode {$tahun} Bulan {$bulan} Minggu {$minggu} tidak tersedia. Menampilkan data terbaru.",
+                    'message' => "Data untuk periode {$tahun} Bulan {$bulan} Minggu {$minggu} belum dipublikasi. Menampilkan data terbaru yang tersedia.",
                     'data_available' => false,
                     'showing_latest' => true,
                     'period' => [
-                        'tahun' => $latestImport->tahun,
-                        'bulan' => $latestImport->bulan,
-                        'minggu' => $latestImport->minggu
+                        'tahun' => $latestPublication->tahun,
+                        'bulan' => $latestPublication->bulan,
+                        'minggu' => $latestPublication->minggu
                     ],
-                    'import_log_id' => $latestImport->id
+                    'publication_id' => $latestPublication->id
                 ]);
             }
 
@@ -670,11 +865,11 @@ class WilayahController extends Controller
                 'message' => 'Data ditemukan',
                 'data_available' => true,
                 'period' => [
-                    'tahun' => $importLog->tahun,
-                    'bulan' => $importLog->bulan,
-                    'minggu' => $importLog->minggu
+                    'tahun' => $publication->tahun,
+                    'bulan' => $publication->bulan,
+                    'minggu' => $publication->minggu
                 ],
-                'import_log_id' => $importLog->id
+                'publication_id' => $publication->id
             ]);
         } catch (\Exception $e) {
             return response()->json([

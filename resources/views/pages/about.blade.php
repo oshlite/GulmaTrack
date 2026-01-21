@@ -327,7 +327,7 @@
         <h2><i class="fas fa-star"></i> Fitur Unggulan</h2>
         <div class="features-grid">
             <div class="feature-card" onclick="window.location.href='/wilayah'">
-                <div class="feature-icon"><i class="fas fa-map"></i></div>
+                <div class="feature-icon"><i class="fa-solid fa-map-location-dot"></i></div>
                 <h4>Peta Interaktif</h4>
                 <p>Visualisasi geografis lengkap dengan detail wilayah produksi yang mudah dijelajahi</p>
             </div>
@@ -376,7 +376,7 @@
                 <div class="tech-name">JavaScript</div>
             </div>
             <div class="tech-item">
-                <div class="tech-icon"><i class="fas fa-map"></i></div>
+                <div class="tech-icon"><i class="fa-solid fa-map-location-dot"></i></div>
                 <div class="tech-name">Leaflet.js Maps</div>
             </div>
             <div class="tech-item">

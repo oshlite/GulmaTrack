@@ -6,6 +6,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\ExcelDataController;
 use App\Http\Controllers\ImportLogController;
 use App\Http\Controllers\CsvController;
+use App\Http\Controllers\DebugController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,14 @@ Route::get('/wilayah/data', [WilayahController::class, 'getData'])
 
 Route::get('/wilayah/periods', [WilayahController::class, 'getPeriods'])
     ->name('api.wilayah.periods')
+    ->withoutMiddleware('api');
+
+Route::get('/debug/publications', [\App\Http\Controllers\DebugController::class, 'checkPublications'])
+    ->name('api.debug.publications')
+    ->withoutMiddleware('api');
+
+Route::post('/debug/restore-publications', [\App\Http\Controllers\DebugController::class, 'restorePublications'])
+    ->name('api.debug.restore-publications')
     ->withoutMiddleware('api');
 
 Route::get('/wilayah/data-by-period', [WilayahController::class, 'getDataByPeriod'])

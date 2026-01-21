@@ -1,10 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Drone - Perencanaan Pengendalian Gulma')
+@section('title', 'Drone')
 
 @section('content')
 <!-- Poppins Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fa-solid fa-paper-plane"></i> Drone Pengendalian Gulma</h1>
+        <p>
+            Dokumen perencanaan penggunaan drone untuk pengendalian gulma di berbagai wilayah. Download dan pelajari strategi perencanaan terbaru.
+        </p>
+    </div>
 
 <style>
     :root {
@@ -20,7 +28,13 @@
 
     body {
         font-family: 'Poppins';
-        padding-top: 0;
+        padding-top: 70px;
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-top: 0;
+        padding-top: 40px;
     }
 
     /* Main Content */
@@ -31,32 +45,6 @@
         margin-right: auto;
     }
 
-    /* Page Header */
-    .page-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
-    .page-title {
-        font-size: 40px;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: 15px;
-    }
-
-    .page-subtitle {
-        font-size: 16px;
-        color: #666;
-        margin-bottom: 20px;
-    }
-
-    .page-description {
-        font-size: 15px;
-        color: #777;
-        max-width: 600px;
-        margin: 0 auto;
-        line-height: 1.6;
-    }
 
     /* Cards Grid */
     .drone-grid {
@@ -454,14 +442,6 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1 class="page-title">📋 Drone - Perencanaan Pengendalian Gulma</h1>
-        <p class="page-description">
-            Dokumen perencanaan penggunaan drone untuk pengendalian gulma di berbagai wilayah. Download dan pelajari strategi perencanaan terbaru.
-        </p>
-    </div>
-
     <!-- Filter Section -->
     @if ($drones->count() > 0)
         <div class="filter-section">

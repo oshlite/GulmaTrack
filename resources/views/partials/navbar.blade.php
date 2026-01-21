@@ -17,7 +17,7 @@
             </li>
             <li class="nav-item">
                 <a href="{{ route('wilayah') }}" class="nav-link {{ request()->routeIs('wilayah') ? 'active' : '' }}">
-                    <i class="fas fa-map"></i> Wilayah
+                    <i class="fa-solid fa-map-location-dot"></i> Wilayah
                 </a>
             </li>
             <li class="nav-item">
@@ -27,7 +27,7 @@
             </li>
             <li class="nav-item">
                 <a href="{{ route('drone') }}" class="nav-link {{ request()->routeIs('drone') ? 'active' : '' }}">
-                    <i class="fas fa-cube"></i> Drone
+                    <i class="fas fa-paper-plane"></i> Drone
                 </a>
             </li>
             <li class="nav-item">

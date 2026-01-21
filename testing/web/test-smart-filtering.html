@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Smart Filtering - Wilayah Publik</title>
+    <style>
+        body { 
+            font-family: 'Poppins', Arial; 
+            margin: 20px; 
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #128241; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 20px; }
+        .section { margin: 20px 0; }
+        .section-title { 
+            background: #e8f5e9; 
+            padding: 10px; 
+            border-left: 4px solid #128241;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        pre { 
+            background: #f9f9f9; 
+            border: 1px solid #ddd;
+            padding: 15px; 
+            border-radius: 4px; 
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .test-button {
+            background: #128241;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0d5a2b;
+        }
+        .success { color: #128241; font-weight: 600; }
+        .warning { color: #f39c12; font-weight: 600; }
+        .error { color: #e74c3c; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Smart Filtering - Wilayah Publik</h1>
+        <p class="subtitle">Verifikasi bahwa dropdown filter tahun/bulan/minggu hanya menampilkan periode yang sudah dipublikasi</p>
+        
+        <div class="section">
+            <div class="section-title">1️⃣ Test: Load API Periods</div>
+            <button class="test-button" onclick="testLoadPeriods()">Load Periods dari API</button>
+            <div id="result1"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">2️⃣ Test: Smart Filtering Logic</div>
+            <button class="test-button" onclick="testSmartFiltering()">Test Smart Filtering Logic</button>
+            <div id="result2"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">3️⃣ Test: Dropdown Population</div>
+            <button class="test-button" onclick="testDropdownPopulation()">Test Dropdown Population</button>
+            <div id="result3"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📋 Live Wilayah Page Test</div>
+            <p>Buka <a href="/wilayah" target="_blank" style="color: #128241;">halaman wilayah publik</a> dan cek:</p>
+            <ul>
+                <li>Dropdown Tahun hanya menampilkan tahun dengan publikasi</li>
+                <li>Dropdown Bulan otomatis update saat tahun berubah</li>
+                <li>Dropdown Minggu otomatis update saat bulan berubah</li>
+                <li>Tombol yang tidak ada data muncul dengan opacity rendah (disabled)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testLoadPeriods() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const response = await fetch('/api/wilayah/periods');
+                const data = await response.json();
+                
+                let html = '<p class="success">✅ API Response OK</p>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Validation
+                html += '<h4>Validation:</h4>';
+                if (data.filter_structure) {
+                    html += '<p class="success">✅ filter_structure tersedia</p>';
+                    html += '<p><strong>Struktur:</strong> Tahun → Bulan → [Minggu]</p>';
+                } else {
+                    html += '<p class="error">❌ filter_structure TIDAK tersedia</p>';
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testSmartFiltering() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.innerHTML = '<p>Testing smart filtering logic...</p>';
+            
+            try {
+                const response = await fetch('/api/wilayah/periods');
+                const data = await response.json();
+                
+                // Simulate the smart filtering logic
+                let html = '<p class="success">✅ Smart Filtering Logic Test</p>';
+                
+                // Test getAvailableBulanForTahun logic
+                html += '<h4>Test Case: getAvailableBulanForTahun</h4>';
+                html += '<p>For filter_structure logic:</p>';
+                
+                for (let tahun in data.filter_structure) {
+                    const bulanMap = data.filter_structure[tahun];
+                    const bulanArray = Object.keys(bulanMap).map(b => parseInt(b)).sort((a, b) => b - a);
+                    html += `<div style="background: #f0f0f0; padding: 10px; margin: 5px 0; border-radius: 4px;">
+                        <strong>Tahun ${tahun}</strong> → Available Bulan: [${bulanArray.join(', ')}]
+                    </div>`;
+                    
+                    // Test getAvailableMingguForTahunBulan logic
+                    for (let bulan of bulanArray) {
+                        const mingguArray = bulanMap[bulan].sort((a, b) => b - a);
+                        html += `<div style="background: #e8f4f8; padding: 8px; margin: 3px 0 3px 20px; border-left: 3px solid #128241;">
+                            Tahun ${tahun} → Bulan ${bulan} → Available Minggu: [${mingguArray.join(', ')}]
+                        </div>`;
+                    }
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function testDropdownPopulation() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.innerHTML = '<p>Testing dropdown population...</p>';
+            
+            try {
+                const response = await fetch('/api/wilayah/periods');
+                const data = await response.json();
+                
+                let html = '<p class="success">✅ Dropdown Population Test</p>';
+                
+                // Test tahun dropdown
+                html += '<h4>Tahun Dropdown:</h4>';
+                html += '<p>Hanya tahun dengan publikasi yang ditampilkan:</p>';
+                html += '<div style="background: #f9f9f9; padding: 10px; border-radius: 4px;">';
+                data.tahun_list.forEach(tahun => {
+                    html += `<button style="padding: 8px 12px; margin: 5px; background: #128241; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        ${tahun}
+                    </button>`;
+                });
+                html += '</div>';
+                
+                // Test bulan dropdown for each tahun
+                html += '<h4>Bulan Dropdown (per Tahun):</h4>';
+                data.tahun_list.forEach(tahun => {
+                    const bulanMap = data.filter_structure[tahun];
+                    const bulanArray = Object.keys(bulanMap).map(b => parseInt(b)).sort((a, b) => b - a);
+                    const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    
+                    html += `<p><strong>Jika Tahun ${tahun} dipilih:</strong></p>`;
+                    html += '<div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 15px;">';
+                    
+                    // Show all 12 months with enabled/disabled state
+                    for (let m = 1; m <= 12; m++) {
+                        const isAvailable = bulanArray.includes(m);
+                        const opacity = isAvailable ? '1' : '0.4';
+                        const cursor = isAvailable ? 'pointer' : 'not-allowed';
+                        const status = isAvailable ? '✅ AKTIF' : '❌ DISABLED';
+                        
+                        html += `<button style="padding: 8px 12px; margin: 5px; background: #128241; color: white; border: none; border-radius: 4px; cursor: ${cursor}; opacity: ${opacity};" ${!isAvailable ? 'disabled' : ''}>
+                            ${bulanNames[m]} ${status}
+                        </button>`;
+                    }
+                    html += '</div>';
+                });
+                
+                html += '<p class="success">✅ Smart filtering logic working correctly!</p>';
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

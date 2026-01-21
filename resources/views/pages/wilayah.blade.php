@@ -3,9 +3,9 @@
 @section('title', 'Wilayah')
 
 @section('content')
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<!-- Leaflet CSS - Using Cloudflare CDN (faster for Indonesia) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
 <!-- Poppins Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -431,7 +431,7 @@
 .btn-secondary {
     background: white;
     border: 2px solid #d8e1dd;
-    color: #FBA919;
+    color: white;
     box-shadow: none;
 }
 
@@ -1004,9 +1004,9 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                 </h3>
                 <span id="tableInfoText" style="font-size: 12px; color: #666;"></span>
             </div>
-            <button onclick="exportToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
+            <!-- <button onclick="exportToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
                 <i class="fas fa-download"></i> Export CSV
-            </button>
+            </button> -->
         </div>
         <div style="overflow-x: auto;">
             <table class="location-table" id="locationTable">
@@ -1095,8 +1095,8 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 </div>
 
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet JS - Using Cloudflare CDN (faster for Indonesia) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     // ==================
     // ==================
@@ -1194,6 +1194,7 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             updateBulanDropdown(value);
             
             console.log(`✅ Tahun dipilih: ${value}`);
+            // 🛑 NO AUTO-RELOAD! Tunggu user selesai pilih semua 3 periode
         } else if (type === 'bulan') {
             const tahun = document.getElementById('tahunSelect').value;
             
@@ -1205,8 +1206,23 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             updateMingguDropdown(tahun, value);
             
             console.log(`✅ Bulan dipilih: ${value}, tahun: ${tahun}`);
+            // 🛑 NO AUTO-RELOAD! Tunggu user selesai pilih semua 3 periode
         } else if (type === 'minggu') {
             console.log(`✅ Minggu dipilih: ${value}`);
+            
+            // ✅ FIXED: SATU PINTU LOAD - gunakan applyPeriodFilter() saja
+            const tahun = document.getElementById('tahunSelect').value;
+            const bulan = document.getElementById('bulanSelect').value;
+            const minggu = document.getElementById('mingguSelect').value;
+            
+            if (tahun && bulan && minggu) {
+                console.log(`🔄 All periods selected - calling applyPeriodFilter()...`);
+                
+                // Apply dengan small delay to allow UI to update
+                setTimeout(() => {
+                    applyPeriodFilter();
+                }, 300);
+            }
         }
         
         // Close grid
@@ -1216,7 +1232,10 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 
     // Close grids when clicking outside
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.control-item')) {
+        // Ignore clicks on map, popup, and control items
+        if (!e.target.closest('.control-item') && 
+            !e.target.closest('.leaflet-popup') && 
+            !e.target.closest('#map')) {
             document.querySelectorAll('.button-grid').forEach(grid => {
                 grid.style.display = 'none';
             });
@@ -1300,8 +1319,8 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
             loadAllWilayah();
         }
         
-        // Scroll to map
-        document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+        // Scroll to map - DISABLED to prevent auto scroll when clicking on map
+        // document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
     }
 
     // ===================
@@ -1316,6 +1335,9 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     let showLocationLabels = false; // Track whether to show location code labels
     let currentStatusFilter = ''; // Track current status filter
     let allLocationData = []; // Store all location data for table
+    let isInFilteredMode = false; // ✅ NEW: Track if user is in filtered mode (selected period != latest published)
+    let mapLoadingController = null; // ✅ NEW: AbortController untuk cancel map loading requests
+    let currentLoadId = 0; // ✅ CRITICAL: Hard guard state - prevent stale renders from old requests
 
     // Initialize map
     // Initialize map
@@ -1332,7 +1354,9 @@ function initMap() {
         center: [-4.85, 105.0],
         zoom: 12,
         zoomControl: true,
-        attributionControl: true
+        attributionControl: true,
+        scrollWheelZoom: true,
+        trackResize: true
     });
 
     // Define base layers
@@ -1357,8 +1381,9 @@ function initMap() {
 
     L.control.layers(baseLayers).addTo(map);
 
-    // ===== PENTING: Event listener untuk load foto di popup TANPA JEDA =====
+    // ===== POPUP HANDLER: Load foto saat popup dibuka =====
     map.on('popupopen', function (e) {
+        // Load foto di popup
         console.log('🖼️  Popup opened, loading image...');
         const img = e.popup._contentNode.querySelector('img[data-kategori]');
         if (!img) {
@@ -1552,6 +1577,163 @@ function initMap() {
         }
     }
 
+    // ✅ NEW: Helper function untuk load wilayah dari card buttons (skip period check)
+    // Digunakan oleh tombol "Lihat Peta" dan "Tabel" di wilayah cards
+    async function loadWilayahMapDirect(wilayahNumber) {
+        console.log(`📍 [loadWilayahMapDirect] Loading wilayah ${wilayahNumber} dengan periode yang sudah di-set`);
+        
+        // Tidak perlu check period lagi karena sudah di-check saat applyPeriodFilter()
+        // Langsung load map dengan periode yang ada di selector
+        
+        if (!wilayahNumber) {
+            console.log('⚠️  Wilayah tidak dipilih, menampilkan Semua Wilayah');
+            await loadAllWilayah();
+            return;
+        }
+
+        // Initialize map if not exists
+        if (!map) {
+            initMap();
+        }
+
+        // Enable location labels when specific wilayah is selected
+        showLocationLabels = true;
+
+        // Clear existing layers
+        clearAllLayers();
+
+        // Show loading spinner
+        console.log(`Loading Wilayah ${wilayahNumber}...`);
+        showMapLoading(true);
+        const startTime = performance.now();
+
+        const cacheBust = new Date().getTime();
+        
+        // Get current period for API calls
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        const periodParams = tahun && bulan && minggu 
+            ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+            : '';
+        
+        console.log(`📅 [loadWilayahMapDirect] Loading dengan periode: ${tahun}/${bulan}/W${minggu}`);
+        console.log(`🔗 [loadWilayahMapDirect] API URL will be: /api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}${periodParams}`);
+        
+        // Load GeoJSON (for map display), stats (for summary), and records (for table)
+        const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        });
+        
+        const statsPromise = fetch(`/api/wilayah/stats/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        }).then(response => {
+            if (!response.ok) return null;
+            return response.json();
+        });
+        
+        const recordsPromise = fetch(`/api/wilayah/records/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        }).then(response => {
+            if (!response.ok) return null;
+            return response.json();
+        });
+        
+        Promise.all([geojsonPromise, statsPromise, recordsPromise])
+            .then(([data, stats, records]) => {
+                const response = data;
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ Wilayah ${wilayahNumber} loaded in ${loadTime}ms`);
+                showMapLoading(false);
+                
+                if (response.error) {
+                    throw new Error(response.error);
+                }
+
+                if (!response.features || response.features.length === 0) {
+                    throw new Error(`Tidak ada data untuk wilayah ${wilayahNumber}`);
+                }
+
+                // Add GeoJSON layer with styling
+                const layer = L.geoJSON(response, {
+                    style: function(feature) {
+                        return getFeatureStyle(feature);
+                    },
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            layer.bindPopup(createPopupContent(feature.properties), {
+                                maxWidth: 300,
+                                minWidth: 150,
+                                maxHeight: 600,
+                                autoPan: false
+                            });
+                            
+                            layer.bindTooltip(createTooltipContent(feature.properties), {
+                                permanent: false,
+                                sticky: true,
+                                direction: 'top',
+                                offset: [0, -10]
+                            });
+                            
+                            layer.on('mouseover', function(e) {
+                                const originalStyle = getFeatureStyle(feature);
+                                this.setStyle({
+                                    weight: 8,
+                                    fillOpacity: 0.8,
+                                    opacity: 1,
+                                    color: originalStyle.color
+                                });
+                                this.bringToFront();
+                            });
+                            
+                            layer.on('mouseout', function(e) {
+                                this.setStyle(getFeatureStyle(feature));
+                            });
+                        }
+                    }
+                }).addTo(map);
+
+                geoJsonLayers[wilayahNumber] = layer;
+
+                // Fit map to bounds
+                const bounds = layer.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+                }
+
+                console.log(`Wilayah ${wilayahNumber} loaded: ${response.features.length} features (${stats ? stats.bersih_count + ' bersih, ' + stats.ringan_count + ' ringan' : 'stats pending'})`);
+                
+                // Use database records for location table (not GeoJSON features)
+                if (records && records.features) {
+                    populateLocationTable(records.features, wilayahNumber);
+                } else {
+                    populateLocationTable(response.features, wilayahNumber);
+                }
+            })
+            .catch(error => {
+                showMapLoading(false);
+                console.error('Error loading wilayah:', error);
+                alert('Gagal memuat data wilayah: ' + error.message);
+            });
+    }
+
     // Load single wilayah
     async function loadWilayahMap() {
         // Check period first (Tahun, Bulan, Minggu WAJIB)
@@ -1586,8 +1768,18 @@ function initMap() {
 
         const cacheBust = new Date().getTime();
         
+        // Get current period for API calls
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        const periodParams = tahun && bulan && minggu 
+            ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+            : '';
+        
+        console.log(`📅 [loadWilayahMap] Loading dengan periode: ${tahun}/${bulan}/W${minggu}`);
+        
         // Load GeoJSON (for map display), stats (for summary), and records (for table)
-        const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}`, {
+        const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
@@ -1600,7 +1792,7 @@ function initMap() {
             return response.json();
         });
         
-        const statsPromise = fetch(`/api/wilayah/stats/${wilayahNumber}?_t=${cacheBust}`, {
+        const statsPromise = fetch(`/api/wilayah/stats/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
@@ -1611,7 +1803,7 @@ function initMap() {
             return response.json();
         });
         
-        const recordsPromise = fetch(`/api/wilayah/records/${wilayahNumber}?_t=${cacheBust}`, {
+        const recordsPromise = fetch(`/api/wilayah/records/${wilayahNumber}?_t=${cacheBust}${periodParams}`, {
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
@@ -1654,7 +1846,7 @@ function initMap() {
                                 maxWidth: 300,
                                 minWidth: 150,
                                 maxHeight: 600,
-                                autoPan: true
+                                autoPan: false
                             });
                             
                             // Add tooltip for hover (quick info)
@@ -1740,8 +1932,152 @@ function initMap() {
         loader.style.display = show ? 'block' : 'none';
     }
 
+    // ✅ NEW LOGIC: Setelah period dipilih, tampilkan info periode dan tombol "Tampilkan Peta"
+    // Data HANYA di-load setelah user klik tombol (tidak auto-load)
+    function applyPeriodFilter() {
+        console.log('📍 [applyPeriodFilter] Period selected, showing info and load button');
+        
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        if (!tahun || !bulan || !minggu) {
+            console.warn('⚠️ Period incomplete');
+            return;
+        }
+        
+        // ✅ CLEAR wilayah cards (hapus data lama)
+        clearWilayahCardsAndShowPlaceholder();
+        
+        // Show period info with load button
+        const isLatest = latestPeriod && 
+            latestPeriod.tahun == tahun && 
+            latestPeriod.bulan == bulan && 
+            latestPeriod.minggu == minggu;
+        
+        updatePeriodInfoDisplay({ tahun, bulan, minggu }, isLatest);
+        
+        // Show "Tampilkan Peta" button
+        showLoadMapButton();
+    }
+    
+    // Clear wilayah cards and show placeholder message
+    function clearWilayahCardsAndShowPlaceholder() {
+        const grid = document.getElementById('wilayahGrid');
+        grid.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 60px 40px; color: #666; background: #f8f9fa; border-radius: 12px; border: 2px dashed #dee2e6;">
+                <i class="fas fa-filter" style="font-size: 48px; color: #128241; margin-bottom: 16px; display: block;"></i>
+                <h3 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 20px;">Filter Periode Dipilih</h3>
+                <p style="margin: 0; font-size: 14px; color: #6c757d;">Klik tombol <strong>"Tampilkan Peta"</strong> di atas untuk memuat data sesuai periode yang dipilih</p>
+            </div>
+        `;
+    }
+    
+    // Show "Tampilkan Peta" button in period info area
+    function showLoadMapButton() {
+        const periodInfoText = document.getElementById('periodInfoText');
+        const existingButton = document.getElementById('loadMapButton');
+        
+        // Remove existing button if any
+        if (existingButton) {
+            existingButton.remove();
+        }
+        
+        // Create "Tampilkan Peta" button
+        const button = document.createElement('button');
+        button.id = 'loadMapButton';
+        button.innerHTML = '<i class="fas fa-map-marked-alt"></i> Tampilkan Peta';
+        button.style.cssText = `
+            background: linear-gradient(135deg, #128241, #0d6631);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 16px;
+            box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
+            transition: all 0.3s ease;
+            font-family: 'Poppins';
+        `;
+        button.onmouseover = () => {
+            button.style.transform = 'translateY(-2px)';
+            button.style.boxShadow = '0 6px 16px rgba(18, 130, 65, 0.4)';
+        };
+        button.onmouseout = () => {
+            button.style.transform = 'translateY(0)';
+            button.style.boxShadow = '0 4px 12px rgba(18, 130, 65, 0.3)';
+        };
+        button.onclick = () => {
+            loadDataForFilteredPeriod();
+        };
+        
+        // Insert button after period info text
+        periodInfoText.parentNode.insertBefore(button, periodInfoText.nextSibling);
+    }
+    
+    // Load all data (wilayah cards, map, table) for filtered period
+    function loadDataForFilteredPeriod() {
+        console.log('🚀 [loadDataForFilteredPeriod] ========== STARTING ==========');
+        
+        // Check current period values
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        console.log(`🚀 [loadDataForFilteredPeriod] Current period: ${tahun}/${bulan}/W${minggu}`);
+        console.log('🚀 [loadDataForFilteredPeriod] Loading all data for filtered period...');
+        
+        // Remove "Tampilkan Peta" button
+        const button = document.getElementById('loadMapButton');
+        if (button) {
+            button.remove();
+        }
+        
+        // Show loading state in wilayah cards area
+        const grid = document.getElementById('wilayahGrid');
+        grid.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 60px 40px; color: #128241;">
+                <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em; margin-bottom: 16px;"></div>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px;">Memuat Data...</h3>
+                <p style="margin: 0; font-size: 14px; color: #6c757d;">Mengambil data untuk periode yang dipilih</p>
+            </div>
+        `;
+        
+        // Load wilayah cards with filtered period data
+        console.log('   → Loading wilayah cards & stats...');
+        loadWilayahDataAndStats();
+        
+        // Load map with filtered period data
+        const wilayahNumber = document.getElementById('wilayahSelect').value;
+        if (wilayahNumber) {
+            console.log(`   → Loading specific wilayah: ${wilayahNumber}`);
+            loadWilayahMap();
+        } else {
+            console.log(`   → Loading all wilayah...`);
+            loadAllWilayah();
+        }
+        
+        // Scroll to wilayah cards section to show loading
+        setTimeout(() => {
+            document.getElementById('wilayahGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
     // Load all wilayah
     async function loadAllWilayah() {
+        // ✅ CRITICAL: Generate unique loadId untuk guard stale renders
+        const loadId = ++currentLoadId;
+        console.log(`🔄 [loadAllWilayah] Starting load #${loadId}...`);
+        
+        // ✅ NEW: Cancel any previous map loading requests
+        if (mapLoadingController) {
+            console.log(`🛑 [loadAllWilayah #${loadId}] Cancelling previous map loading...`);
+            mapLoadingController.abort();
+        }
+        mapLoadingController = new AbortController();
+        
         // Check period first
         const periodOk = await checkPeriodAndLoadData();
         if (!periodOk) return;
@@ -1750,6 +2086,20 @@ function initMap() {
         if (!map) {
             initMap();
         }
+
+        // ✅ NEW: Check if user selected a period DIFFERENT from latest published
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        const isLatestPeriod = latestPeriod && 
+            latestPeriod.tahun == tahun && 
+            latestPeriod.bulan == bulan && 
+            latestPeriod.minggu == minggu;
+        
+        isInFilteredMode = !isLatestPeriod; // If NOT latest period, we're in filtered mode
+        
+        console.log(`📍 [loadAllWilayah] Filtered mode: ${isInFilteredMode} | Selected: ${tahun}/${bulan}/W${minggu} | Latest: ${latestPeriod?.tahun}/${latestPeriod?.bulan}/W${latestPeriod?.minggu}`);
 
         // Disable location labels when showing all wilayah (keep map clean)
         showLocationLabels = false;
@@ -1765,7 +2115,18 @@ function initMap() {
         try {
             // Get list of all wilayah from API
             console.log('🔍 [wilayah.blade] loadAllWilayah() dimulai...');
-            const summaryResponse = await fetch('/api/wilayah/data');
+            
+            // ✅ NEW: Get current period for API calls
+            const tahun = document.getElementById('tahunSelect').value;
+            const bulan = document.getElementById('bulanSelect').value;
+            const minggu = document.getElementById('mingguSelect').value;
+            const periodParams = tahun && bulan && minggu 
+                ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+                : '';
+            
+            console.log(`📅 [wilayah.blade] Loading wilayah summary dengan periode: ${tahun}/${bulan}/W${minggu}`);
+            
+            const summaryResponse = await fetch(`/api/wilayah/data?_t=${new Date().getTime()}${periodParams}`);
             console.log('🌐 [wilayah.blade] API /wilayah/data response status:', summaryResponse.status);
             console.log('🌐 [wilayah.blade] Response headers:', {
                 'content-type': summaryResponse.headers.get('content-type'),
@@ -1794,16 +2155,19 @@ function initMap() {
             const wilayahNumbers = summary.data.map(w => w.wilayah);
             console.log('📍 [wilayah.blade] Will load wilayah:', wilayahNumbers);
             
+            console.log(`📅 [wilayah.blade] Loading map dengan periode: ${tahun}/${bulan}/W${minggu}`);
+            
             // Load each wilayah
             const promises = wilayahNumbers.map(num => {
                 console.log(`🌍 [wilayah.blade] Fetching wilayah ${num}...`);
                 const cacheBust = new Date().getTime();
-                return fetch(`/api/wilayah/geojson/${num}?_t=${cacheBust}`, {
+                return fetch(`/api/wilayah/geojson/${num}?_t=${cacheBust}${periodParams}`, {
                     headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
                         'Pragma': 'no-cache',
                         'Expires': '0'
-                    }
+                    },
+                    signal: mapLoadingController.signal // ✅ NEW: Pass abort signal
                 })
                     .then(r => {
                         console.log(`📥 [wilayah.blade] Wilayah ${num} response: status ${r.status}`);
@@ -1828,6 +2192,15 @@ function initMap() {
             });
 
             const results = await Promise.all(promises);
+            
+            // ✅ CRITICAL GUARD: Check if this load is still the latest
+            // Jika user membuat request baru sementara request lama masih proses
+            if (loadId !== currentLoadId) {
+                console.log(`⛔ [loadAllWilayah] Load #${loadId} is STALE (current: #${currentLoadId}), ABORTING render`);
+                showMapLoading(false);
+                return; // STOP RENDER!
+            }
+            
             const validResults = results.filter(r => r !== null);
             const allBounds = [];
 
@@ -1868,7 +2241,7 @@ function initMap() {
                                     maxWidth: 300,
                                     minWidth: 150,
                                     maxHeight: 600,
-                                    autoPan: true
+                                    autoPan: false
                                 });
                                 
                                 // Add tooltip for hover (quick info)
@@ -1924,7 +2297,13 @@ function initMap() {
                 map.fitBounds([[-10.3, 95.3], [5.9, 141.0]], { padding: [80, 80] });
             }
 
-            console.log(`Loaded ${validResults.length} wilayah successfully`);
+            // ✅ DOUBLE-CHECK guard sebelum update display final
+            if (loadId !== currentLoadId) {
+                console.log(`⛔ [loadAllWilayah] Load #${loadId} aborted before display update (current: #${currentLoadId})`);
+                return;
+            }
+            
+            console.log(`✅ Loaded ${validResults.length} wilayah successfully (Load #${loadId})`);
             
             // Hide loading spinner
             const loadTime = (performance.now() - startTime).toFixed(2);
@@ -1946,6 +2325,13 @@ function initMap() {
             }
         } catch (error) {
             showMapLoading(false);
+            
+            // ✅ NEW: Handle abort gracefully - don't show error if request was cancelled
+            if (error.name === 'AbortError') {
+                console.log('⏹️ Map loading was aborted (user selected different period)');
+                return; // Exit silently, don't show error to user
+            }
+            
             console.error('❌ Error loading all wilayah:', error);
             console.error('Error stack:', error.stack);
             const errorMsg = error.message || 'Gagal memuat data wilayah';
@@ -2151,17 +2537,23 @@ function initMap() {
             // Handle both comma and dot as decimal separator, then convert to number
             const tkString = String(tkTotal).replace(/,/g, '.');
             const tkNumber = parseFloat(tkString);
-            tkValue = !isNaN(tkNumber) ? parseFloat(tkNumber).toFixed(2) : '<span style="color: #999; font-style: italic;">null</span>';
+            tkValue = !isNaN(tkNumber) ? Math.round(tkNumber) : '<span style="color: #999; font-style: italic;">null</span>';
         } else {
             tkValue = '<span style="color: #999; font-style: italic;">null</span>';
         }
         const tkDisplay = (typeof tkValue === 'string' && tkValue.includes('span')) ? tkValue : `${tkValue} TK`;
-        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Total TK:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Kebutuhan Tenaga Kerja:</strong></span><span style="color: #128241; font-weight: 600; font-size: 13px;">${tkDisplay}</span></div>`;
 
         // Aktivitas - dari CSV activitas (note: column name is "activitas" with 'c', not 'k')
         const aktivitas = props.activitas || props.Aktivitas || props.activity || props.Activity || props.aktivitas || null;
         const aktivitasDisplay = aktivitas ? aktivitas : '<span style="color: #999; font-style: italic;">null</span>';
         html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Aktivitas:</strong></span><span style="color: #128241; font-weight: 600;">${aktivitasDisplay}</span></div>`;
+
+        // Hasil Rencana Kerja - dari CSV HASIL
+        const hasil = props.HASIL || props.hasil || props.Hasil || null;
+        const hasilValue = hasil ? (typeof hasil === 'string' ? hasil.replace(',', '.') : hasil) : null;
+        const hasilDisplay = hasil ? `${hasilValue} Ha` : '<span style="color: #999; font-style: italic;">null</span>';
+        html += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding: 4px 0;"><span style="color: #555;"><strong>Hasil Rencana Wilayah:</strong></span><span style="color: #128241; font-weight: 600;">${hasilDisplay}</span></div>`;
 
         // Luas Netto Gulma - dari CSV neto
         // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || props.luas_netto || null;
@@ -2196,7 +2588,29 @@ function initMap() {
 
     // Load wilayah data and populate select
     function loadWilayahDataAndStats() {
-        fetch('/api/wilayah/data')
+        // ✅ NEW: Get current period for API calls
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        // 🚨 CRITICAL DEBUG: Verify period values
+        console.log('🔍 [DEBUG] tahunSelect element:', document.getElementById('tahunSelect'));
+        console.log('🔍 [DEBUG] tahunSelect.value:', tahun);
+        console.log('🔍 [DEBUG] bulanSelect.value:', bulan);
+        console.log('🔍 [DEBUG] mingguSelect.value:', minggu);
+        
+        const periodParams = tahun && bulan && minggu 
+            ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+            : '';
+        
+        console.log(`📅 [loadWilayahDataAndStats] Loading dengan periode: ${tahun}/${bulan}/W${minggu}`);
+        console.log(`🔗 [loadWilayahDataAndStats] Period params string: "${periodParams}"`);
+        console.log(`🔗 [loadWilayahDataAndStats] Fetching: /api/wilayah/data?_t=${new Date().getTime()}${periodParams}`);
+        
+        const apiUrl = `/api/wilayah/data?_t=${new Date().getTime()}${periodParams}`;
+        console.log(`🔗 [loadWilayahDataAndStats] Final API URL: ${apiUrl}`);
+        
+        fetch(apiUrl)
             .then(response => response.json())
             .then(data => {
                 // Enrich wilayah data with additional statistics
@@ -2248,8 +2662,19 @@ function initMap() {
                 const promises = enrichedData.map(wilayah => {
                     const cacheBust = new Date().getTime();
                     
+                    // Get current period for API calls
+                    const tahun = document.getElementById('tahunSelect').value;
+                    const bulan = document.getElementById('bulanSelect').value;
+                    const minggu = document.getElementById('mingguSelect').value;
+                    const periodParams = tahun && bulan && minggu 
+                        ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+                        : '';
+                    
+                    console.log(`🔗 [wilayah ${wilayah.wilayah}] Period params: ${periodParams}`);
+                    console.log(`🔗 [wilayah ${wilayah.wilayah}] Stats URL: /api/wilayah/stats/${wilayah.wilayah}?_t=${cacheBust}${periodParams}`);
+                    
                     // Fetch both GeoJSON and stats in parallel
-                    const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayah.wilayah}?_t=${cacheBust}`, {
+                    const geojsonPromise = fetch(`/api/wilayah/geojson/${wilayah.wilayah}?_t=${cacheBust}${periodParams}`, {
                         headers: {
                             'Cache-Control': 'no-cache, no-store, must-revalidate',
                             'Pragma': 'no-cache',
@@ -2257,7 +2682,7 @@ function initMap() {
                         }
                     }).then(r => r.ok ? r.json() : null);
                     
-                    const statsPromise = fetch(`/api/wilayah/stats/${wilayah.wilayah}?_t=${cacheBust}`, {
+                    const statsPromise = fetch(`/api/wilayah/stats/${wilayah.wilayah}?_t=${cacheBust}${periodParams}`, {
                         headers: {
                             'Cache-Control': 'no-cache, no-store, must-revalidate',
                             'Pragma': 'no-cache',
@@ -2267,6 +2692,18 @@ function initMap() {
                     
                     return Promise.all([geojsonPromise, statsPromise])
                         .then(([geojson, stats]) => {
+                            console.log(`📊 [wilayah ${wilayah.wilayah}] ========== STATS DETAIL ==========`);
+                            console.log(`📊 [wilayah ${wilayah.wilayah}] Raw stats:`, JSON.stringify(stats, null, 2));
+                            console.table({
+                                'Bersih': stats?.status_counts?.bersih || 0,
+                                'Ringan': stats?.status_counts?.ringan || 0,
+                                'Sedang': stats?.status_counts?.sedang || 0,
+                                'Berat': stats?.status_counts?.berat || 0,
+                                'Total TK': stats?.total_tk || 0,
+                                'Total Neto': stats?.total_neto || 0
+                            });
+                            console.log(`📊 [wilayah ${wilayah.wilayah}] ====================================`);
+                            
                             if (!geojson || !geojson.features) return wilayah;
                             
                             // Use stats endpoint for accurate counts
@@ -2302,8 +2739,8 @@ function initMap() {
                                 const props = feature.properties;
                                 
                                 // Sum Luas Netto (from CSV neto field)
-                                // const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
-                                // totalLuasNetto += parseFloat(neto) || 0;
+                                const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
+                                totalLuasNetto += parseFloat(neto) || 0;
 
                                 // Sum TK (from CSV TOTAL_TK field)
                                 const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || 0;
@@ -2390,8 +2827,8 @@ function initMap() {
             card.style.cursor = 'pointer';
             card.onclick = () => {
                 document.getElementById('wilayahSelect').value = wilayah.wilayah;
-                loadWilayahMap();
-                document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+                loadWilayahMapDirect(wilayah.wilayah);
+                // No scroll - stay at current position to see popup
             };
 
             // Create status grid HTML
@@ -2453,7 +2890,7 @@ function initMap() {
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-ruler-combined"></i>
-                            <span>Luas Netto Wilayah</span>
+                            <span>Luas Rencana Wilayah</span>
                         </span>
                         <span class="info-value">
                             ${(wilayah.total_luas_netto ? parseFloat(wilayah.total_luas_netto).toFixed(2) : '0.00')} Ha
@@ -2465,7 +2902,7 @@ function initMap() {
                             <span>Total Tenaga Kerja Existing</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? parseFloat(wilayah.total_tk).toFixed(2) : '0.00')} TK
+                            ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk)) : 0)} TK
                         </span>
                     </div>
                     <div class="info-row">
@@ -2474,7 +2911,7 @@ function initMap() {
                             <span>5 Hari Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? (parseFloat(wilayah.total_tk) / 5).toFixed(2) : '0.00')} TK/hari
+                            ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk) / 5) : 0)} TK/hari
                         </span>
                     </div>
                     <div class="info-row">
@@ -2483,7 +2920,7 @@ function initMap() {
                             <span>6 Hari Kerja</span>
                         </span>
                         <span class="info-value">
-                            ${(wilayah.total_tk ? (parseFloat(wilayah.total_tk) / 6).toFixed(2) : '0.00')} TK/hari
+                            ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk) / 6) : 0)} TK/hari
                         </span>
                     </div>
                     <div>
@@ -2491,10 +2928,10 @@ function initMap() {
                         ${statusGridHTML}
                     </div>
                     <div style="margin-top: 10px; padding-top: 10px; text-align: center; display: flex; gap: 8px; justify-content: center;">
-                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('map').scrollIntoView({ behavior: 'smooth' });" style="flex: 1; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(18, 130, 65, 0.2)';">
-                            <i class="fas fa-map"></i> Lihat Peta
+                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMapDirect(${wilayah.wilayah});" style="flex: 1; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(18, 130, 65, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(18, 130, 65, 0.2)';">
+                            <i class="fa-solid fa-map-location-dot"></i> Lihat Peta
                         </button>
-                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMap(); document.getElementById('locationDetailsTable').classList.add('active'); document.getElementById('toggleIcon').className = 'fas fa-times'; document.getElementById('toggleText').textContent = 'Sembunyikan Tabel'; document.getElementById('locationDetailsTable').scrollIntoView({ behavior: 'smooth' });" style="flex: 1; background: linear-gradient(135deg, #FBA919, #f39c12); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(251, 169, 25, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(251, 169, 25, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(251, 169, 25, 0.2)';">
+                        <button onclick="event.stopPropagation(); document.getElementById('wilayahSelect').value = ${wilayah.wilayah}; loadWilayahMapDirect(${wilayah.wilayah}); document.getElementById('locationDetailsTable').classList.add('active'); document.getElementById('toggleIcon').className = 'fas fa-times'; document.getElementById('toggleText').textContent = 'Sembunyikan Tabel';" style="flex: 1; background: linear-gradient(135deg, #FBA919, #f39c12); color: white; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 10px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(251, 169, 25, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(251, 169, 25, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(251, 169, 25, 0.2)';">
                             <i class="fas fa-table"></i> Tabel
                         </button>
                     </div>
@@ -2837,6 +3274,12 @@ function initMap() {
 
     // Helper: Get available bulan for selected tahun
     function getAvailableBulanForTahun(tahun) {
+        // Use filter_structure if available (faster & more efficient)
+        if (availablePeriods.filter_structure && availablePeriods.filter_structure[tahun]) {
+            return Object.keys(availablePeriods.filter_structure[tahun]).map(b => parseInt(b)).sort((a, b) => b - a);
+        }
+        
+        // Fallback to periods array
         const bulanSet = new Set();
         availablePeriods.periods.forEach(period => {
             if (period.tahun == tahun) {
@@ -2848,6 +3291,12 @@ function initMap() {
 
     // Helper: Get available minggu for selected tahun & bulan
     function getAvailableMingguForTahunBulan(tahun, bulan) {
+        // Use filter_structure if available (faster & more efficient)
+        if (availablePeriods.filter_structure && availablePeriods.filter_structure[tahun] && availablePeriods.filter_structure[tahun][bulan]) {
+            return availablePeriods.filter_structure[tahun][bulan].sort((a, b) => b - a);
+        }
+        
+        // Fallback to periods array
         const mingguSet = new Set();
         availablePeriods.periods.forEach(period => {
             if (period.tahun == tahun && period.bulan == bulan) {
@@ -2961,15 +3410,17 @@ function initMap() {
             
             if (data.success) {
                 console.log('✅ Loaded periods:', data.periods.length, 'unique periods');
+                console.log('📊 Filter structure:', data.filter_structure);
                 
                 // Store periods data for smart filtering
                 availablePeriods = {
                     periods: data.periods,
                     tahun_list: data.tahun_list,
-                    latest_period: data.latest_period
+                    latest_period: data.latest_period,
+                    filter_structure: data.filter_structure  // NEW: Nested structure untuk smart filtering
                 };
                 
-                // Populate tahun button grid with ALL years
+                // Populate tahun button grid dengan HANYA tahun yang punya publikasi
                 const tahunGrid = document.getElementById('tahunGrid');
                 tahunGrid.innerHTML = '';
                 
@@ -2979,6 +3430,9 @@ function initMap() {
                     btn.setAttribute('data-value', tahunItem);
                     btn.textContent = tahunItem;
                     btn.title = `Data tersedia untuk tahun ${tahunItem}`;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.disabled = false;
                     btn.onclick = () => selectGridOption('tahun', tahunItem, tahunItem);
                     tahunGrid.appendChild(btn);
                 });
@@ -3166,13 +3620,11 @@ function initMap() {
                 }
             } else {
                 currentPeriod = { tahun, bulan, minggu };
-                // Only update display if user manually selected different period
-                if (!isLatestPeriod) {
-                    updatePeriodInfoDisplay(currentPeriod);
-                    console.log('✅ Periode data tersedia:', currentPeriod);
-                } else {
-                    console.log('✅ Using latest published period');
-                }
+                // Always update display when user clicks "Tampilkan Peta"
+                // Show whether it's latest period or not
+                const isLatestMsg = isLatestPeriod ? 'true' : 'false';
+                updatePeriodInfoDisplay(currentPeriod, isLatestPeriod);
+                console.log(`✅ Periode data tersedia: ${tahun}/${bulan}/W${minggu} (isLatest: ${isLatestMsg})`, currentPeriod);
             }
             
             return true;
@@ -3232,8 +3684,26 @@ function initMap() {
             loadAvailablePeriods(); // Load periods and then auto-load map
         }
     });
+
+    // Export CSV function (from csv-handler.js)
+    async function exportToCsv(filters = {}) {
+        try {
+            // Build query string from current location table data
+            const params = new URLSearchParams();
+            
+            // Get current wilayah if any
+            const wilayahSelect = document.getElementById('wilayahSelect');
+            if (wilayahSelect && wilayahSelect.value) {
+                params.append('wilayah_id', wilayahSelect.value);
+            }
+            
+            // Download file
+            const url = `/api/csv/export?${params.toString()}`;
+            window.location.href = url;
+            
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+            alert('Gagal mengexport data: ' + error.message);
+        }
+    }
 </script>
-
-<!-- CSV Handler Script -->
-<script src="{{ asset('js/csv-handler.js') }}"></script>
-

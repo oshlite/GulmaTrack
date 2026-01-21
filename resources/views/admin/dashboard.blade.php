@@ -1167,7 +1167,7 @@
                 <p style="margin-top: 20px; padding: 15px; background: #fff8e1; border-left: 4px solid var(--accent-color); border-radius: 8px; font-size: 13px; color: #666;">
                     <strong style="color: var(--accent-color);">📋 Format CSV yang valid:</strong><br>
                     <span style="font-size: 12px; line-height: 1.6; display: block; margin-top: 8px;">
-                        PG, FM, Wilayah, SEKSI, Neto, Hasil, Umur Tanaman, Penanggungjawab, Kode Aktf, ACTIVITAS, KATEGORI, TK/HA, TOTAL TK
+                        PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,<br>TANGGAL,TK/HA,TOTAL_TK
                     </span>
                 </p>
             </div>
@@ -1177,7 +1177,7 @@
     <!-- Map Card -->
     <div class="card full-width">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="margin: 0;"><i class="fas fa-map"></i> Peta Wilayah - Status Gulma</h2>
+            <h2 style="margin: 0;"><i class="fa-solid fa-map-location-dot"></i> Peta Wilayah - Status Gulma</h2>
             
             <!-- Publish Map Button -->
             <div>
@@ -1559,7 +1559,7 @@
                                             style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
                                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
                                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                        <i class="fas fa-map"></i> Lihat Peta
+                                        <i class="fa-solid fa-map-location-dot"></i> Lihat Peta
                                     </button>
                                 </td>
                             `;

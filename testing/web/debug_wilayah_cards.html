@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Wilayah Cards Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-card h3 {
+            margin-top: 0;
+            color: #128241;
+        }
+        button {
+            background: #128241;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d6631;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .result-section {
+            margin-top: 15px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug: Wilayah Cards Data untuk Periode 2030/3/W3</h1>
+    
+    <div class="test-card">
+        <h3>Test 1: API /api/wilayah/data</h3>
+        <p>Test apakah API mengembalikan data yang benar untuk periode <span class="highlight">2030/3/W3</span></p>
+        <button onclick="testWilayahDataAPI()">Run Test</button>
+        <div id="result1" class="result-section"></div>
+    </div>
+    
+    <div class="test-card">
+        <h3>Test 2: API /api/wilayah/stats/16</h3>
+        <p>Test apakah stats API mengembalikan data yang benar untuk Wilayah 16</p>
+        <button onclick="testWilayahStatsAPI()">Run Test</button>
+        <div id="result2" class="result-section"></div>
+    </div>
+    
+    <div class="test-card">
+        <h3>Test 3: Simulasi Frontend Logic</h3>
+        <p>Simulasi cara frontend mengambil dan memproses data wilayah cards</p>
+        <button onclick="simulateFrontendLogic()">Run Test</button>
+        <div id="result3" class="result-section"></div>
+    </div>
+
+    <script>
+        const EXPECTED_VALUES = {
+            total_tk: 413.8,
+            total_neto: 103.45,
+            ringan_count: 14,
+            bersih_count: 0
+        };
+        
+        function compareValues(actual, expected, label) {
+            const diff = Math.abs(actual - expected);
+            const match = diff < 0.01;
+            return `<div>${label}: <strong>${actual}</strong> ${match ? '<span class="success">✓ MATCH</span>' : `<span class="error">✗ EXPECTED ${expected}</span>`}</div>`;
+        }
+        
+        async function testWilayahDataAPI() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.innerHTML = '<div>Loading...</div>';
+            
+            try {
+                const url = `/api/wilayah/data?tahun=2030&bulan=3&minggu=3&_t=${Date.now()}`;
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log('Full response:', data);
+                
+                const wil16 = data.data.find(w => w.wilayah == 16);
+                
+                if (!wil16) {
+                    resultDiv.innerHTML = '<pre class="error">Wilayah 16 tidak ditemukan!</pre>';
+                    return;
+                }
+                
+                let html = '<h4>Hasil:</h4>';
+                html += compareValues(wil16.total_tk, EXPECTED_VALUES.total_tk, 'Total TK');
+                html += compareValues(wil16.total_luas_netto, EXPECTED_VALUES.total_neto, 'Total Neto');
+                html += compareValues(wil16.status_counts.ringan, EXPECTED_VALUES.ringan_count, 'Ringan Count');
+                html += compareValues(wil16.status_counts.bersih, EXPECTED_VALUES.bersih_count, 'Bersih Count');
+                
+                html += '<h4>Raw Data:</h4>';
+                html += '<pre>' + JSON.stringify(wil16, null, 2) + '</pre>';
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<pre class="error">Error: ' + error.message + '</pre>';
+                console.error('Error:', error);
+            }
+        }
+        
+        async function testWilayahStatsAPI() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.innerHTML = '<div>Loading...</div>';
+            
+            try {
+                const url = `/api/wilayah/stats/16?tahun=2030&bulan=3&minggu=3&_t=${Date.now()}`;
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                console.log('Full response:', data);
+                
+                let html = '<h4>Hasil:</h4>';
+                html += compareValues(data.total_tk, EXPECTED_VALUES.total_tk, 'Total TK');
+                html += compareValues(data.total_neto, EXPECTED_VALUES.total_neto, 'Total Neto');
+                html += compareValues(data.ringan_count, EXPECTED_VALUES.ringan_count, 'Ringan Count');
+                html += compareValues(data.bersih_count, EXPECTED_VALUES.bersih_count, 'Bersih Count');
+                
+                html += '<h4>Raw Data:</h4>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<pre class="error">Error: ' + error.message + '</pre>';
+                console.error('Error:', error);
+            }
+        }
+        
+        async function simulateFrontendLogic() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.innerHTML = '<div>Running simulation...</div>';
+            
+            try {
+                // Step 1: Fetch wilayah list
+                const tahun = '2030';
+                const bulan = '3';
+                const minggu = '3';
+                const periodParams = `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`;
+                
+                console.log('Step 1: Fetching wilayah list...');
+                const dataUrl = `/api/wilayah/data?_t=${Date.now()}${periodParams}`;
+                console.log('URL:', dataUrl);
+                
+                const dataResponse = await fetch(dataUrl);
+                const wilayahList = await dataResponse.json();
+                
+                console.log('Wilayah list response:', wilayahList);
+                
+                const wil16Data = wilayahList.data.find(w => w.wilayah == 16);
+                
+                // Step 2: Enrich with stats
+                console.log('Step 2: Fetching stats for Wilayah 16...');
+                const statsUrl = `/api/wilayah/stats/16?_t=${Date.now()}${periodParams}`;
+                console.log('URL:', statsUrl);
+                
+                const statsResponse = await fetch(statsUrl);
+                const stats = await statsResponse.json();
+                
+                console.log('Stats response:', stats);
+                
+                // Step 3: Merge data (simulate frontend logic)
+                const enrichedData = {
+                    ...wil16Data,
+                    total_luas_netto: stats.total_neto,
+                    total_tk: stats.total_tk,
+                    status_counts: {
+                        bersih: stats.bersih_count,
+                        ringan: stats.ringan_count,
+                        sedang: stats.sedang_count,
+                        berat: stats.berat_count
+                    }
+                };
+                
+                console.log('Enriched data:', enrichedData);
+                
+                // Display results
+                let html = '<h4>Hasil Simulasi Frontend:</h4>';
+                html += '<p>Ini adalah data yang SEHARUSNYA ditampilkan di wilayah card:</p>';
+                html += compareValues(enrichedData.total_tk, EXPECTED_VALUES.total_tk, 'Total TK');
+                html += compareValues(enrichedData.total_luas_netto, EXPECTED_VALUES.total_neto, 'Total Neto');
+                html += compareValues(enrichedData.status_counts.ringan, EXPECTED_VALUES.ringan_count, 'Ringan Count');
+                html += compareValues(enrichedData.status_counts.bersih, EXPECTED_VALUES.bersih_count, 'Bersih Count');
+                
+                html += '<h4>Enriched Data (yang akan di-render ke card):</h4>';
+                html += '<pre>' + JSON.stringify(enrichedData, null, 2) + '</pre>';
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<pre class="error">Error: ' + error.message + '</pre>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

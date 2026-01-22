@@ -356,21 +356,8 @@ class AdminController extends Controller
 
                     $parseDate2 = function($val) {
                         if (empty($val)) return null;
-                        try {
-                            $val = trim($val);
-                            // Try multiple date formats
-                            $date = \DateTime::createFromFormat('Y-m-d', $val);
-                            if ($date === false) $date = \DateTime::createFromFormat('d-m-Y', $val);
-                            if ($date === false) $date = \DateTime::createFromFormat('d/m/Y', $val);
-                            if ($date === false) $date = \DateTime::createFromFormat('d-M-Y', $val); // 2-Nov-2025
-                            if ($date === false) $date = \DateTime::createFromFormat('d-M-y', $val); // 2-Nov-25
-                            if ($date === false) $date = \DateTime::createFromFormat('d M Y', $val);
-                            if ($date === false) $date = \DateTime::createFromFormat('d M y', $val);
-                            
-                            return $date ? $date->format('Y-m-d') : null;
-                        } catch (\Exception $e) {
-                            return null;
-                        }
+                        // Keep raw string from CSV as-is, don't parse/format
+                        return trim($val);
                     };
 
                     $pg = $getField('pg');
@@ -380,7 +367,7 @@ class AdminController extends Controller
                     $tnm_sts = $getField('tnm_sts') ?? $getField('tnm sts');
                     $activitas = $getField('activitas') ?? $getField('aktivitas');
                     $kategori = $getField('kategori');
-                    $tanggal = $parseDate2($getField('tanggal')) ?? now()->toDateString();
+                    $tanggal = $parseDate2($getField('tanggal')) ?? '';
                     $tk_ha = $parseFloat2($getField('tk/ha') ?? $getField('tkha'));
                     $total_tk = $parseFloat2($getField('total_tk') ?? $getField('total tk'));
 
@@ -647,7 +634,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => '✅ Peta berhasil dipublikasikan!',
+                'message' => ' Peta berhasil dipublikasikan!',
                 'published_at' => $publication->published_at->format('d M Y H:i'),
                 'import_id' => $importToDeploy->id,
                 'nama_file' => $importToDeploy->nama_file,

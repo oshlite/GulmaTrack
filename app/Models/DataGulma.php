@@ -35,7 +35,7 @@ class DataGulma extends Model
     ];
 
     protected $casts = [
-        'tanggal' => 'date',
+        // 'tanggal' => 'date',  // Keep as raw string from CSV, don't format
         'neto' => 'decimal:2',
         'hasil' => 'decimal:2',
         'tk_ha' => 'decimal:2',

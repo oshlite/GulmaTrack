@@ -1452,9 +1452,11 @@ function initMap() {
         
         let savedScrollY = window.scrollY;
         let savedScrollX = window.scrollX;
+        let isInteracting = false;
         
         // passive: false = bisa block browser default behavior
         mapContainer.addEventListener('mousedown', function(e) {
+            isInteracting = true;
             savedScrollY = window.scrollY;
             savedScrollX = window.scrollX;
             console.log('🔒 [Click] Saving scroll position:', savedScrollY);
@@ -1470,6 +1472,8 @@ function initMap() {
             setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 10);
             setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 50);
             setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 100);
+            
+            isInteracting = false;
         }, { passive: false });
         
         // ALSO block click event
@@ -1478,8 +1482,48 @@ function initMap() {
             window.scrollTo(savedScrollX, savedScrollY);
         }, { passive: false });
         
+        // Block ALL scroll events on map - force position restore
+        mapContainer.addEventListener('wheel', function(e) {
+            if (isInteracting) return;
+            e.preventDefault();
+            window.scrollTo(savedScrollX, savedScrollY);
+        }, { passive: false });
+        
+        // Block touch scroll on map
+        mapContainer.addEventListener('touchmove', function(e) {
+            if (isInteracting) return;
+            e.preventDefault();
+            window.scrollTo(savedScrollX, savedScrollY);
+        }, { passive: false });
+        
+        // Disable Leaflet auto-pan when popup opens
+        map.on('popupopen', function(e) {
+            console.log('🔒 [POPUP] Popup opened - disabling autoPan, maintaining scroll position');
+            // Restore scroll position when popup opens
+            window.scrollTo(savedScrollX, savedScrollY);
+        });
+        
         console.log('✅ [WILAYAH] NO-SCROLL protection active for ALL map clicks!');
     }
+    
+    // Global scroll prevention - block scroll up from any element except user-initiated
+    let lastScrollY = window.scrollY;
+    let userScroll = false;
+    
+    window.addEventListener('scroll', function(e) {
+        // If scroll went significantly up (more than 100px), restore it
+        if (window.scrollY < lastScrollY - 50 && !userScroll) {
+            console.log('🔒 [GLOBAL] Blocking scroll up - restoring position from', window.scrollY, 'to', lastScrollY);
+            window.scrollTo(window.scrollX, lastScrollY);
+        }
+        lastScrollY = window.scrollY;
+    }, { passive: true });
+    
+    // Detect user-initiated scroll
+    document.addEventListener('mousewheel', function() {
+        userScroll = true;
+        setTimeout(() => { userScroll = false; }, 500);
+    }, { passive: true });
 }
 
     // Error handling functions
@@ -1714,53 +1758,12 @@ function initMap() {
                     },
                     onEachFeature: function(feature, layer) {
                         if (feature.properties) {
-                            // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
-                            layer.on('click', function(e) {
-                                L.DomEvent.stopPropagation(e);
-                                
-                                const existingPopup = document.getElementById('customMapPopup');
-                                if (existingPopup) existingPopup.remove();
-                                
-                                const popup = document.createElement('div');
-                                popup.id = 'customMapPopup';
-                                popup.style.cssText = `
-                                    position: fixed;
-                                    top: 50%;
-                                    left: 50%;
-                                    transform: translate(-50%, -50%);
-                                    background: white;
-                                    border-radius: 8px;
-                                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-                                    z-index: 10000;
-                                    max-width: 300px;
-                                    max-height: 80vh;
-                                    overflow-y: auto;
-                                `;
-                                
-                                popup.innerHTML = `
-                                    <div style="position: relative;">
-                                        <button onclick="document.getElementById('customMapPopup').remove()" 
-                                                style="position: absolute; top: 8px; right: 8px; z-index: 10001;
-                                                       background: rgba(255,255,255,0.9); border: none; 
-                                                       width: 28px; height: 28px; border-radius: 50%; 
-                                                       cursor: pointer; font-size: 16px; font-weight: bold;
-                                                       box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                            ×
-                                        </button>
-                                        ${createPopupContent(feature.properties)}
-                                    </div>
-                                `;
-                                
-                                document.body.appendChild(popup);
-                                
-                                setTimeout(() => {
-                                    document.addEventListener('click', function closePopup(ev) {
-                                        if (!popup.contains(ev.target)) {
-                                            popup.remove();
-                                            document.removeEventListener('click', closePopup);
-                                        }
-                                    });
-                                }, 100);
+                            // Bind standard Leaflet popup
+                            layer.bindPopup(createPopupContent(feature.properties), {
+                                maxWidth: 300,
+                                maxHeight: 400,
+                                closeButton: true,
+                                autoPan: true
                             });
                             
                             layer.bindTooltip(createTooltipContent(feature.properties), {
@@ -1920,53 +1923,12 @@ function initMap() {
                     },
                     onEachFeature: function(feature, layer) {
                         if (feature.properties) {
-                            // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
-                            layer.on('click', function(e) {
-                                L.DomEvent.stopPropagation(e);
-                                
-                                const existingPopup = document.getElementById('customMapPopup');
-                                if (existingPopup) existingPopup.remove();
-                                
-                                const popup = document.createElement('div');
-                                popup.id = 'customMapPopup';
-                                popup.style.cssText = `
-                                    position: fixed;
-                                    top: 50%;
-                                    left: 50%;
-                                    transform: translate(-50%, -50%);
-                                    background: white;
-                                    border-radius: 8px;
-                                    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-                                    z-index: 10000;
-                                    max-width: 300px;
-                                    max-height: 80vh;
-                                    overflow-y: auto;
-                                `;
-                                
-                                popup.innerHTML = `
-                                    <div style="position: relative;">
-                                        <button onclick="document.getElementById('customMapPopup').remove()" 
-                                                style="position: absolute; top: 8px; right: 8px; z-index: 10001;
-                                                       background: rgba(255,255,255,0.9); border: none; 
-                                                       width: 28px; height: 28px; border-radius: 50%; 
-                                                       cursor: pointer; font-size: 16px; font-weight: bold;
-                                                       box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                            ×
-                                        </button>
-                                        ${createPopupContent(feature.properties)}
-                                    </div>
-                                `;
-                                
-                                document.body.appendChild(popup);
-                                
-                                setTimeout(() => {
-                                    document.addEventListener('click', function closePopup(ev) {
-                                        if (!popup.contains(ev.target)) {
-                                            popup.remove();
-                                            document.removeEventListener('click', closePopup);
-                                        }
-                                    });
-                                }, 100);
+                            // Bind standard Leaflet popup
+                            layer.bindPopup(createPopupContent(feature.properties), {
+                                maxWidth: 300,
+                                maxHeight: 400,
+                                closeButton: true,
+                                autoPan: true
                             });
                             
                             // Add tooltip for hover (quick info)
@@ -2179,9 +2141,9 @@ function initMap() {
             loadAllWilayah();
         }
         
-        // Scroll to wilayah cards section to show loading
+        // Scroll to map section
         setTimeout(() => {
-            document.getElementById('wilayahGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
     }
 
@@ -2357,53 +2319,12 @@ function initMap() {
                         },
                         onEachFeature: function(feature, layer) {
                             if (feature.properties) {
-                                // ✅ CUSTOM POPUP SYSTEM - Bypass Leaflet popup untuk avoid scroll issue
-                                layer.on('click', function(e) {
-                                    L.DomEvent.stopPropagation(e);
-                                    
-                                    const existingPopup = document.getElementById('customMapPopup');
-                                    if (existingPopup) existingPopup.remove();
-                                    
-                                    const popup = document.createElement('div');
-                                    popup.id = 'customMapPopup';
-                                    popup.style.cssText = `
-                                        position: fixed;
-                                        top: 50%;
-                                        left: 50%;
-                                        transform: translate(-50%, -50%);
-                                        background: white;
-                                        border-radius: 8px;
-                                        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-                                        z-index: 10000;
-                                        max-width: 300px;
-                                        max-height: 80vh;
-                                        overflow-y: auto;
-                                    `;
-                                    
-                                    popup.innerHTML = `
-                                        <div style="position: relative;">
-                                            <button onclick="document.getElementById('customMapPopup').remove()" 
-                                                    style="position: absolute; top: 8px; right: 8px; z-index: 10001;
-                                                           background: rgba(255,255,255,0.9); border: none; 
-                                                           width: 28px; height: 28px; border-radius: 50%; 
-                                                           cursor: pointer; font-size: 16px; font-weight: bold;
-                                                           box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                                ×
-                                            </button>
-                                            ${createPopupContent(feature.properties)}
-                                        </div>
-                                    `;
-                                    
-                                    document.body.appendChild(popup);
-                                    
-                                    setTimeout(() => {
-                                        document.addEventListener('click', function closePopup(ev) {
-                                            if (!popup.contains(ev.target)) {
-                                                popup.remove();
-                                                document.removeEventListener('click', closePopup);
-                                            }
-                                        });
-                                    }, 100);
+                                // Bind standard Leaflet popup
+                                layer.bindPopup(createPopupContent(feature.properties), {
+                                    maxWidth: 300,
+                                    maxHeight: 400,
+                                    closeButton: true,
+                                    autoPan: true
                                 });
                                 
                                 // Add tooltip for hover (quick info)

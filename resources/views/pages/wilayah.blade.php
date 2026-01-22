@@ -2,6 +2,36 @@
 
 @section('title', 'Wilayah')
 
+@push('head')
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png?v=' . time()) }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png?v=' . time()) }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png?v=' . time()) }}">
+<script>
+    // Force set favicon on page load for Wilayah page
+    window.addEventListener('load', function() {
+        const favicon32 = document.createElement('link');
+        favicon32.rel = 'icon';
+        favicon32.type = 'image/png';
+        favicon32.sizes = '32x32';
+        favicon32.href = '{{ asset("image/logo3.png?v=" . time()) }}';
+        document.head.appendChild(favicon32);
+        
+        const favicon16 = document.createElement('link');
+        favicon16.rel = 'icon';
+        favicon16.type = 'image/png';
+        favicon16.sizes = '16x16';
+        favicon16.href = '{{ asset("image/logo3.png?v=" . time()) }}';
+        document.head.appendChild(favicon16);
+        
+        const appleIcon = document.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        appleIcon.sizes = '180x180';
+        appleIcon.href = '{{ asset("image/logo3.png?v=" . time()) }}';
+        document.head.appendChild(appleIcon);
+    });
+</script>
+@endpush
+
 @section('content')
 <!-- Leaflet CSS - Using Cloudflare CDN (faster for Indonesia) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -308,6 +338,11 @@
             min-width: max-content;
             max-height: 400px;
             overflow-y: auto;
+        }
+
+        /* Khusus untuk Tahun - hanya 3 kolom */
+        #tahunGrid.button-grid {
+            grid-template-columns: repeat(3, 1fr);
         }
 
         /* Khusus untuk Bulan - 6 kolom */
@@ -1099,6 +1134,68 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     // ==================
+    // PERFORMANCE OPTIMIZATION: Data Caching
+    // ==================
+    const apiCache = new Map();
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+    const REQUEST_TIMEOUT = 15000; // 15 second timeout
+    
+    function getCacheKey(url) {
+        return url;
+    }
+    
+    function getCachedData(key) {
+        if (!apiCache.has(key)) return null;
+        const cached = apiCache.get(key);
+        if (Date.now() - cached.timestamp > CACHE_TTL) {
+            apiCache.delete(key);
+            return null;
+        }
+        console.log('✅ Using cached data');
+        return cached.data;
+    }
+    
+    function setCachedData(key, data) {
+        apiCache.set(key, {
+            data,
+            timestamp: Date.now()
+        });
+    }
+    
+    // Optimized fetch with timeout and caching (full URL with query params already included)
+    async function fetchWithCache(fullUrl) {
+        const cacheKey = getCacheKey(fullUrl);
+        
+        // Check cache first
+        const cached = getCachedData(cacheKey);
+        if (cached) return cached;
+        
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+        
+        try {
+            const response = await fetch(fullUrl, {
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            if (!response.ok) throw new Error(`HTTP ${response.status} from ${fullUrl}`);
+            
+            const data = await response.json();
+            setCachedData(cacheKey, data);
+            return data;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            console.error('❌ Fetch error:', error.message);
+            throw error;
+        }
+    }
+    
     // ==================
     // DEPRECATED - OLD CUSTOM SELECT (Now using Button Grid)
     // ==================
@@ -2147,6 +2244,37 @@ function initMap() {
         }, 100);
     }
 
+    // ✅ OPTIMIZATION: Lazy load stats & records after map renders
+    async function lazyLoadStatsAndRecords(wilayahNumbers, periodParams, loadId) {
+        // Don't block rendering - load async
+        setTimeout(async () => {
+            if (loadId !== currentLoadId) {
+                console.log(`⛔ [lazyLoad] Skipping stats load for outdated loadId #${loadId}`);
+                return;
+            }
+            
+            try {
+                console.log(`⏳ [lazyLoad] Loading stats for ${wilayahNumbers.length} wilayah...`);
+                
+                // Load stats in parallel (fast API endpoints)
+                const statsPromises = wilayahNumbers.map(num =>
+                    fetchWithCache(`/api/wilayah/stats/${num}${periodParams}`)
+                        .catch(e => {
+                            console.warn(`⚠️  Failed to load stats for wilayah ${num}:`, e.message);
+                            return null;
+                        })
+                );
+                
+                const statsResults = await Promise.all(statsPromises);
+                console.log(`✅ [lazyLoad] Loaded stats for ${statsResults.filter(r => r).length} wilayah`);
+                
+                // Note: Stats are loaded but not blocking - user sees map immediately
+            } catch (error) {
+                console.error(`❌ [lazyLoad] Error loading stats:`, error);
+            }
+        }, 100); // Small delay to let browser render map first
+    }
+
     // Load all wilayah
     async function loadAllWilayah() {
         // ✅ CRITICAL: Generate unique loadId untuk guard stale renders
@@ -2203,23 +2331,13 @@ function initMap() {
             const bulan = document.getElementById('bulanSelect').value;
             const minggu = document.getElementById('mingguSelect').value;
             const periodParams = tahun && bulan && minggu 
-                ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
+                ? `?tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
                 : '';
             
             console.log(`📅 [wilayah.blade] Loading wilayah summary dengan periode: ${tahun}/${bulan}/W${minggu}`);
             
-            const summaryResponse = await fetch(`/api/wilayah/data?_t=${new Date().getTime()}${periodParams}`);
-            console.log('🌐 [wilayah.blade] API /wilayah/data response status:', summaryResponse.status);
-            console.log('🌐 [wilayah.blade] Response headers:', {
-                'content-type': summaryResponse.headers.get('content-type'),
-                'content-length': summaryResponse.headers.get('content-length')
-            });
-            
-            if (!summaryResponse.ok) {
-                throw new Error(`API /wilayah/data returned status ${summaryResponse.status}`);
-            }
-            
-            const summary = await summaryResponse.json();
+            // ✅ OPTIMIZED: Use cached fetch (no cache-buster _t)
+            const summary = await fetchWithCache(`/api/wilayah/data${periodParams}`);
             console.log('📊 [wilayah.blade] API /wilayah/data response:', summary);
             
             if (summary.error) {
@@ -2239,26 +2357,11 @@ function initMap() {
             
             console.log(`📅 [wilayah.blade] Loading map dengan periode: ${tahun}/${bulan}/W${minggu}`);
             
-            // Load each wilayah
+            // Load each wilayah - ONLY GEOJSON for fast rendering
             const promises = wilayahNumbers.map(num => {
                 console.log(`🌍 [wilayah.blade] Fetching wilayah ${num}...`);
-                const cacheBust = new Date().getTime();
-                return fetch(`/api/wilayah/geojson/${num}?_t=${cacheBust}${periodParams}`, {
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    },
-                    signal: mapLoadingController.signal // ✅ NEW: Pass abort signal
-                })
-                    .then(r => {
-                        console.log(`📥 [wilayah.blade] Wilayah ${num} response: status ${r.status}`);
-                        if (!r.ok) {
-                            console.error(`Failed to fetch wilayah ${num}: status ${r.status}`);
-                            return null;
-                        }
-                        return r.json();
-                    })
+                // ✅ OPTIMIZED: Remove cache buster, use client-side caching
+                return fetchWithCache(`/api/wilayah/geojson/${num}${periodParams}`)
                     .then(data => {
                         if (data) {
                             console.log(`✅ [wilayah.blade] Wilayah ${num}: ${data.features?.length || 0} features loaded`);
@@ -2392,6 +2495,9 @@ function initMap() {
             const loadTime = (performance.now() - startTime).toFixed(2);
             console.log(`✅ All wilayah loaded in ${loadTime}ms`);
             showMapLoading(false);
+            
+            // ✅ OPTIMIZATION: Lazy-load stats & records AFTER map renders
+            lazyLoadStatsAndRecords(wilayahNumbers, periodParams, loadId);
             
             // Populate location table with ALL data (unfiltered)
             // This ensures allLocationData is always populated with complete dataset
@@ -2682,15 +2788,15 @@ function initMap() {
         console.log('🔍 [DEBUG] bulanSelect.value:', bulan);
         console.log('🔍 [DEBUG] mingguSelect.value:', minggu);
         
-        const periodParams = tahun && bulan && minggu 
+        // Build period params with & (not ?) since we'll use it after ?_t=
+        const periodParamsWithAmp = tahun && bulan && minggu 
             ? `&tahun=${tahun}&bulan=${bulan}&minggu=${minggu}`
             : '';
         
         console.log(`📅 [loadWilayahDataAndStats] Loading dengan periode: ${tahun}/${bulan}/W${minggu}`);
-        console.log(`🔗 [loadWilayahDataAndStats] Period params string: "${periodParams}"`);
-        console.log(`🔗 [loadWilayahDataAndStats] Fetching: /api/wilayah/data?_t=${new Date().getTime()}${periodParams}`);
+        console.log(`🔗 [loadWilayahDataAndStats] Period params string: "${periodParamsWithAmp}"`);
         
-        const apiUrl = `/api/wilayah/data?_t=${new Date().getTime()}${periodParams}`;
+        const apiUrl = `/api/wilayah/data?_t=${new Date().getTime()}${periodParamsWithAmp}`;
         console.log(`🔗 [loadWilayahDataAndStats] Final API URL: ${apiUrl}`);
         
         fetch(apiUrl)
@@ -3069,8 +3175,8 @@ function initMap() {
             const aktivitas = String(props.activitas || props.ACTIVITAS || props.aktivitas || '').trim() || '-';
             const kategori = props.kategori || props.KATEGORI || '-';
             // Tanggal sudah dalam format CSV "2-Nov" bukan ISO timestamp
-            const tanggalRaw = String(props.tanggal || props.TANGGAL || '').trim();
-            const tanggalRencana = tanggalRaw || '-';
+            const tanggal= String(props.tanggal || props.TANGGAL || '').trim();
+            const tanggalRencana = tanggal || '-';
             const tkTotal = String(props.total_tk || props.TOTAL_TK || '').trim();
             let tkValue = (tkTotal && tkTotal !== '') ? Math.round(parseFloat(tkTotal)) + ' TK' : '-';
             

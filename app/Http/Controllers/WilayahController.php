@@ -498,17 +498,91 @@ class WilayahController extends Controller
                 ->where('import_log_id', $latestPublication->import_log_id)
                 ->get();
             
-            \Log::info("Total records for Wilayah {$wilayah_number}: " . $data->count());
+            \Log::info("Total raw database records for Wilayah {$wilayah_number}: " . $data->count());
             
-            // Count by kategori (direct count of all records)
-            $bersihCount = $data->where('kategori', 'Bersih')->count();
-            $ringanCount = $data->where('kategori', 'Ringan')->count();
-            $sedangCount = $data->where('kategori', 'Sedang')->count();
-            $beratCount = $data->where('kategori', 'Berat')->count();
+            // ✅ CRITICAL FIX: Calculate stats using SAME LOGIC as GeoJSON merge
+            // Only count records that have matching lokasi in GeoJSON features
+            // (This ensures frontend stats match what's actually displayed on map)
             
-            // Sum totals (all records contribute) - PAKE TOTAL_TK BUKAN TK_HA
+            // Load GeoJSON file to get all possible lokasi
+            $filePath = base_path("datala/Wil{$wilayah_number}.geojson");
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'error' => 'GeoJSON file not found',
+                    'wilayah_id' => $wilayah_number
+                ], 404);
+            }
+            
+            $geojson = json_decode(file_get_contents($filePath), true);
+            
+            // Create map of all records by seksi
+            $gulmaMap = [];
+            foreach ($data as $dbRecord) {
+                $normalizedSeksi = strtolower(trim($dbRecord->seksi));
+                if (!isset($gulmaMap[$normalizedSeksi])) {
+                    $gulmaMap[$normalizedSeksi] = [];
+                }
+                $gulmaMap[$normalizedSeksi][] = $dbRecord;
+            }
+            
+            // Count only records that match GeoJSON features (simulating merge logic)
+            $bersihCount = 0;
+            $ringanCount = 0;
+            $sedangCount = 0;
+            $beratCount = 0;
+            $mergedCount = 0;
+            
+            if (isset($geojson['features'])) {
+                foreach ($geojson['features'] as $feature) {
+                    if (isset($feature['properties'])) {
+                        $seksiValue = $feature['properties']['Lokasi'] 
+                                ?? $feature['properties']['SEKSI'] 
+                                ?? $feature['properties']['Seksi'] 
+                                ?? $feature['properties']['seksi']
+                                ?? null;
+                        
+                        $normalizedSeksiValue = $seksiValue ? strtolower(trim($seksiValue)) : null;
+                        
+                        if ($normalizedSeksiValue && isset($gulmaMap[$normalizedSeksiValue])) {
+                            // Found matching records for this feature
+                            $records = $gulmaMap[$normalizedSeksiValue];
+                            $mergedCount++;
+                            
+                            // Select BEST kategori (following exact getGeojson logic)
+                            $kategoriValues = ['bersih' => 1, 'ringan' => 2, 'sedang' => 3, 'berat' => 4];
+                            $bestKategori = null;
+                            $bestValue = 999;
+                            
+                            foreach ($records as $rec) {
+                                // Find best kategori
+                                $dataValue = $kategoriValues[strtolower($rec->kategori ?? 'berat')] ?? 5;
+                                if ($dataValue < $bestValue) {
+                                    $bestValue = $dataValue;
+                                    $bestKategori = $rec->kategori;
+                                }
+                            }
+                            
+                            // Count by best kategori
+                            $kategoriLower = strtolower($bestKategori ?? '');
+                            if (strpos($kategoriLower, 'bersih') !== false) {
+                                $bersihCount++;
+                            } elseif (strpos($kategoriLower, 'ringan') !== false) {
+                                $ringanCount++;
+                            } elseif (strpos($kategoriLower, 'sedang') !== false) {
+                                $sedangCount++;
+                            } elseif (strpos($kategoriLower, 'berat') !== false) {
+                                $beratCount++;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            \Log::info("Merged records for Wilayah {$wilayah_number}: " . $mergedCount . " (Bersih: $bersihCount, Ringan: $ringanCount, Sedang: $sedangCount, Berat: $beratCount)");
+            
+            // Calculate totals from ALL raw records (not just merged ones)
             $totalTk = (float)$data->sum('total_tk');
-            $totalNeto = $data->sum('neto');
+            $totalNeto = (float)$data->sum('neto');
             
             $response = [
                 'wilayah_id' => $wilayah_number,
@@ -714,21 +788,42 @@ class WilayahController extends Controller
     /**
      * Get available periods (tahun, bulan, minggu) from publications
      * Return structure for SMART FILTERING of dropdown buttons
-     * ✅ LOGIC: Only show last 2 years for public user (guest)
+     * ✅ LOGIC: Only show last 3 years (from max year in database)
      */
     public function getPeriods(): JsonResponse
     {
         try {
-            // ✅ NEW: Get current year
-            $currentYear = now()->year;
-            $maxYears = 2;  // Only show last 2 years
-            $minYear = $currentYear - ($maxYears - 1);  // e.g., if 2026: 2026 - 1 = 2025 (min)
+            // ✅ FIXED: Get maximum tahun from database, not current year
+            $maxYearInDb = \App\Models\MapPublication::where('status', 'published')
+                ->max('tahun');
             
-            \Log::info("🔍 getPeriods() - Current year: {$currentYear}, Min year for display: {$minYear}");
+            if (!$maxYearInDb) {
+                // No published data
+                return response()->json([
+                    'success' => true,
+                    'periods' => [],
+                    'tahun_list' => [],
+                    'filter_structure' => [],
+                    'latest_period' => null,
+                    'year_range' => [
+                        'current_year' => now()->year,
+                        'min_year' => null,
+                        'max_years' => 3
+                    ]
+                ])
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+            }
             
-            // ✅ NEW: Filter publications untuk hanya 2 tahun terakhir
+            $maxYears = 3;  // Show last 3 years
+            $minYear = $maxYearInDb - ($maxYears - 1);  // e.g., if 2031: 2031 - 2 = 2029
+            
+            \Log::info("🔍 getPeriods() - Max year in DB: {$maxYearInDb}, Min year for display: {$minYear}");
+            
+            // ✅ FIXED: Filter publications untuk hanya 3 tahun terakhir (dari max year)
             $publications = \App\Models\MapPublication::where('status', 'published')
-                ->where('tahun', '>=', $minYear)  // Only last 2 years
+                ->where('tahun', '>=', $minYear)  // Only last 3 years
                 ->with('importLog')
                 ->orderBy('tahun', 'desc')
                 ->orderBy('bulan', 'desc')
@@ -802,11 +897,14 @@ class WilayahController extends Controller
                 'filter_structure' => $filterStructure,  // NEW: Nested structure for smart filtering
                 'latest_period' => $latestPeriod,
                 'year_range' => [
-                    'current_year' => $currentYear,
+                    'max_year_in_db' => $maxYearInDb,
                     'min_year' => $minYear,
                     'max_years' => $maxYears
                 ]
-            ]);
+            ])
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

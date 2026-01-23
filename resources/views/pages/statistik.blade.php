@@ -421,21 +421,29 @@
         background: white;
         border: 2px solid #128241;
         border-radius: 10px;
-        padding: 12px;
+        padding: 10px 8px;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
         z-index: 999999;
         box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
         animation: slideDown 0.3s ease;
-        min-width: max-content;
         max-height: 400px;
         overflow-y: auto;
+        width: auto;
+        max-width: 320px;
     }
 
     /* Khusus untuk Bulan - 6 kolom */
     #bulanGrid.button-grid {
         grid-template-columns: repeat(6, 1fr);
+        max-width: 600px;
+    }
+    
+    /* Khusus untuk Minggu - 4 kolom */
+    #mingguGrid.button-grid {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 300px;
     }
 
     @keyframes slideDown {
@@ -450,20 +458,19 @@
     }
 
     .grid-btn {
-        padding: 13px 12px;
+        padding: 10px 8px;
         border: 2px solid #e3eae8;
-        border-radius: 8px;
+        border-radius: 6px;
         background: white;
         color: #2c3e50;
         font-family: 'Poppins', sans-serif;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
         text-align: center;
         white-space: normal;
-        min-width: 80px;
-        line-height: 1.3;
+        line-height: 1.2;
         position: relative;
     }
 
@@ -625,18 +632,7 @@
                         <i class="fas fa-chevron-down grid-arrow"></i>
                     </div>
                     <div id="bulanGrid" class="button-grid" style="display: none;">
-                        <button class="grid-btn" data-value="1" onclick="selectGridOption('bulan', '1', 'Januari')">Januari</button>
-                        <button class="grid-btn" data-value="2" onclick="selectGridOption('bulan', '2', 'Februari')">Februari</button>
-                        <button class="grid-btn" data-value="3" onclick="selectGridOption('bulan', '3', 'Maret')">Maret</button>
-                        <button class="grid-btn" data-value="4" onclick="selectGridOption('bulan', '4', 'April')">April</button>
-                        <button class="grid-btn" data-value="5" onclick="selectGridOption('bulan', '5', 'Mei')">Mei</button>
-                        <button class="grid-btn" data-value="6" onclick="selectGridOption('bulan', '6', 'Juni')">Juni</button>
-                        <button class="grid-btn" data-value="7" onclick="selectGridOption('bulan', '7', 'Juli')">Juli</button>
-                        <button class="grid-btn" data-value="8" onclick="selectGridOption('bulan', '8', 'Agustus')">Agustus</button>
-                        <button class="grid-btn" data-value="9" onclick="selectGridOption('bulan', '9', 'September')">September</button>
-                        <button class="grid-btn" data-value="10" onclick="selectGridOption('bulan', '10', 'Oktober')">Oktober</button>
-                        <button class="grid-btn" data-value="11" onclick="selectGridOption('bulan', '11', 'November')">November</button>
-                        <button class="grid-btn" data-value="12" onclick="selectGridOption('bulan', '12', 'Desember')">Desember</button>
+                        <!-- Will be populated by JS -->
                     </div>
                 </div>
 
@@ -650,10 +646,7 @@
                         <i class="fas fa-chevron-down grid-arrow"></i>
                     </div>
                     <div id="mingguGrid" class="button-grid" style="display: none;">
-                        <button class="grid-btn" data-value="1" onclick="selectGridOption('minggu', '1', 'Minggu ke-1')">Ke-1</button>
-                        <button class="grid-btn" data-value="2" onclick="selectGridOption('minggu', '2', 'Minggu ke-2')">Ke-2</button>
-                        <button class="grid-btn" data-value="3" onclick="selectGridOption('minggu', '3', 'Minggu ke-3')">Ke-3</button>
-                        <button class="grid-btn" data-value="4" onclick="selectGridOption('minggu', '4', 'Minggu ke-4')">Ke-4</button>
+                        <!-- Will be populated by JS -->
                     </div>
                 </div>
             </div>
@@ -661,7 +654,7 @@
             <!-- Baris 2: Action Button -->
             <div class="controls-buttons-row">
                 <button onclick="updateStats()" class="btn-secondary" title="Tampilkan statistik berdasarkan periode yang dipilih">
-                    <i class="fas fa-chart-bar"></i> Tampilkan Statistik
+                    <i class="fas fa-refresh"></i> Update Statistik
                 </button>
             </div>
         </div>
@@ -775,18 +768,44 @@ async function loadAvailablePeriods() {
             console.log('✅ Latest period:', availablePeriods.latest_period);
             
             populateTahunDropdown();
+            populateBulanAndMingguGrids();
             
             if (availablePeriods.latest_period) {
                 const latest = availablePeriods.latest_period;
-                currentPeriod = { tahun: latest.tahun, bulan: latest.bulan, minggu: latest.minggu };
+                const tahun = latest.tahun;
+                const bulan = latest.bulan;
+                const minggu = latest.minggu;
                 
-                // Set grid button selections
-                selectGridOption('tahun', latest.tahun, latest.tahun);
-                selectGridOption('bulan', latest.bulan, monthNames[latest.bulan] || `Bulan ${latest.bulan}`);
-                selectGridOption('minggu', latest.minggu, `Minggu ke-${latest.minggu}`);
+                console.log('🎯 Setting default to latest period:', {tahun, bulan, minggu});
                 
+                // Set hidden selectors
+                document.getElementById('tahunSelect').value = tahun;
+                document.getElementById('bulanSelect').value = bulan;
+                document.getElementById('mingguSelect').value = minggu;
+                
+                // Update display text
+                const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                document.getElementById('tahunSelected').textContent = tahun;
+                document.getElementById('bulanSelected').textContent = bulanNames[parseInt(bulan)];
+                document.getElementById('mingguSelected').textContent = 'Minggu ke-' + minggu;
+                
+                // Mark selected buttons with .selected class
+                const tahunGrid = document.getElementById('tahunGrid');
+                const bulanGrid = document.getElementById('bulanGrid');
+                const mingguGrid = document.getElementById('mingguGrid');
+                
+                tahunGrid.querySelector(`[data-value="${tahun}"]`)?.classList.add('selected');
+                bulanGrid.querySelector(`[data-value="${bulan}"]`)?.classList.add('selected');
+                mingguGrid.querySelector(`[data-value="${minggu}"]`)?.classList.add('selected');
+                
+                // Initialize dependent dropdowns
+                updateBulanDropdown(tahun);
+                updateMingguDropdown(tahun, bulan);
+                
+                currentPeriod = latest;
                 updatePeriodInfoDisplay();
-                console.log('✅ Default period set:', latest);
+                
+                console.log('📍 Period defaults set to latest:', latest);
             }
             
             await loadAllStatistics();
@@ -807,10 +826,7 @@ async function loadAvailablePeriods() {
 }
 
 /* ===============================
-   POPULATE FILTERS
-================================ */
-/* ===============================
-   POPULATE FILTERS
+   POPULATE FILTERS WITH SMART FILTERING
 ================================ */
 function populateTahunDropdown() {
     const grid = document.getElementById('tahunGrid');
@@ -818,37 +834,363 @@ function populateTahunDropdown() {
     
     grid.innerHTML = '';
     
-    // Get all years from 2020 to current year
-    const currentYear = new Date().getFullYear();
-    const allYears = [];
-    for (let i = 2020; i <= currentYear; i++) {
-        allYears.push(i);
-    }
-    
+    // Get only years from availablePeriods (yang sudah di-upload admin)
     const activeYears = availablePeriods.tahun_list || [];
     
-    allYears.forEach(year => {
+    // Sort years in descending order (terbaru dulu)
+    const sortedYears = [...activeYears].sort((a, b) => b - a);
+    
+    sortedYears.forEach(year => {
         const btn = document.createElement('button');
         btn.className = 'grid-btn';
         btn.setAttribute('data-value', year);
         btn.textContent = year;
-        
-        const isActive = activeYears.includes(year);
-        
-        if (!isActive) {
-            btn.setAttribute('disabled', 'disabled');
-        } else {
-            btn.onclick = (e) => {
-                e.preventDefault();
-                selectGridOption('tahun', year, year);
-            };
-        }
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.onclick = (e) => {
+            e.preventDefault();
+            selectGridOption('tahun', year, year);
+        };
         
         grid.appendChild(btn);
     });
     
-    console.log('✅ Tahun grid populated. Active years:', activeYears.length);
+    console.log('✅ Tahun grid populated with available years:', sortedYears);
 }
+
+/* ===============================
+   UPDATE BULAN DROPDOWN - SMART FILTERING
+================================ */
+function updateBulanDropdown(tahun) {
+    const bulanGrid = document.getElementById('bulanGrid');
+    const availableBulan = getAvailableBulanForTahun(tahun);
+    const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
+    // Mark buttons based on availability
+    const buttons = bulanGrid.querySelectorAll('.grid-btn');
+    buttons.forEach(btn => {
+        const bulanValue = parseInt(btn.getAttribute('data-value'));
+        if (availableBulan.includes(bulanValue)) {
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.disabled = false;
+            btn.title = `${bulanNames[bulanValue]} tersedia`;
+        } else {
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.disabled = true;
+            btn.title = `${bulanNames[bulanValue]} tidak ada data`;
+        }
+    });
+    
+    console.log(`📊 Bulan tersedia untuk tahun ${tahun}:`, availableBulan);
+}
+
+/* ===============================
+   UPDATE MINGGU DROPDOWN - SMART FILTERING
+================================ */
+function updateMingguDropdown(tahun, bulan) {
+    const mingguGrid = document.getElementById('mingguGrid');
+    const availableMinggu = getAvailableMingguForTahunBulan(tahun, bulan);
+    
+    // Mark buttons based on availability
+    const buttons = mingguGrid.querySelectorAll('.grid-btn');
+    buttons.forEach(btn => {
+        const mingguValue = parseInt(btn.getAttribute('data-value'));
+        if (availableMinggu.includes(mingguValue)) {
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.disabled = false;
+            btn.title = `Minggu ke-${mingguValue} tersedia`;
+        } else {
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.disabled = true;
+            btn.title = `Minggu ke-${mingguValue} tidak ada data`;
+        }
+    });
+    
+    console.log(`📊 Minggu tersedia untuk ${tahun}/${bulan}:`, availableMinggu);
+}
+
+/* ===============================
+   POPULATE BULAN & MINGGU GRIDS - DYNAMIC
+================================ */
+function populateBulanAndMingguGrids() {
+    const bulanGrid = document.getElementById('bulanGrid');
+    const mingguGrid = document.getElementById('mingguGrid');
+    const bulanNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
+    // Get all unique bulan and minggu from availablePeriods
+    const allBulan = new Set();
+    const allMinggu = new Set();
+    
+    if (availablePeriods.periods && availablePeriods.periods.length > 0) {
+        availablePeriods.periods.forEach(period => {
+            allBulan.add(period.bulan);
+            allMinggu.add(period.minggu);
+        });
+    }
+    
+    // Clear existing buttons
+    bulanGrid.innerHTML = '';
+    mingguGrid.innerHTML = '';
+    
+    // Populate Bulan Grid - All 12 months, disabled if no data
+    for (let bulan = 1; bulan <= 12; bulan++) {
+        const btn = document.createElement('button');
+        btn.className = 'grid-btn';
+        btn.setAttribute('data-value', bulan);
+        btn.textContent = bulanNames[bulan];
+        
+        const isActive = allBulan.has(bulan);
+        
+        if (!isActive) {
+            btn.setAttribute('disabled', 'disabled');
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.title = `${bulanNames[bulan]} tidak ada data`;
+        } else {
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.title = `${bulanNames[bulan]} tersedia`;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                selectGridOption('bulan', bulan, bulanNames[bulan]);
+            };
+        }
+        
+        bulanGrid.appendChild(btn);
+    }
+    
+    // Populate Minggu Grid - All 4 weeks, disabled if no data
+    for (let minggu = 1; minggu <= 4; minggu++) {
+        const btn = document.createElement('button');
+        btn.className = 'grid-btn';
+        btn.setAttribute('data-value', minggu);
+        btn.textContent = `Ke-${minggu}`;
+        
+        const isActive = allMinggu.has(minggu);
+        
+        if (!isActive) {
+            btn.setAttribute('disabled', 'disabled');
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.title = `Minggu ke-${minggu} tidak ada data`;
+        } else {
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.title = `Minggu ke-${minggu} tersedia`;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                selectGridOption('minggu', minggu, `Minggu ke-${minggu}`);
+            };
+        }
+        
+        mingguGrid.appendChild(btn);
+    }
+    
+    console.log('✅ Bulan dan Minggu grids populated');
+}
+
+/* ===============================
+   GET AVAILABLE BULAN FOR TAHUN
+================================ */
+function getAvailableBulanForTahun(tahun) {
+    if (!availablePeriods.periods || availablePeriods.periods.length === 0) {
+        return [];
+    }
+    
+    const bulanSet = new Set();
+    availablePeriods.periods.forEach(period => {
+        if (period.tahun == tahun) {
+            bulanSet.add(period.bulan);
+        }
+    });
+    
+    return Array.from(bulanSet).sort((a, b) => a - b);
+}
+
+/* ===============================
+   GET AVAILABLE MINGGU FOR TAHUN & BULAN
+================================ */
+function getAvailableMingguForTahunBulan(tahun, bulan) {
+    if (!availablePeriods.periods || availablePeriods.periods.length === 0) {
+        return [];
+    }
+    
+    const mingguSet = new Set();
+    availablePeriods.periods.forEach(period => {
+        if (period.tahun == tahun && period.bulan == bulan) {
+            mingguSet.add(period.minggu);
+        }
+    });
+    
+    return Array.from(mingguSet).sort((a, b) => a - b);
+}
+
+/* ===============================
+   TOGGLE BUTTON GRID (DROPDOWN)
+================================ */
+function toggleButtonGrid(type) {
+    let gridId = type + 'Grid';
+    const grid = document.getElementById(gridId);
+    const trigger = grid.previousElementSibling;
+    
+    // Toggle current grid
+    if (grid.style.display === 'none' || grid.style.display === '') {
+        // Close all other grids
+        document.querySelectorAll('.button-grid').forEach(g => {
+            if (g.id !== gridId) {
+                g.style.display = 'none';
+            }
+        });
+        document.querySelectorAll('.button-grid-trigger').forEach(t => {
+            if (t !== trigger) {
+                t.classList.remove('active');
+            }
+        });
+        
+        // Set FIXED positioning dan hitung koordinat viewport
+        grid.style.position = 'fixed';
+        grid.style.display = 'grid';
+        trigger.classList.add('active');
+        
+        // Calculate position dari trigger element
+        const triggerRect = trigger.getBoundingClientRect();
+        
+        // Position dropdown di bawah trigger
+        let top = triggerRect.bottom + 8;
+        let left = triggerRect.left;
+        
+        // Use requestAnimationFrame untuk memastikan grid sudah ter-render
+        requestAnimationFrame(() => {
+            const gridHeight = grid.offsetHeight;
+            const gridWidth = grid.offsetWidth;
+            
+            // Check jika dropdown keluar dari batas bawah screen
+            if (top + gridHeight > window.innerHeight - 10) {
+                // Positioning di ATAS trigger
+                top = triggerRect.top - gridHeight - 8;
+            }
+            
+            // Check jika dropdown keluar dari batas kanan screen
+            if (left + gridWidth > window.innerWidth - 10) {
+                // Shift ke kiri
+                left = Math.max(10, window.innerWidth - gridWidth - 10);
+            }
+            
+            // Check jika dropdown keluar dari batas kiri screen
+            if (left < 10) {
+                left = 10;
+            }
+            
+            // Pastikan top tidak negatif
+            top = Math.max(10, top);
+            
+            // APPLY positioning untuk VIEWPORT (fixed)
+            grid.style.top = top + 'px';
+            grid.style.left = left + 'px';
+            grid.style.zIndex = '999999';
+        });
+        
+    } else {
+        // Close this grid
+        grid.style.display = 'none';
+        trigger.classList.remove('active');
+    }
+}
+
+/* ===============================
+   SELECT GRID OPTION
+================================ */
+function selectGridOption(type, value, label) {
+    // Update hidden input
+    document.getElementById(type + 'Select').value = value;
+    
+    // Update display text
+    document.getElementById(type + 'Selected').textContent = label;
+    
+    // Update selected button
+    let gridId = type + 'Grid';
+    const grid = document.getElementById(gridId);
+    
+    // Remove selected class from all buttons in this grid
+    grid.querySelectorAll('.grid-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    // Add selected class to the clicked button
+    if (event && event.target && event.target.classList) {
+        event.target.classList.add('selected');
+    } else {
+        // If called programmatically, find the button by data-value
+        const btn = grid.querySelector(`[data-value="${value}"]`);
+        if (btn) btn.classList.add('selected');
+    }
+    
+    // CUSTOM LOGIC: Handle period-related dropdown updates
+    if (type === 'tahun') {
+        // Reset bulan & minggu selections
+        document.getElementById('bulanSelect').value = '';
+        document.getElementById('mingguSelect').value = '';
+        document.getElementById('bulanSelected').textContent = 'Pilih Bulan...';
+        document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+        
+        // Update bulan options
+        updateBulanDropdown(value);
+        
+        console.log(`✅ Tahun dipilih: ${value}`);
+        
+    } else if (type === 'bulan') {
+        const tahun = document.getElementById('tahunSelect').value;
+        
+        // Reset minggu selection
+        document.getElementById('mingguSelect').value = '';
+        document.getElementById('mingguSelected').textContent = 'Pilih Minggu ke-...';
+        
+        // Update minggu options
+        updateMingguDropdown(tahun, value);
+        
+        console.log(`✅ Bulan dipilih: ${value}, tahun: ${tahun}`);
+        
+    } else if (type === 'minggu') {
+        console.log(`✅ Minggu dipilih: ${value}`);
+        
+        // Auto-load statistics when all periods are selected
+        const tahun = document.getElementById('tahunSelect').value;
+        const bulan = document.getElementById('bulanSelect').value;
+        const minggu = document.getElementById('mingguSelect').value;
+        
+        if (tahun && bulan && minggu) {
+            console.log(`🔄 Semua periode dipilih - memuat statistik...`);
+            
+            // Update display and load stats
+            setTimeout(() => {
+                updateStats();
+            }, 200);
+        }
+    }
+    
+    // Close grid
+    grid.style.display = 'none';
+    grid.previousElementSibling.classList.remove('active');
+}
+
+/* ===============================
+   CLOSE GRIDS WHEN CLICKING OUTSIDE
+================================ */
+document.addEventListener('click', (e) => {
+    // Ignore clicks on control items
+    if (!e.target.closest('.control-item')) {
+        document.querySelectorAll('.button-grid').forEach(grid => {
+            grid.style.display = 'none';
+        });
+        document.querySelectorAll('.button-grid-trigger').forEach(trigger => {
+            trigger.classList.remove('active');
+        });
+    }
+});
 
 /* ===============================
    UPDATE PERIOD INFO DISPLAY
@@ -953,9 +1295,9 @@ async function loadAllStatistics() {
    UPDATE STATS
 ================================ */
 async function updateStats() {
-    const tahun = document.getElementById('filterTahun')?.value;
-    const bulan = document.getElementById('filterBulan')?.value;
-    const minggu = document.getElementById('filterMinggu')?.value;
+    const tahun = document.getElementById('tahunSelect')?.value;
+    const bulan = document.getElementById('bulanSelect')?.value;
+    const minggu = document.getElementById('mingguSelect')?.value;
 
     console.log('🔍 Filter:', { tahun, bulan, minggu });
     currentPeriod = { tahun, bulan, minggu };

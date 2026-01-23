@@ -199,7 +199,7 @@
             max-width: 100%;
             font-family: 'Poppins';
             overflow: visible;
-            position: relative;
+            position: static;
             z-index: 1;
         }
 
@@ -210,7 +210,7 @@
             flex-wrap: nowrap;
             margin-bottom: 16px;
             overflow: visible;
-            position: relative;
+            position: static;
         }
 
         .control-item {
@@ -222,6 +222,7 @@
             min-width: 0;
             z-index: 100;
             overflow: visible;
+            min-height: 0;
         }
 
         .control-item.compact {
@@ -321,10 +322,11 @@
 
         /* Button Grid */
         .button-grid {
-            position: absolute;
-            top: calc(100% + 5px);
-            left: 0;
-            right: 0;
+            position: fixed;
+            top: auto;
+            bottom: auto;
+            left: auto;
+            right: auto;
             background: white;
             border: 2px solid #128241;
             border-radius: 10px;
@@ -332,12 +334,14 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            z-index: 999999;
+            z-index: 999999 !important;
             box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
             animation: slideDown 0.3s ease;
-            min-width: max-content;
             max-height: 400px;
             overflow-y: auto;
+            min-width: max-content;
+            width: auto;
+            pointer-events: auto;
         }
 
         /* Khusus untuk Tahun - hanya 3 kolom */
@@ -577,6 +581,8 @@
             display: block;
             position: relative;
             z-index: 1;
+            overflow: hidden; 
+            outline: none;
         }
 
         .leaflet-popup-content {
@@ -1243,15 +1249,60 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         if (grid.style.display === 'none' || grid.style.display === '') {
             // Close all other grids
             document.querySelectorAll('.button-grid').forEach(g => {
-                g.style.display = 'none';
+                if (g.id !== gridId) {
+                    g.style.display = 'none';
+                }
             });
             document.querySelectorAll('.button-grid-trigger').forEach(t => {
-                t.classList.remove('active');
+                if (t !== trigger) {
+                    t.classList.remove('active');
+                }
             });
             
-            // Open this grid
+            // Set FIXED positioning dan hitung koordinat viewport
+            grid.style.position = 'fixed';
             grid.style.display = 'grid';
             trigger.classList.add('active');
+            
+            // Calculate position dari trigger element
+            // getBoundingClientRect() memberikan posisi relatif ke VIEWPORT (screen)
+            const triggerRect = trigger.getBoundingClientRect();
+            
+            // Position dropdown di bawah trigger
+            let top = triggerRect.bottom + 8;
+            let left = triggerRect.left;
+            
+            // Use requestAnimationFrame untuk memastikan grid sudah ter-render
+            requestAnimationFrame(() => {
+                const gridHeight = grid.offsetHeight;
+                const gridWidth = grid.offsetWidth;
+                
+                // Check jika dropdown keluar dari batas bawah screen
+                if (top + gridHeight > window.innerHeight - 10) {
+                    // Positioning di ATAS trigger
+                    top = triggerRect.top - gridHeight - 8;
+                }
+                
+                // Check jika dropdown keluar dari batas kanan screen
+                if (left + gridWidth > window.innerWidth - 10) {
+                    // Shift ke kiri
+                    left = Math.max(10, window.innerWidth - gridWidth - 10);
+                }
+                
+                // Check jika dropdown keluar dari batas kiri screen
+                if (left < 10) {
+                    left = 10;
+                }
+                
+                // Pastikan top tidak negatif
+                top = Math.max(10, top);
+                
+                // APPLY positioning untuk VIEWPORT (fixed)
+                grid.style.top = top + 'px';
+                grid.style.left = left + 'px';
+                grid.style.zIndex = '999999';
+            });
+            
         } else {
             // Close this grid
             grid.style.display = 'none';
@@ -1437,7 +1488,6 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
     let currentLoadId = 0; // ✅ CRITICAL: Hard guard state - prevent stale renders from old requests
 
     // Initialize map
-    // Initialize map
 function initMap() {
     console.log('🗺️  [WILAYAH] Starting initMap...');
     // Check if map already exists
@@ -1480,7 +1530,6 @@ function initMap() {
 
     // ===== POPUP HANDLER: Load foto saat popup dibuka =====
     map.on('popupopen', function (e) {
-        // Load foto di popup
         console.log('🖼️  Popup opened, loading image...');
         const img = e.popup._contentNode.querySelector('img[data-kategori]');
         if (!img) {
@@ -1559,19 +1608,7 @@ function initMap() {
             console.log('🔒 [Click] Saving scroll position:', savedScrollY);
         }, { passive: false });
         
-        // Restore scroll IMMEDIATELY after mouseup (tanpa conditional check!)
-        mapContainer.addEventListener('mouseup', function(e) {
-            console.log('🔓 [Click] Restoring scroll to', savedScrollY);
-            e.preventDefault(); // Block browser scroll behavior
-            window.scrollTo(savedScrollX, savedScrollY);
-            
-            // Triple restore untuk memastikan (10ms, 50ms, 100ms)
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 10);
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 50);
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 100);
-            
-            isInteracting = false;
-        }, { passive: false });
+        
         
         // ALSO block click event
         mapContainer.addEventListener('click', function(e) {
@@ -1595,9 +1632,9 @@ function initMap() {
         
         // Disable Leaflet auto-pan when popup opens
         map.on('popupopen', function(e) {
-            console.log('🔒 [POPUP] Popup opened - disabling autoPan, maintaining scroll position');
-            // Restore scroll position when popup opens
-            window.scrollTo(savedScrollX, savedScrollY);
+           if (e.popup._container) {
+               e.popup._container.focus();
+    }
         });
         
         console.log('✅ [WILAYAH] NO-SCROLL protection active for ALL map clicks!');
@@ -1860,7 +1897,8 @@ function initMap() {
                                 maxWidth: 300,
                                 maxHeight: 400,
                                 closeButton: true,
-                                autoPan: true
+                                autoPan: false,
+                                keepInView: true
                             });
                             
                             layer.bindTooltip(createTooltipContent(feature.properties), {
@@ -3851,6 +3889,35 @@ function initMap() {
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
         console.log('Initializing GulmaTrack Wilayah Map...');
+        
+        // ✅ NEW: Close dropdown saat window di-scroll atau di-resize
+        // Ini memastikan dropdown positioning tetap valid
+        function closeAllDropdowns() {
+            document.querySelectorAll('.button-grid').forEach(grid => {
+                grid.style.display = 'none';
+            });
+            document.querySelectorAll('.button-grid-trigger').forEach(trigger => {
+                trigger.classList.remove('active');
+            });
+        }
+        
+        // Close dropdown on scroll
+        window.addEventListener('scroll', closeAllDropdowns, { passive: true });
+        
+        // Close dropdown on resize
+        window.addEventListener('resize', closeAllDropdowns, { passive: true });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            // Check if click is on trigger atau grid
+            const isOnTrigger = e.target.closest('.button-grid-trigger');
+            const isOnGrid = e.target.closest('.button-grid');
+            
+            // Jika click di luar trigger dan grid, tutup semua dropdown
+            if (!isOnTrigger && !isOnGrid) {
+                closeAllDropdowns();
+            }
+        });
         
         // Ensure Leaflet is loaded
         if (typeof L === 'undefined') {

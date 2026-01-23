@@ -546,6 +546,8 @@
             display: block;
             position: relative;
             z-index: 1;
+            overflow: hidden; 
+            outline: none;
         }
 
         .leaflet-popup-content {
@@ -1509,19 +1511,7 @@ function initMap() {
             console.log('🔒 [Click] Saving scroll position:', savedScrollY);
         }, { passive: false });
         
-        // Restore scroll IMMEDIATELY after mouseup (tanpa conditional check!)
-        mapContainer.addEventListener('mouseup', function(e) {
-            console.log('🔓 [Click] Restoring scroll to', savedScrollY);
-            e.preventDefault(); // Block browser scroll behavior
-            window.scrollTo(savedScrollX, savedScrollY);
-            
-            // Triple restore untuk memastikan (10ms, 50ms, 100ms)
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 10);
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 50);
-            setTimeout(() => window.scrollTo(savedScrollX, savedScrollY), 100);
-            
-            isInteracting = false;
-        }, { passive: false });
+        
         
         // ALSO block click event
         mapContainer.addEventListener('click', function(e) {
@@ -1545,9 +1535,9 @@ function initMap() {
         
         // Disable Leaflet auto-pan when popup opens
         map.on('popupopen', function(e) {
-            console.log('🔒 [POPUP] Popup opened - disabling autoPan, maintaining scroll position');
-            // Restore scroll position when popup opens
-            window.scrollTo(savedScrollX, savedScrollY);
+           if (e.popup._container) {
+               e.popup._container.focus();
+    }
         });
         
         console.log('✅ [WILAYAH] NO-SCROLL protection active for ALL map clicks!');
@@ -1810,7 +1800,8 @@ function initMap() {
                                 maxWidth: 300,
                                 maxHeight: 400,
                                 closeButton: true,
-                                autoPan: true
+                                autoPan: false,
+                                keepInView: true
                             });
                             
                             layer.bindTooltip(createTooltipContent(feature.properties), {

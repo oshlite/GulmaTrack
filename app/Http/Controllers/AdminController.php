@@ -1454,6 +1454,138 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memperbarui publikasi: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * API: Get publikasi data untuk auto-refresh
+     * Endpoint: /api/admin/publikasi-refresh
+     */
+    public function getPublikasiRefresh(Request $request)
+    {
+        try {
+            // Get all import logs dengan status success
+            $allImports = ImportLog::where('status', 'success')
+                ->orderBy('tahun', 'desc')
+                ->orderBy('bulan', 'desc')
+                ->orderBy('minggu', 'desc')
+                ->get()
+                ->groupBy(function($import) {
+                    return $import->tahun . '-' . $import->bulan . '-' . $import->minggu;
+                });
+
+            // Get all publications dengan status published
+            $publications = MapPublication::where('status', 'published')
+                ->with('importLog')
+                ->get()
+                ->groupBy(function($pub) {
+                    return $pub->importLog->tahun . '-' . $pub->importLog->bulan . '-' . $pub->importLog->minggu;
+                });
+
+            $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            $rows = [];
+
+            foreach ($allImports as $periodKey => $imports) {
+                [$tahun, $bulan, $minggu] = explode('-', $periodKey);
+                $published = $publications->get($periodKey)?->first();
+
+                $rows[] = [
+                    'periode' => $tahun . ' ' . $monthNames[$bulan] . ' W' . $minggu,
+                    'periode_key' => $periodKey,
+                    'tahun' => $tahun,
+                    'bulan' => $bulan,
+                    'minggu' => $minggu,
+                    'nama_file' => $published?->importLog?->nama_file ?? '-',
+                    'file_id' => $published?->importLog?->id ?? null,
+                    'records' => $published?->importLog?->jumlah_berhasil ?? '-',
+                    'upload_time' => $published?->importLog?->created_at?->format('d M Y H:i') ?? '-',
+                    'publikasi_time' => $published?->published_at?->format('d M Y H:i') ?? '-',
+                    'is_published' => $published ? true : false
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $rows
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getPubiklasiRefresh: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Get riwayat upload data untuk auto-refresh
+     * Endpoint: /api/admin/riwayat-upload-refresh
+     */
+    public function getRiwayatUploadRefresh(Request $request)
+    {
+        try {
+            $query = ImportLog::latest('created_at');
+
+            // Apply search filter if provided
+            if ($request->has('search') && $request->search) {
+                $search = str_replace('#', '', $request->search);
+                $query->where(function($q) use ($search) {
+                    $q->where('id', 'LIKE', "%{$search}%")
+                      ->orWhere('nama_file', 'LIKE', "%{$search}%")
+                      ->orWhere('tahun', 'LIKE', "%{$search}%")
+                      ->orWhere('bulan', 'LIKE', "%{$search}%")
+                      ->orWhere('minggu', 'LIKE', "%{$search}%")
+                      ->orWhere('status', 'LIKE', "%{$search}%");
+                });
+            }
+
+            // Apply period filters if provided
+            if ($request->has('tahun') && $request->tahun) {
+                $query->where('tahun', $request->tahun);
+            }
+            if ($request->has('bulan') && $request->bulan) {
+                $query->where('bulan', $request->bulan);
+            }
+            if ($request->has('minggu') && $request->minggu) {
+                $query->where('minggu', $request->minggu);
+            }
+
+            $importLogs = $query->get();
+
+            $monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            $rows = [];
+
+            foreach ($importLogs as $log) {
+                $periodText = $log->tahun && $log->bulan && $log->minggu 
+                    ? $log->tahun . ' / ' . $monthNames[$log->bulan] . ' - Minggu ' . $log->minggu
+                    : '-';
+
+                $statusBadge = $log->status === 'success' 
+                    ? 'Berhasil'
+                    : ($log->status === 'pending' ? 'Pending' : 'Gagal');
+
+                $rows[] = [
+                    'id' => '#' . $log->id,
+                    'nama_file' => $log->nama_file,
+                    'periode' => $periodText,
+                    'data' => $log->jumlah_records,
+                    'status' => $statusBadge,
+                    'status_class' => $log->status === 'success' ? 'success' : ($log->status === 'pending' ? 'pending' : 'failed'),
+                    'waktu_upload' => $log->created_at->format('d M Y H:i'),
+                    'import_id' => $log->id
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $rows
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getRiwayatUploadRefresh: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }

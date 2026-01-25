@@ -2,7 +2,7 @@
     <div class="navbar-container">
         <a href="{{ route('home') }}" class="logo" style="text-decoration:none;">
             <img src="{{ asset('image/logo.png') }}" alt="GulmaTrack Logo" class="logo-img">
-            <span style="color:#FBA919 !important;">GulmaTrack</span>
+            <span style="color:#FBA919 !important; font-size: 30px;">GulmaTrack</span>
         </a>
 
         <button class="mobile-toggle" id="mobileToggle">

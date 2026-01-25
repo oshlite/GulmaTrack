@@ -9,7 +9,7 @@
     .hero-section {
         position: relative;
         width: 100%;
-        min-height: 720px; 
+        min-height: 750px;
         background:
             linear-gradient(135deg, rgba(25,123,64,.65), rgba(13,92,46,.75)),
             url('https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1600&fit=crop')
@@ -21,7 +21,10 @@
         text-align: center;
         overflow: hidden;
         box-shadow: inset 0 -50px 100px rgba(0, 0, 0, 0.2);
-}
+        padding: 40px 20px;
+        margin-top: -70px;
+        padding-top: 110px;
+    }
 
     .hero-content {
         max-width: 960px;
@@ -30,16 +33,16 @@
     }
 
     .hero-content h1 {
-        font-size: 64px;
+        font-size: 56px;
         font-weight: 800;
         margin-bottom: 25px;
-        line-height: 1.1;
+        line-height: 1.2;
         text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
         letter-spacing: -0.5px;
     }
 
     .hero-content p {
-        font-size: 22px;
+        font-size: 20px;
         margin-bottom: 40px;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         font-weight: 300;
@@ -51,18 +54,23 @@
         gap: 15px;
         justify-content: center;
         flex-wrap: wrap;
+        align-items: center;
     }
 
     .btn-hero {
-        display: inline-block;
-        padding: 16px 40px;
-        border-radius: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 32px;
+        border-radius: 28px;
         text-decoration: none;
         font-weight: 700;
-        font-size: 18px;
+        font-size: 15px;
         transition: all 0.3s ease;
         border: 2px solid transparent;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
     }
 
     .btn-hero.primary {
@@ -73,7 +81,7 @@
     .btn-hero.primary:hover {
         background-color: #D6DF20;
         color: #333;
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: 0 8px 30px rgba(166, 206, 57, 0.5);
     }
 
@@ -86,23 +94,23 @@
     .btn-hero.secondary:hover {
         background-color: white;
         color: var(--primary-color);
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
     }
 
     .btn-hero.third {
         background-color: white;
         color: var(--primary-color);
-        transform: translateY(-5px);
+        allign-items: center;
     }
 
     .btn-hero.third:hover {
-        background-color: white;
+        background-color: #f0f0f0;
         color: var(--secondary-color);
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+        allign-items: center;
     }
-
 
     @keyframes fadeInUp {
         from {
@@ -118,13 +126,14 @@
     /* Statistics Section */
     .stats-section {
         padding: 60px 40px;
-        margin-right: 70px;
-        margin-left: 70px;
+        margin-right: auto;
+        margin-left: auto;
         margin-bottom: 70px;
+        max-width: 1400px;
     }
 
     .section-title {
-        font-size: 32px;
+        font-size: 40px;
         color: var(--text-color);
         text-align: center;
         margin-bottom: 15px;
@@ -134,20 +143,20 @@
     .section-subtitle {
         text-align: center;
         color: #666;
-        margin-bottom: 40px;
-        font-size: 16px;
+        margin-bottom: 50px;
+        font-size: 18px;
     }
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 30px;
     }
 
     .stat-card {
         background: white;
-        padding: 30px;
-        border-radius: 30px;
+        padding: 35px;
+        border-radius: 20px;
         text-align: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
@@ -180,8 +189,8 @@
     }
 
     .stat-icon {
-        font-size: 40px;
-        margin-bottom: 15px;
+        font-size: 50px;
+        margin-bottom: 20px;
     }
 
     .stat-icon.bersih {
@@ -201,42 +210,54 @@
     }
 
     .stat-label {
-        font-size: 14px;
+        font-size: 15px;
         color: #666;
-        margin-bottom: 10px;
-        font-weight: 500;
+        margin-bottom: 12px;
+        font-weight: 600;
     }
 
     .stat-value {
-        font-size: 42px;
-        font-weight: 700;
+        font-size: 48px;
+        font-weight: 800;
         color: var(--primary-color);
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }
 
     .stat-description {
-        font-size: 13px;
+        font-size: 14px;
         color: #999;
     }
 
     /* Features Section */
     .features-section {
         margin-bottom: 70px;
+        margin-right: 70px;
+        margin-left: 70px;
     }
 
     .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .feature-card {
         background: white;
-        padding: 30px;
-        border-radius: 30px;
+        padding: 45px 35px;
+        border-radius: 40px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         text-align: center;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: calc(33.333% - 30px);
+        min-width: 300px;
     }
 
     .feature-card:hover {
@@ -300,190 +321,12 @@
     /* CTA Section */
     .cta-section {
         background: #128241;
-        padding: 60px 40px;
-        border-radius: 30px;
-        text-align: center;
-        color: white;
-        margin-bottom: 70px;
-    }
-
-    .cta-section h2 {
-        font-size: 36px;
-        margin-bottom: 20px;
-        font-weight: 700;
-    }
-
-    .cta-section p {
-        font-size: 18px;
-        margin-bottom: 30px;
-    }
-
-    .cta-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .hero-section {
-            min-height: 600px;
-        }
-
-        .hero-content {
-            padding: 0 25px;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .stat-card.sedang {
-        border-left-color: #E67E22;
-        background: linear-gradient(135deg, rgba(230, 126, 34, 0.05), rgba(230, 126, 34, 0.02));
-    }
-
-    .stat-card.berat {
-        border-left-color: #E74C3C;
-        background: linear-gradient(135deg, rgba(231, 76, 60, 0.05), rgba(231, 76, 60, 0.02));
-    }
-
-    .stat-icon {
-        font-size: 45px;
-        margin-bottom: 20px;
-    }
-
-    .stat-icon.bersih {
-        color: #57ce39ff;
-    }
-
-    .stat-icon.ringan {
-        color: #F39C12;
-    }
-
-    .stat-icon.sedang {
-        color: #E67E22;
-    }
-
-    .stat-icon.berat {
-        color: #E74C3C;
-    }
-
-    .stat-label {
-        font-size: 15px;
-        color: #666;
-        margin-bottom: 12px;
-        font-weight: 600;
-    }
-
-    .stat-value {
-        font-size: 48px;
-        font-weight: 800;
-        color: var(--primary-color);
-        margin-bottom: 8px;
-    }
-
-    .stat-description {
-        font-size: 14px;
-        color: #999;
-    }
-
-    /* Features Section */
-    .features-section {
-        padding: 80px 20px;
-        max-width: 1400px;
-        margin: 0 auto;
-        background: #f9f9f9;
-    }
-
-    .features-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 30px;
-        justify-content: center;
-        align-items: stretch;
-    }
-
-    .feature-card {
-        background: white;
-        padding: 40px;
-        border-radius: 30px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        text-align: center;
-        width: calc(33.333% - 20px);
-        min-width: 280px;
-        flex: 0 1 auto;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    .feature-icon {
-        font-size: 56px;
-        margin-bottom: 25px;
-        display: inline-block;
-        width: 80px;
-        height: 80px;
-        line-height: 80px;
-        border-radius: 30px;
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:nth-child(1) .feature-icon {
-        background-color: rgba(220, 53, 69, 0.1);
-        color: #ff5162ff;
-    }
-
-    .feature-card:nth-child(2) .feature-icon {
-        background-color: rgba(230, 126, 34, 0.1);
-        color: #E67E22;
-    }
-
-    .feature-card:nth-child(3) .feature-icon {
-        background-color: rgba(52, 152, 219, 0.1);
-        color: #3498DB;
-    }
-
-    .feature-card:nth-child(4) .feature-icon {
-        background-color: rgba(155, 89, 182, 0.1);
-        color: #9B59B6;
-    }
-
-    .feature-card:nth-child(5) .feature-icon {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-
-    .feature-card:hover .feature-icon {
-        transform: scale(1.15) rotate(5deg);
-    }
-
-    .feature-title {
-        font-size: 22px;
-        color: var(--text-color);
-        margin-bottom: 15px;
-        font-weight: 700;
-    }
-
-    .feature-description {
-        font-size: 15px;
-        color: #666;
-        line-height: 1.7;
-    }
-
-    /* CTA Section */
-    .cta-section {
-        background: #128241;
         padding: 80px 40px;
         text-align: center;
         color: white;
         max-width: 1400px;
         margin: 0 auto;
+        border-radius: 40px;
     }
 
     .cta-section h2 {
@@ -503,63 +346,112 @@
         gap: 20px;
         justify-content: center;
         flex-wrap: wrap;
+        align-items: center;
     }
 
     /* Responsive */
     @media (max-width: 1024px) {
+        .hero-section {
+            min-height: 500px;
+            padding: 30px 20px;
+            padding-top: 90px;
+        }
+
         .hero-content h1 {
-            font-size: 56px;
+            font-size: 48px;
         }
 
         .hero-content p {
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .btn-hero {
-            padding: 14px 35px;
-            font-size: 16px;
+            padding: 12px 28px;
+            font-size: 14px;
         }
 
         .section-title {
             font-size: 36px;
         }
 
+        .section-subtitle {
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
         .stats-section,
         .features-section,
         .cta-section {
-            padding: 60px 20px;
+            padding: 60px 30px;
+        }
+
+        .stat-card {
+            padding: 30px;
+        }
+
+        .stat-icon {
+            font-size: 45px;
+        }
+
+        .stat-value {
+            font-size: 42px;
         }
 
         .feature-card {
-            width: calc(50% - 15px);
-            min-width: 250px;
+            padding: 35px 28px;
+            min-height: 250px;
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            font-size: 48px;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
         }
     }
 
     @media (max-width: 768px) {
+        .hero-section {
+            min-height: 450px;
+            padding: 20px 16px;
+            padding-top: 80px;
+        }
+
         .hero-content {
-            padding: 0 20px;
+            padding: 0 15px;
         }
 
         .hero-content h1 {
-            font-size: 42px;
-            margin-bottom: 20px;
+            font-size: 36px;
+            margin-bottom: 18px;
         }
 
         .hero-content p {
-            font-size: 18px;
-            margin-bottom: 30px;
+            font-size: 16px;
+            margin-bottom: 25px;
         }
 
         .hero-buttons {
-            gap: 12px;
+            gap: 10px;
+            flex-direction: row;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .btn-hero {
-            padding: 12px 24px;
-            font-size: 15px;
-            width: 100%;
-            max-width: 280px;
+            padding: 11px 20px;
+            font-size: 13px;
+            width: auto;
+            max-width: none;
+            margin: 0;
         }
 
         .section-title {
@@ -567,8 +459,14 @@
         }
 
         .section-subtitle {
-            font-size: 15px;
+            font-size: 14px;
             margin-bottom: 30px;
+        }
+
+        .stats-section,
+        .features-section,
+        .cta-section {
+            padding: 45px 20px;
         }
 
         .stats-grid {
@@ -577,65 +475,215 @@
         }
 
         .stat-card {
-            padding: 25px;
+            padding: 22px;
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            font-size: 13px;
         }
 
         .stat-value {
             font-size: 36px;
         }
 
+        .stat-description {
+            font-size: 12px;
+        }
+
         .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 20px;
+            max-width: 100%;
         }
 
         .feature-card {
-            width: 100%;
-            min-width: auto;
-            padding: 30px 20px;
+            padding: 30px;
+            min-height: 240px;
+            width: calc(50% - 20px);
+            min-width: 250px;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            font-size: 42px;
+            margin-bottom: 18px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            font-size: 13px;
         }
 
         .cta-section {
-            padding: 50px 20px;
+            padding: 40px 20px;
         }
 
         .cta-section h2 {
             font-size: 28px;
+            margin-bottom: 18px;
         }
 
         .cta-section p {
-            font-size: 16px;
+            font-size: 15px;
+            margin-bottom: 30px;
         }
 
-        .stats-section,
-        .features-section,
-        .cta-section {
-            padding: 50px 20px;
+        .cta-buttons {
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .btn-hero {
+            width: 100%;
+            max-width: 220px;
         }
     }
 
     @media (max-width: 480px) {
         .hero-section {
-            top: 70px;
+            min-height: 380px;
+            padding: 15px 12px;
+            padding-top: 70px;
+        }
+
+        .hero-content {
+            padding: 0 10px;
         }
 
         .hero-content h1 {
-            font-size: 32px;
+            font-size: 28px;
+            margin-bottom: 15px;
+            line-height: 1.1;
         }
 
         .hero-content p {
-            font-size: 16px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .hero-buttons {
+            gap: 8px;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            padding: 10px 18px;
+            font-size: 12px;
+            width: auto;
+            max-width: none;
+        }
+
+        .btn-hero i {
+            display: none;
+        }
+
+        .section-title {
+            font-size: 22px;
+        }
+
+        .section-subtitle {
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stats-section,
+        .features-section,
+        .cta-section {
+            padding: 30px 15px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .stat-card {
+            padding: 18px;
+            border-radius: 12px;
+        }
+
+        .stat-icon {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
         }
 
         .stat-value {
             font-size: 28px;
         }
 
-        .section-title {
-            font-size: 24px;
+        .stat-description {
+            font-size: 11px;
         }
 
-        .stats-grid {
+        .feature-card {
+            padding: 18px;
+            border-radius: 12px;
+        }
+
+        .features-grid {
             grid-template-columns: 1fr;
+            gap: 15px;
+            max-width: 100%;
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .feature-description {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .cta-section {
+            padding: 30px 15px;
+        }
+
+        .cta-section h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .cta-section p {
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .cta-buttons {
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .btn-hero {
+            width: 100%;
+            max-width: none;
         }
     }
 </style>
@@ -643,8 +691,8 @@
 <!-- Hero Section - Fullscreen -->
 <section class="hero-section">
     <div class="hero-content">
-        <h1>Sistem Visualisasi Persebaran Gulma</h1>
-        <p>Monitoring dan analisis persebaran gulma pada pertanian nanas dengan teknologi data interaktif</p>
+        <h1>Sistem Visualisasi Peta Persebaran Gulma</h1>
+        <p>Monitoring dan analisis persebaran gulma pada perkebunan nanas dengan teknologi data peta interaktif, statistik, dan arsip drone</p>
         <div class="hero-buttons">
             <a href="{{ route('wilayah') }}" class="btn-hero third">
                 <i class="fas fa-map-marker-alt"></i> Lihat Peta
@@ -660,7 +708,7 @@
 <div class="scroll-content">
 
     <!-- Features Section -->
-    <section class="features-section">
+    <section class="features-section"><br><br>
         <h2 class="section-title">Fitur Unggulan</h2>
         <p class="section-subtitle">Solusi lengkap untuk monitoring dan analisis persebaran gulma</p>
         <div class="features-grid">

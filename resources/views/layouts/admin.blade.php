@@ -74,24 +74,26 @@
         .navbar-container {
             max-width: 100%;
             margin: 0;
-            padding: 0 20px;
+            padding: 0 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             height: 70px;
+            flex-wrap: wrap;
         }
 
         .navbar-brand {
-            font-size: 25px;
+            font-size: 22px;
             font-family: 'Poppins';
             font-weight: 800;
             color: #FBA919;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transition: all 0.3s ease;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .navbar-brand:hover {
@@ -100,8 +102,8 @@
         }
 
         .navbar-brand img {
-            width: 85px;
-            height: 60px;
+            width: 60px;
+            height: 45px;
             object-fit: contain;
             transition: all 0.3s ease;
         }
@@ -112,6 +114,7 @@
 
         .navbar-brand span {
             color: #FBA919 !important;
+            font-size: 18px;
         }
 
         .nav-menu {
@@ -120,6 +123,7 @@
             gap: 2px;
             flex-wrap: nowrap;
             margin: 0;
+            align-items: center;
         }
 
         .nav-item {
@@ -130,11 +134,11 @@
         .nav-link {
             color: #ecf0f1;
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 10px 16px;
             display: block;
             transition: all 0.3s ease;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.3px;
             position: relative;
@@ -168,24 +172,25 @@
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .admin-info {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 8px 16px;
+            gap: 10px;
+            padding: 6px 12px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            border-radius: 6px;
             color: #ecf0f1;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
         }
 
         .admin-avatar {
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
             display: flex;
@@ -194,11 +199,12 @@
             color: var(--primary-color);
             font-weight: 700;
             font-family: 'Poppins';
+            font-size: 14px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .logout-btn {
-            padding: 8px 16px;
+            padding: 8px 14px;
             background: #E74C3C;
             color: white;
             border: none;
@@ -206,16 +212,33 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
-            font-size: 13px;
+            font-size: 12px;
             font-family: 'Poppins';
             letter-spacing: 0.3px;
             box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+            white-space: nowrap;
         }
 
         .logout-btn:hover {
             background: #c0392b;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        }
+
+        .mobile-toggle-admin {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 6px;
+            flex-shrink: 0;
+        }
+
+        .mobile-toggle-admin:hover {
+            color: var(--secondary-color);
         }
 
         /* Animations */
@@ -233,21 +256,170 @@
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body {
                 font-size: 14px;
             }
 
             .navbar-container {
-                flex-wrap: wrap;
+                padding: 0 12px;
+            }
+
+            .navbar-brand {
+                font-size: 18px;
+            }
+
+            .navbar-brand img {
+                width: 50px;
+                height: 40px;
+            }
+
+            .navbar-brand span {
+                font-size: 16px;
+            }
+
+            .nav-link {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            .admin-info {
+                padding: 6px 10px;
+                font-size: 11px;
+                gap: 8px;
+            }
+
+            .admin-avatar {
+                width: 28px;
+                height: 28px;
+            }
+
+            .logout-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle-admin {
+                display: block !important;
+            }
+
+            .navbar-container {
+                padding: 0 10px;
+            }
+
+            .navbar-brand {
+                font-size: 16px;
+            }
+
+            .navbar-brand span {
+                display: none;
+            }
+
+            .navbar-brand img {
+                width: 45px;
+                height: 35px;
             }
 
             .nav-menu {
+                display: none !important;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                width: 100vw;
+                max-width: 100%;
+                flex-direction: column;
                 gap: 0;
+                margin-top: 0;
+                background: #128241;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                z-index: 999;
+            }
+
+            .nav-menu.active {
+                display: flex !important;
+            }
+
+            .nav-item {
+                width: 100%;
+            }
+
+            .nav-link {
+                text-align: left;
+                border-radius: 0;
+                padding: 12px 14px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                font-size: 12px;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+
+            .nav-link.active {
+                background: rgba(214, 223, 32, 0.1);
+                border-left: 4px solid var(--secondary-color);
+                padding-left: 10px;
+            }
+
+            .navbar-right {
+                gap: 8px;
+                position: absolute;
+                right: 50px;
+                top: 10px;
+            }
+
+            .admin-info {
+                display: none;
+            }
+
+            .logout-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            body {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-toggle-admin {
+                font-size: 20px;
+            }
+
+            .navbar-container {
+                padding: 0 8px;
+            }
+
+            .navbar-brand {
+                font-size: 14px;
+            }
+
+            .navbar-brand img {
+                width: 40px;
+                height: 30px;
             }
 
             .nav-link {
                 padding: 10px 12px;
+                font-size: 11px;
+            }
+
+            .navbar-right {
+                right: 45px;
+                top: 12px;
+            }
+
+            .logout-btn {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+
+            body {
                 font-size: 12px;
             }
         }
@@ -266,12 +438,12 @@
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-chart-line"></i> Wilayah
+                            <i class="fas fa-map-location-dot"></i> Wilayah
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.drone.index') }}" class="nav-link {{ request()->routeIs('admin.drone*') ? 'active' : '' }}">
-                            <i class="fas fa-cube"></i> Drone
+                            <i class="fas fa-paper-plane"></i> Drone
                         </a>
                     </li>
                     <li class="nav-item">

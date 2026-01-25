@@ -462,10 +462,46 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
+            <button type="submit" id="submitBtn" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
                 ✅ Upload Drone
             </button>
+            <div id="uploadProgress" style="margin-top: 15px; display: none;">
+                <div style="background: #e9ecef; border-radius: 6px; overflow: hidden; height: 8px;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #128241, #D6DF20); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <p style="text-align: center; margin-top: 10px; font-size: 13px; color: #666;">
+                    <i class="fas fa-spinner fa-spin" style="color: #128241;"></i> Sedang mengupload... <span id="progressText">0%</span>
+                </p>
+            </div>
         </form>
+
+        <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.style.cursor = 'not-allowed';
+            progressDiv.style.display = 'block';
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.floor(progress) + '%';
+            }, 500);
+            
+            // Cleanup saat form selesai
+            this.addEventListener('submit', function cleanup() {
+                clearInterval(interval);
+            }, { once: true });
+        });
+        </script>
     </div>
 
     <!-- Data Table Section -->

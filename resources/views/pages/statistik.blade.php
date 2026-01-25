@@ -13,26 +13,32 @@
     <style>
         .stats-controls {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 8px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             box-shadow: var(--shadow);
             display: flex;
-            gap: 15px;
+            gap: 12px;
             flex-wrap: wrap;
             align-items: center;
+            position: relative;
+            z-index: 30;
         }
 
         .stats-controls input,
         .stats-controls select {
-            padding: 10px 15px;
+            padding: 10px 12px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
+            font-family: 'Poppins';
+            position: relative;
+            z-index: 40;
+            background: white;
         }
 
         .stats-controls button {
-            padding: 10px 25px;
+            padding: 10px 20px;
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -40,6 +46,8 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
+            font-size: 13px;
+            white-space: nowrap;
         }
 
         .stats-controls button:hover {
@@ -48,36 +56,23 @@
 
         .stat-section {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 8px;
             box-shadow: var(--shadow);
-            margin-bottom: 30px;
-        }
-
-        .stat-section h3 {
-            color: var(--title-color);
             margin-bottom: 25px;
-            font-size: 20px;
-            border-bottom: 3px solid var(--title-color);
-            padding-bottom: 15px;
-        }
-
-        .stat-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
+            overflow-x: auto;
+        overflow-y: visible !important;
         .stat-table th {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 15px;
+            padding: 12px;
             text-align: left;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .stat-table td {
-            padding: 15px;
+            padding: 12px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -101,23 +96,24 @@
         .bar-item {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            gap: 12px;
         }
 
         .bar-label {
-            width: 180px;
+            min-width: 150px;
             font-weight: 600;
             color: var(--text-color);
+            font-size: 12px;
         }
 
         .bar-container {
             flex: 1;
             background-color: var(--light-color);
-            height: 30px;
+            height: 26px;
             border-radius: 4px;
             overflow: hidden;
             position: relative;
-            margin: 0 15px;
         }
 
         .bar-fill {
@@ -127,26 +123,367 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding-right: 10px;
+            padding-right: 8px;
             color: white;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .bar-value {
-            width: 80px;
+            min-width: 60px;
             text-align: right;
             font-weight: 600;
             color: var(--primary-color);
+            font-size: 12px;
         }
 
         .comparison-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
             margin: 20px 0;
         }
 
+        .comparison-card {
+            background: linear-gradient(135deg, var(--light-color), #fff);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .comparison-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .comparison-stat:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .comparison-label {
+            color: #666;
+        }
+
+        .comparison-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .trend-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .trend-up {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .trend-down {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .export-btn {
+            background-color: var(--secondary-color);
+            color: #333;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .export-btn:hover {
+            background-color: #c5ce1a;
+            transform: translateY(-2px);
+        }
+
+        .year-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .year-item {
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .year-item .year {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .year-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .year-item .label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-controls {
+                padding: 18px;
+                gap: 10px;
+            }
+
+            .stats-controls input,
+            .stats-controls select,
+            .stats-controls button {
+                font-size: 12px;
+                padding: 9px 12px;
+                .stats-controls input,
+                .stats-controls select {
+                    padding: 10px 12px;
+                    border: 1px solid var(--border-color);
+                    border-radius: 4px;
+                    font-size: 13px;
+                    font-family: 'Poppins';
+                    position: relative;
+                    z-index: 40;
+                    background: white;
+                }
+            .stat-table th,
+            .stat-table td {
+                padding: 10px;
+            }
+
+            .bar-label {
+                min-width: 120px;
+                font-size: 11px;
+            }
+
+            .bar-item {
+                margin-bottom: 15px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 15px;
+            }
+
+            .year-comparison {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-controls {
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+                overflow: visible !important;
+            }
+
+            .stats-controls input,
+            .stats-controls select,
+            .stats-controls button {
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .stat-section {
+                padding: 15px;
+                margin-bottom: 20px;
+                font-size: 12px;
+                overflow: visible !important;
+            }
+
+            .stat-section h3 {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .stat-table {
+                font-size: 11px;
+            }
+
+            .stat-table th {
+                padding: 8px;
+            }
+
+            .stat-table td {
+                padding: 8px;
+            }
+
+            .bar-label {
+                min-width: 100px;
+                font-size: 10px;
+            }
+
+            .bar-item {
+                margin-bottom: 12px;
+                gap: 8px;
+            }
+
+            .bar-container {
+                height: 22px;
+            }
+
+            .bar-value {
+                min-width: 50px;
+                font-size: 11px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .comparison-card {
+                padding: 14px;
+            }
+
+            .year-comparison {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .year-item {
+                padding: 14px;
+            }
+
+            .year-item .value {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-controls {
+                padding: 12px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .stats-controls input,
+            .stats-controls select,
+            .stats-controls button {
+                width: 100%;
+                padding: 9px 10px;
+                font-size: 11px;
+            }
+
+            .stat-section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .stat-section h3 {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .stat-table {
+                font-size: 10px;
+            }
+
+            .stat-table th {
+                padding: 6px;
+            }
+
+            .stat-table td {
+                padding: 6px;
+            }
+
+            .bar-label {
+                min-width: 80px;
+                font-size: 9px;
+            }
+
+            .bar-item {
+                margin-bottom: 10px;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            .bar-container {
+                flex: 1;
+                min-width: 100px;
+                height: 20px;
+            }
+
+            .bar-value {
+                min-width: 40px;
+                font-size: 10px;
+            }
+
+            .comparison-grid {
+                gap: 10px;
+            }
+
+            .comparison-card {
+                padding: 12px;
+            }
+
+            .comparison-title {
+                font-size: 13px;
+            }
+
+            .comparison-stat {
+                margin-bottom: 8px;
+                padding-bottom: 8px;
+                font-size: 11px;
+            }
+
+            .year-comparison {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .year-item {
+                padding: 12px;
+            }
+
+            .year-item .value {
+                font-size: 18px;
+            }
+
+            .export-btn {
+                width: 100%;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+
+    <style>
         .comparison-card {
             background: linear-gradient(135deg, var(--light-color), #fff);
             border: 2px solid var(--border-color);
@@ -269,7 +606,8 @@
         border-left: 4px solid #128241;
         font-family: 'Poppins', sans-serif;
         position: relative;
-        overflow: visible;
+        overflow: visible !important;
+        pointer-events: auto;
     }
 
     .wilayah-controls::before {
@@ -291,7 +629,7 @@
     .controls-wrapper {
         max-width: 100%;
         font-family: 'Poppins', sans-serif;
-        overflow: visible;
+        overflow: visible !important;
         position: relative;
         z-index: 1;
     }
@@ -302,7 +640,7 @@
         gap: 12px;
         flex-wrap: nowrap;
         margin-bottom: 16px;
-        overflow: visible;
+        overflow: visible !important;
         position: relative;
     }
 
@@ -314,7 +652,7 @@
         flex: 1;
         min-width: 0;
         z-index: 100;
-        overflow: visible;
+        overflow: visible !important;
     }
 
     .control-item.compact {
@@ -362,36 +700,44 @@
 
     /* Button Grid Trigger */
     .button-grid-trigger {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 11px 14px;
-        border: 2px solid #e3eae8;
-        border-radius: 10px;
-        background-color: white;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-family: 'Poppins', sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        color: #2c3e50;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        user-select: none;
-        white-space: nowrap;
-    }
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 14px;
+            border: 2px solid #e3eae8;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Poppins';
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c3e50;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            user-select: none;
+            white-space: nowrap;
+            pointer-events: auto;
+            position: relative;
+        }
 
-    .button-grid-trigger:hover {
-        border-color: #128241;
-        box-shadow: 0 6px 16px rgba(18, 130, 65, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
-        background-color: #fafdfb;
-    }
+        .button-grid-trigger:hover {
+            border-color: #128241;
+            box-shadow: 0 6px 16px rgba(18, 130, 65, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+            background-color: #fafdfb;
+        }
 
-    .button-grid-trigger.active {
-        border-color: #128241;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        background-color: #fafdfb;
-    }
+        .button-grid-trigger.active {
+            border-color: #128241;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            background-color: #fafdfb;
+            z-index: 99998 !important;
+            position: relative;
+        }
+
+        .button-grid-trigger.active ~ .button-grid {
+            z-index: 99999 !important;
+        }
 
     .grid-selected-text {
         flex: 1;
@@ -414,10 +760,7 @@
 
     /* Button Grid */
     .button-grid {
-        position: absolute;
-        top: calc(100% + 5px);
-        left: 0;
-        right: 0;
+        position: fixed !important;
         background: white;
         border: 2px solid #128241;
         border-radius: 10px;
@@ -425,7 +768,8 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
-        z-index: 999999;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
         box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
         animation: slideDown 0.3s ease;
         max-height: 400px;
@@ -472,6 +816,7 @@
         white-space: normal;
         line-height: 1.2;
         position: relative;
+        pointer-events: auto !important;
     }
 
     .grid-btn:hover {
@@ -562,43 +907,202 @@
     @media (max-width: 768px) {
         .wilayah-controls {
             padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+        .controls-wrapper {
+            overflow: visible;
         }
 
         .controls-row {
+            gap: 8px;
+            margin-bottom: 10px;
             flex-direction: column;
-            gap: 16px;
+            align-items: stretch;
+        }
+
+        .control-item {
+            min-width: 100%;
+            flex: 1 1 100%;
+            width: 100%;
         }
 
         .control-item.compact {
+            min-width: 100%;
             flex: 1 1 100%;
-        }
-
-        .controls-buttons-row {
-            flex-direction: column;
+            width: 100%;
         }
 
         .control-label {
             font-size: 10px;
+            margin-bottom: 6px;
         }
 
         .button-grid-trigger {
             padding: 10px 12px;
             font-size: 12px;
+            width: 100%;
+        }
+
+        .grid-selected-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls-buttons-row {
+            gap: 8px;
+            flex-direction: column;
+            align-items: stretch;
+            margin-top: 12px;
+        }
+
+        .btn-secondary {
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 12px;
+            gap: 6px;
         }
 
         .button-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 12px;
+            grid-template-columns: repeat(3, 1fr) !important;
+            padding: 10px;
+            gap: 8px;
+            max-height: 300px;
+        }
+
+        #tahunGrid.button-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
         }
 
         #bulanGrid.button-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        #mingguGrid.button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
         }
 
         .grid-btn {
-            padding: 11px 8px;
+            padding: 10px 8px;
             font-size: 12px;
+            min-width: 60px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .wilayah-controls {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .controls-row {
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .control-item {
+            min-width: 100%;
+            flex: 1 1 100%;
+        }
+
+        .control-label {
+            font-size: 9px;
+            margin-bottom: 4px;
+            gap: 4px;
+        }
+
+        .control-label i {
+            font-size: 12px;
+            width: 14px;
+        }
+
+        .button-grid-trigger {
+            padding: 8px 10px;
+            font-size: 11px;
+            width: 100%;
+            min-height: 36px;
+        }
+
+        .grid-arrow {
+            font-size: 10px;
+            margin-left: 6px;
+        }
+
+        .controls-buttons-row {
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .btn-secondary {
+            flex: 1 1 100%;
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 11px;
+            gap: 4px;
+        }
+
+        .btn-secondary i {
+            font-size: 12px;
+        }
+
+        .button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            padding: 8px;
+            gap: 6px;
+            max-height: 250px;
+            font-size: 10px;
+        }
+
+        #tahunGrid.button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        #bulanGrid.button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        #mingguGrid.button-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .grid-btn {
+            padding: 8px 6px;
+            font-size: 10px;
+            min-width: 50px;
+        }
+
+        /* Mobile Dropdown Z-Index Fix */
+        .button-grid {
+            z-index: 99999 !important;
+            position: absolute !important;
+        }
+
+        .button-grid-trigger.active {
+            z-index: 99998 !important;
+        }
+
+        .button-grid-trigger {
+            z-index: 99998 !important;
+            position: relative !important;
+        }
+
+        .control-item {
+            overflow: visible !important;
+            z-index: 99997 !important;
+        }
+
+        .controls-wrapper {
+            overflow: visible !important;
+            z-index: 99996 !important;
+        }
+
+        .wilayah-controls {
+            overflow: visible !important;
+            z-index: 99995 !important;
         }
     }
     </style>

@@ -142,7 +142,7 @@
                 <button onclick="loadAllWilayah()" class="btn-primary" title="Tampilkan peta untuk semua wilayah berdasarkan periode yang dipilih">
                     <i class="fas fa-globe"></i> Semua Wilayah
                 </button>
-                <button onclick="loadWilayahMap()" class="btn-secondary" title="Tampilkan peta berdasarkan wilayah dan periode yang dipilih (wilayah opsional)">
+                <button onclick="handleTampilkanPeta()" class="btn-secondary" title="Tampilkan peta berdasarkan wilayah dan periode yang dipilih (wilayah opsional)">
                     <i class="fas fa-search"></i> Tampilkan Peta
                 </button>
             </div>
@@ -177,6 +177,7 @@
             font-family: 'Poppins';
             position: relative;
             overflow: visible;
+            z-index: 1;
         }
 
         .wilayah-controls::before {
@@ -207,7 +208,7 @@
             display: flex;
             align-items: flex-end;
             gap: 12px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             margin-bottom: 16px;
             overflow: visible;
             position: static;
@@ -219,15 +220,15 @@
             font-family: 'Poppins';
             position: relative;
             flex: 1;
-            min-width: 0;
-            z-index: 100;
+            min-width: 200px;
+            z-index: 1000;
             overflow: visible;
             min-height: 0;
         }
 
         .control-item.compact {
             flex: 1;
-            min-width: 0;
+            min-width: 200px;
         }
 
         .controls-buttons-row {
@@ -235,6 +236,214 @@
             justify-content: space-between;
             gap: 12px;
             z-index: 1;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive untuk Tablet */
+        @media (max-width: 1024px) {
+            .controls-row {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .control-item {
+                min-width: 150px;
+                flex: 0 1 calc(50% - 6px);
+            }
+
+            .control-item.compact {
+                min-width: 150px;
+                flex: 0 1 calc(50% - 6px);
+            }
+
+            .controls-buttons-row {
+                gap: 10px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                flex: 1;
+                min-width: 120px;
+                padding: 11px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* Responsive untuk Mobile */
+        @media (max-width: 768px) {
+            .wilayah-controls {
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                gap: 8px;
+            }
+
+            .controls-wrapper {
+                overflow: visible;
+            }
+
+            .controls-row {
+                gap: 8px;
+                margin-bottom: 10px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-item {
+                min-width: 100%;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .control-item.compact {
+                min-width: 100%;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .control-label {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+
+            .button-grid-trigger {
+                padding: 10px 12px;
+                font-size: 12px;
+                width: 100%;
+            }
+
+            .grid-selected-text {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .controls-buttons-row {
+                gap: 8px;
+                flex-direction: column;
+                align-items: stretch;
+                margin-top: 12px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                flex: 1 1 100% !important;
+                min-width: 100% !important;
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 12px;
+                gap: 6px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                padding: 10px;
+                gap: 8px;
+                max-height: 300px;
+            }
+
+            #tahunGrid.button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            #mingguGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .grid-btn {
+                padding: 10px 8px;
+                font-size: 12px;
+                min-width: 60px;
+            }
+        }
+
+        /* Responsive untuk Mobile Kecil */
+        @media (max-width: 480px) {
+            .wilayah-controls {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .controls-row {
+                gap: 6px;
+                margin-bottom: 8px;
+            }
+
+            .control-item {
+                min-width: 100%;
+                flex: 1 1 100%;
+            }
+
+            .control-label {
+                font-size: 9px;
+                margin-bottom: 4px;
+                gap: 4px;
+            }
+
+            .control-label i {
+                font-size: 12px;
+                width: 14px;
+            }
+
+            .button-grid-trigger {
+                padding: 8px 10px;
+                font-size: 11px;
+                width: 100%;
+                min-height: 36px;
+            }
+
+            .grid-arrow {
+                font-size: 10px;
+                margin-left: 6px;
+            }
+
+            .controls-buttons-row {
+                gap: 6px;
+                margin-top: 10px;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                flex: 1 1 100%;
+                width: 100%;
+                padding: 8px 10px;
+                font-size: 11px;
+                gap: 4px;
+            }
+
+            .btn-primary i,
+            .btn-secondary i {
+                font-size: 12px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                padding: 8px;
+                gap: 6px;
+                max-height: 250px;
+                font-size: 10px;
+            }
+
+            #tahunGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            #mingguGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .grid-btn {
+                padding: 8px 6px;
+                font-size: 10px;
+                min-width: 50px;
+            }
         }
 
         .control-label {
@@ -299,6 +508,12 @@
             border-bottom-left-radius: 4px;
             border-bottom-right-radius: 4px;
             background-color: #fafdfb;
+            z-index: 10000;
+            position: relative;
+        }
+
+        .button-grid-trigger.active ~ .button-grid {
+            z-index: 10001 !important;
         }
 
         .grid-selected-text {
@@ -320,6 +535,11 @@
             transform: rotate(180deg);
         }
 
+        /* Ensure parent control-item gets proper z-index when dropdown is active */
+        .control-item:has(.button-grid-trigger.active) {
+            z-index: 10000 !important;
+        }
+
         /* Button Grid */
         .button-grid {
             position: fixed;
@@ -334,7 +554,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            z-index: 999999 !important;
+            z-index: 10001 !important;
             box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
             animation: slideDown 0.3s ease;
             max-height: 400px;
@@ -342,6 +562,39 @@
             min-width: max-content;
             width: auto;
             pointer-events: auto;
+        }
+
+        #statusGulmaGrid.button-grid {
+            border-color: #e0e0e0;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+            padding: 14px;
+            gap: 10px;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            width: min(92vw, 360px);
+            max-width: 360px;
+            min-width: 220px;
+        }
+
+        @media (max-width: 768px) {
+            #statusGulmaGrid.button-grid {
+                width: min(96vw, 320px);
+                max-width: 320px;
+                gap: 8px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #statusGulmaGrid.button-grid {
+                width: min(100vw - 24px, 300px);
+                gap: 6px;
+                padding: 10px;
+            }
+
+            #statusGulmaGrid.button-grid .grid-btn {
+                font-size: 12px;
+                padding: 10px;
+            }
         }
 
         /* Khusus untuk Tahun - hanya 3 kolom */
@@ -352,6 +605,11 @@
         /* Khusus untuk Bulan - 6 kolom */
         #bulanGrid.button-grid {
             grid-template-columns: repeat(6, 1fr);
+        }
+
+        /* Khusus untuk Minggu - 4 kolom desktop, 2 kolom mobile */
+        #mingguGrid.button-grid {
+            grid-template-columns: repeat(4, 1fr);
         }
 
         @keyframes slideDown {
@@ -725,6 +983,90 @@
             z-index: 10 !important;
         }
 
+        /* ===== ZOOM CONTROL STYLING ===== */
+        /* Container */
+        .leaflet-control-zoom {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Zoom buttons */
+        .leaflet-control-zoom a {
+            background: linear-gradient(135deg, #FBA919, #FF9500) !important;
+            border: 2px solid #128241 !important;
+            color: white !important;
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4), 0 0 16px rgba(255, 152, 0, 0.3) !important;
+            position: relative !important;
+            margin-bottom: 8px !important;
+        }
+
+        /* Zoom button hover effect - lift + glow */
+        .leaflet-control-zoom a:hover {
+            background: linear-gradient(135deg, #FF9500, #FF8C00) !important;
+            border-color: #FF6B00 !important;
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.6), 0 0 24px rgba(255, 152, 0, 0.5) !important;
+        }
+
+        /* Zoom button active/pressed effect */
+        .leaflet-control-zoom a:active {
+            transform: translateY(-1px) scale(0.98) !important;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4), 0 0 12px rgba(255, 152, 0, 0.2) !important;
+        }
+
+        /* Last button (zoom out) - remove bottom margin */
+        .leaflet-control-zoom a:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        /* Tooltip styling */
+        .leaflet-control-zoom a[title] {
+            position: relative !important;
+        }
+
+        /* Custom tooltip on hover */
+        .leaflet-control-zoom a:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 55px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(18, 130, 65, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            font-family: 'Poppins';
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            animation: tooltipSlide 0.2s ease;
+        }
+
+        @keyframes tooltipSlide {
+            from {
+                opacity: 0;
+                right: 45px;
+            }
+            to {
+                opacity: 1;
+                right: 55px;
+            }
+        }
+
         .wilayah-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -929,6 +1271,92 @@
             cursor: pointer;
         }
         
+        /* Search input styling */
+        #searchLocationTable {
+            font-size: 13px !important;
+        }
+        
+        #searchLocationTable::placeholder {
+            color: #bbb;
+        }
+        
+        #searchLocationTable:focus::placeholder {
+            color: #e0e0e0;
+        }
+        
+        /* Result count styling */
+        #searchResultCount {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* No results message styling */
+        tr.no-results-message {
+            background: #f9f9f9 !important;
+        }
+        
+        tr.no-results-message:hover {
+            background: #f9f9f9 !important;
+            cursor: default;
+        }
+        
+        /* Responsive design untuk search box */
+        @media (max-width: 768px) {
+            #searchLocationTable {
+                font-size: 12px !important;
+                padding: 10px 12px 10px 40px !important;
+            }
+            
+            #searchResultCount {
+                font-size: 10px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #searchLocationTable {
+                font-size: 11px !important;
+                padding: 10px 10px 10px 38px !important;
+            }
+            
+            #searchResultCount {
+                font-size: 9px !important;
+            }
+            
+            /* Mobile: Tampilkan title dengan line break */
+            .title-mobile-break {
+                display: inline;
+            }
+            
+            .mobile-break-line {
+                display: block;
+            }
+            
+            .title-desktop-only {
+                display: none;
+            }
+        }
+        
+        /* Desktop: Tampilkan title dalam satu baris */
+        .title-mobile-break {
+            display: none;
+        }
+        
+        .mobile-break-line {
+            display: none;
+        }
+        
+        .title-desktop-only {
+            display: inline;
+        }
+
         .status-badge {
             padding: 4px 10px;
             border-radius: 12px;
@@ -994,6 +1422,53 @@
         </div>
     </div>
 
+        <!-- Kontrol Wilayah -->
+    <div class="wilayah-controls" style="margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-start;">
+        <div style="flex: 0 0 30%; position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #FBA919; font-size: 16px;"></i>
+            <input type="text" id="searchWilayah" placeholder="Cari wilayah..." style="width: 100%; padding: 14px 15px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; transition: all 0.3s ease; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onfocus="this.style.borderColor='#FBA919'; this.style.boxShadow='0 0 0 4px rgba(251, 169, 25, 0.1), 0 2px 8px rgba(0,0,0,0.08)';" onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
+        </div>
+        <div class="control-item" style="flex: 0 0 70%; position: relative;">
+            <!-- Hidden input to store selected value -->
+            <input type="hidden" id="filterKomoditas" value="">
+            
+            <!-- Button Grid Trigger -->
+            <div class="button-grid-trigger" onclick="toggleButtonGrid('statusGulma')" style="width: 100%; padding: 14px 50px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; font-weight: 500; background: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; position: relative;">
+                <i class="fas fa-filter" style="position: absolute; left: 15px; color: #FBA919; font-size: 16px;"></i>
+                <span class="grid-selected-text" id="statusGulmaSelected" style="flex: 1; color: #2c3e50;">Kategori Status Gulma</span>
+                <i class="fas fa-chevron-down grid-arrow" style="color: #FBA919; font-size: 14px; transition: transform 0.3s ease;"></i>
+            </div>
+            
+            <!-- Button Grid -->
+            <div class="button-grid status-grid" id="statusGulmaGrid" style="display: none;">
+                <button class="grid-btn" data-value="bersih" data-color="#3498db" onclick="selectStatusGulma('bersih', 'Bersih', '#3498db')" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 13px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 16px; height: 16px; border-radius: 3px; border: 2px solid #3498db; background: #3498db; flex-shrink: 0;"></div>
+                    <span>Bersih</span>
+                </button>
+                <button class="grid-btn" data-value="ringan" data-color="#57ce39ff" onclick="selectStatusGulma('ringan', 'Ringan', '#57ce39ff')" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 13px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 16px; height: 16px; border-radius: 3px; border: 2px solid #57ce39ff; background: #57ce39ff; flex-shrink: 0;"></div>
+                    <span>Ringan</span>
+                </button>
+                <button class="grid-btn" data-value="sedang" data-color="#f1c40f" onclick="selectStatusGulma('sedang', 'Sedang', '#f1c40f')" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 13px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 16px; height: 16px; border-radius: 3px; border: 2px solid #f1c40f; background: #f1c40f; flex-shrink: 0;"></div>
+                    <span>Sedang</span>
+                </button>
+                <button class="grid-btn" data-value="berat" data-color="#e74c3c" onclick="selectStatusGulma('berat', 'Berat', '#e74c3c')" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 13px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                    <div style="width: 16px; height: 16px; border-radius: 3px; border: 2px solid #e74c3c; background: #e74c3c; flex-shrink: 0;"></div>
+                    <span>Berat</span>
+                </button>
+                <button class="grid-btn" data-value="belum_dimonitoring" data-color="#ecf0f1" onclick="selectStatusGulma('belum_dimonitoring', 'Tidak Ada Data', '#ecf0f1')" style="padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 13px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center; grid-column: 1 / -1;">
+                    <div style="width: 16px; height: 16px; border-radius: 3px; border: 2px solid #c4c4c4; background: #ecf0f1; flex-shrink: 0;"></div>
+                    <span>Tidak Ada Data</span>
+                </button>
+                <!-- <button class="grid-btn selected" data-value="" data-color="linear-gradient(135deg, #3498db, #e74c3c)" onclick="selectStatusGulma('', 'Kategori Status Gulma', 'linear-gradient(135deg, #3498db, #e74c3c)')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center; grid-column: 1 / -1;">
+                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #ddd; background: linear-gradient(135deg, #3498db, #e74c3c); flex-shrink: 0;"></div>
+                    <span style="color: #2c3e50; display: inline-block; font-weight: 500;">Semua Data</span>
+                </button> -->
+            </div>
+        </div>
+    </div>
+
     <!-- Daftar Wilayah -->
     <div style="margin: 30px 0 20px;">
         <h2 style="font-size:35px;font-weight:700;color:#2c3e50;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer"
@@ -1041,13 +1516,15 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div>
                 <h3 style="margin: 0 0 8px 0; color: var(--primary-color); font-size: 18px;">
-                    <i class="fas fa-list-alt"></i> Detail Lokasi per Wilayah
+                    <i class="fas fa-list-alt"></i> <span class="title-mobile-break">Detail Lokasi<br class="mobile-break-line">per Wilayah</span><span class="title-desktop-only">Detail Lokasi per Wilayah</span>
                 </h3>
                 <span id="tableInfoText" style="font-size: 12px; color: #666;"></span>
             </div>
-            <!-- <button onclick="exportToCsv()" style="padding: 10px 20px; background-color: #128241; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0d5e31'" onmouseout="this.style.backgroundColor='#128241'">
-                <i class="fas fa-download"></i> Export CSV
-            </button> -->
+            <div style="flex: 0 1 320px; position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #FBA919; font-size: 16px; z-index: 1;"></i>
+                <input type="text" id="searchLocationTable" placeholder="Cari lokasi, wilayah, status..." style="width: 100%; padding: 12px 15px 12px 45px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'Poppins'; font-size: 13px; transition: all 0.3s ease; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onfocus="this.style.borderColor='#FBA919'; this.style.boxShadow='0 0 0 4px rgba(251, 169, 25, 0.1), 0 2px 8px rgba(0,0,0,0.08)';" onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';" oninput="filterLocationTable();">
+                <span id="searchResultCount" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #999; font-weight: 600; white-space: nowrap;"></span>
+            </div>
         </div>
         <div style="overflow-x: auto;">
             <table class="location-table" id="locationTable">
@@ -1077,53 +1554,6 @@ onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-    
-    <!-- Kontrol Wilayah -->
-    <div class="wilayah-controls" style="margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-start;">
-        <div style="flex: 0 0 30%; position: relative;">
-            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #FBA919; font-size: 16px;"></i>
-            <input type="text" id="searchWilayah" placeholder="Cari wilayah..." style="width: 100%; padding: 14px 15px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; transition: all 0.3s ease; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" onfocus="this.style.borderColor='#FBA919'; this.style.boxShadow='0 0 0 4px rgba(251, 169, 25, 0.1), 0 2px 8px rgba(0,0,0,0.08)';" onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
-        </div>
-        <div class="control-item" style="flex: 1; position: relative;">
-            <!-- Hidden input to store selected value -->
-            <input type="hidden" id="filterKomoditas" value="">
-            
-            <!-- Button Grid Trigger -->
-            <div class="button-grid-trigger" onclick="toggleButtonGrid('statusGulma')" style="width: 100%; padding: 14px 50px 14px 45px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins'; font-size: 14px; font-weight: 500; background: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; position: relative;">
-                <i class="fas fa-filter" style="position: absolute; left: 15px; color: #FBA919; font-size: 16px;"></i>
-                <span class="grid-selected-text" id="statusGulmaSelected" style="flex: 1; color: #2c3e50;">Kategori Status Gulma</span>
-                <i class="fas fa-chevron-down grid-arrow" style="color: #FBA919; font-size: 14px; transition: transform 0.3s ease;"></i>
-            </div>
-            
-            <!-- Button Grid -->
-            <div class="button-grid" id="statusGulmaGrid" style="display: none; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 5px; background: white; border: 2px solid #e0e0e0; border-radius: 10px; margin-top: 0px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); position: absolute; width: 100%; z-index: 0; animation: slideDown 0.3s ease;">
-                <button class="grid-btn" data-value="bersih" data-color="#3498db" onclick="selectStatusGulma('bersih', 'Bersih', '#3498db')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #3498db; background: #3498db; flex-shrink: 0;"></div>
-                    <span>Bersih</span>
-                </button>
-                <button class="grid-btn" data-value="ringan" data-color="#57ce39ff" onclick="selectStatusGulma('ringan', 'Ringan', '#57ce39ff')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #57ce39ff; background: #57ce39ff; flex-shrink: 0;"></div>
-                    <span>Ringan</span>
-                </button>
-                <button class="grid-btn" data-value="sedang" data-color="#f1c40f" onclick="selectStatusGulma('sedang', 'Sedang', '#f1c40f')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #f1c40f; background: #f1c40f; flex-shrink: 0;"></div>
-                    <span>Sedang</span>
-                </button>
-                <button class="grid-btn" data-value="berat" data-color="#e74c3c" onclick="selectStatusGulma('berat', 'Berat', '#e74c3c')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #e74c3c; background: #e74c3c; flex-shrink: 0;"></div>
-                    <span>Berat</span>
-                </button>
-                <button class="grid-btn" data-value="belum_dimonitoring" data-color="#ecf0f1" onclick="selectStatusGulma('belum_dimonitoring', 'Tidak Ada Data', '#ecf0f1')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #c4c4c4; background: #ecf0f1; flex-shrink: 0;"></div>
-                    <span>Tidak Ada Data</span>
-                </button>
-                <!-- <button class="grid-btn selected" data-value="" data-color="linear-gradient(135deg, #3498db, #e74c3c)" onclick="selectStatusGulma('', 'Kategori Status Gulma', 'linear-gradient(135deg, #3498db, #e74c3c)')" style="padding: 8px 6px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-family: 'Poppins'; font-size: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; justify-content: center; grid-column: 1 / -1;">
-                    <div style="width: 18px; height: 18px; border-radius: 3px; border: 2px solid #ddd; background: linear-gradient(135deg, #3498db, #e74c3c); flex-shrink: 0;"></div>
-                    <span style="color: #2c3e50; display: inline-block; font-weight: 500;">Semua Data</span>
-                </button> -->
-            </div>
         </div>
     </div>
     
@@ -1497,9 +1927,13 @@ function initMap() {
     }
 
     // Create map centered on Lampung Tengah
+    // Use higher zoom for mobile devices (3x zoom in)
+    const isMobile = window.innerWidth < 768;
+    const defaultZoom = isMobile ? 21 : 14;
+    
     map = L.map('map', {
         center: [-4.85, 105.0],
-        zoom: 12,
+        zoom: defaultZoom,
         zoomControl: true,
         attributionControl: true,
         scrollWheelZoom: true,
@@ -1509,12 +1943,12 @@ function initMap() {
     // Define base layers
     var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
+        maxZoom: 21
     });
 
     var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        maxZoom: 19
+        maxZoom: 21
     });
 
     // Add default layer (OpenStreetMap)
@@ -1527,6 +1961,24 @@ function initMap() {
     };
 
     L.control.layers(baseLayers).addTo(map);
+
+    // ===== CUSTOMIZE ZOOM BUTTONS: Tambah tooltip dan styling ===== 
+    setTimeout(function() {
+        const zoomInBtn = document.querySelector('.leaflet-control-zoom a.leaflet-control-zoom-in');
+        const zoomOutBtn = document.querySelector('.leaflet-control-zoom a.leaflet-control-zoom-out');
+        
+        if (zoomInBtn) {
+            zoomInBtn.setAttribute('data-tooltip', 'Perbesar peta');
+            zoomInBtn.title = 'Klik untuk Perbesar peta';
+            console.log('✅ Zoom In button customized');
+        }
+        
+        if (zoomOutBtn) {
+            zoomOutBtn.setAttribute('data-tooltip', 'Perkecil peta');
+            zoomOutBtn.title = 'Klik untuk Perkecil peta';
+            console.log('✅ Zoom Out button customized');
+        }
+    }, 100);
 
     // ===== POPUP HANDLER: Load foto saat popup dibuka =====
     map.on('popupopen', function (e) {
@@ -1670,6 +2122,76 @@ function initMap() {
             errorContainer.style.display = 'block';
         }
     }
+
+    // ===== LOCATION TABLE SEARCH/FILTER =====
+    function filterLocationTable() {
+        const searchInput = document.getElementById('searchLocationTable');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const tbody = document.getElementById('locationTableBody');
+        const rows = tbody.querySelectorAll('tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            // Get all text content from cells and convert to lowercase
+            const rowText = Array.from(row.cells)
+                .map(cell => cell.textContent.toLowerCase())
+                .join(' ');
+            
+            // Check if search term matches any part of the row
+            if (searchTerm === '' || rowText.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update result count
+        const resultCountSpan = document.getElementById('searchResultCount');
+        if (resultCountSpan) {
+            if (searchTerm === '') {
+                resultCountSpan.textContent = '';
+            } else {
+                resultCountSpan.textContent = `${visibleCount} hasil`;
+            }
+        }
+        
+        // Show message if no results
+        if (visibleCount === 0 && searchTerm !== '') {
+            // Check if empty message already exists
+            if (!tbody.querySelector('.no-results-message')) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.className = 'no-results-message';
+                emptyRow.innerHTML = `
+                    <td colspan="13" style="text-align: center; padding: 40px; color: #999;">
+                        <i class="fas fa-search" style="font-size: 32px; margin-bottom: 15px; opacity: 0.5;"></i><br>
+                        <strong style="font-size: 14px; display: block; margin-bottom: 8px;">Tidak ada hasil pencarian</strong>
+                        <span style="font-size: 12px; color: #bbb;">untuk "${searchTerm}"</span>
+                    </td>
+                `;
+                tbody.appendChild(emptyRow);
+            }
+        } else {
+            // Remove empty message if it exists
+            const emptyMsg = tbody.querySelector('.no-results-message');
+            if (emptyMsg) emptyMsg.remove();
+        }
+    }
+    
+    // Add keyboard shortcut untuk search
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchLocationTable');
+        if (searchInput) {
+            // Escape key untuk clear search
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                    filterLocationTable();
+                    this.blur();
+                }
+            });
+        }
+    });
 
     // Sort state tracking
     let currentSortColumn = null;
@@ -1931,7 +2453,8 @@ function initMap() {
                 // Fit map to bounds
                 const bounds = layer.getBounds();
                 if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+                    const isMobile = window.innerWidth < 768;
+                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: isMobile ? 21 : 14 });
                 }
 
                 console.log(`Wilayah ${wilayahNumber} loaded: ${response.features.length} features (${stats ? stats.bersih_count + ' bersih, ' + stats.ringan_count + ' ringan' : 'stats pending'})`);
@@ -2098,7 +2621,8 @@ function initMap() {
                 // Fit map to bounds
                 const bounds = layer.getBounds();
                 if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14 });
+                    const isMobile = window.innerWidth < 768;
+                    map.fitBounds(bounds, { padding: [80, 80], maxZoom: isMobile ? 21 : 14 });
                 }
 
                 console.log(`Wilayah ${wilayahNumber} loaded: ${response.features.length} features (${stats ? stats.bersih_count + ' bersih, ' + stats.ringan_count + ' ringan' : 'stats pending'})`);
@@ -2174,8 +2698,8 @@ function initMap() {
         
         updatePeriodInfoDisplay({ tahun, bulan, minggu }, isLatest);
         
-        // Show "Tampilkan Peta" button
-        showLoadMapButton();
+        // 🛑 DEPRECATED: showLoadMapButton() dipindahkan ke handleTampilkanPeta()
+        // showLoadMapButton();
     }
     
     // Clear wilayah cards and show placeholder message
@@ -2190,8 +2714,9 @@ function initMap() {
         `;
     }
     
-    // Show "Tampilkan Peta" button in period info area
-    function showLoadMapButton() {
+    // 🛑 DEPRECATED: showLoadMapButton() - Fungsi ini sudah tidak digunakan
+    // Tombol "Tampilkan Peta" sekarang langsung menggunakan handleTampilkanPeta()
+    /* function showLoadMapButton() {
         const periodInfoText = document.getElementById('periodInfoText');
         const existingButton = document.getElementById('loadMapButton');
         
@@ -2232,6 +2757,31 @@ function initMap() {
         
         // Insert button after period info text
         periodInfoText.parentNode.insertBefore(button, periodInfoText.nextSibling);
+    } */
+    
+    // ✅ NEW: Handle both loadWilayahMap() dan logic tambahan sekaligus
+    function handleTampilkanPeta() {
+        console.log('✓ handleTampilkanPeta() called - executing map load');
+        
+        // ✅ CLEAR placeholder message immediately sebelum loading
+        const grid = document.getElementById('wilayahGrid');
+        grid.innerHTML = `
+            <div style="text-align: center; width: 100%; padding: 40px;">
+                <div class="loading" style="margin: 0 auto;"></div>
+                <p style="margin-top: 20px; color: #c4c4c4ff;">Memuat data wilayah...</p>
+            </div>
+        `;
+        
+        // Jalankan loadWilayahMap() untuk load data
+        loadWilayahMap();
+        
+        // Jika user memilih wilayah spesifik, info saja (loadWilayahMap sudah handle semuanya)
+        const wilayahSelect = document.getElementById('wilayahSelect');
+        if (wilayahSelect && wilayahSelect.value) {
+            console.log('✓ Wilayah dipilih:', wilayahSelect.value);
+        } else {
+            console.log('ℹ️ Tidak ada wilayah spesifik dipilih, load semua wilayah');
+        }
     }
     
     // Load all data (wilayah cards, map, table) for filtered period
@@ -2285,6 +2835,8 @@ function initMap() {
     // ✅ OPTIMIZATION: Lazy load stats & records after map renders
     async function lazyLoadStatsAndRecords(wilayahNumbers, periodParams, loadId) {
         // Don't block rendering - load async
+        console.log(`⏳ [lazyLoad #${loadId}] Starting stats load for ${wilayahNumbers.length} wilayah...`);
+        
         setTimeout(async () => {
             if (loadId !== currentLoadId) {
                 console.log(`⛔ [lazyLoad] Skipping stats load for outdated loadId #${loadId}`);
@@ -2294,21 +2846,125 @@ function initMap() {
             try {
                 console.log(`⏳ [lazyLoad] Loading stats for ${wilayahNumbers.length} wilayah...`);
                 
-                // Load stats in parallel (fast API endpoints)
-                const statsPromises = wilayahNumbers.map(num =>
-                    fetchWithCache(`/api/wilayah/stats/${num}${periodParams}`)
-                        .catch(e => {
-                            console.warn(`⚠️  Failed to load stats for wilayah ${num}:`, e.message);
-                            return null;
-                        })
+                // ✅ OPTIMIZATION: Load stats AND geojson in parallel
+                const enrichmentPromises = wilayahNumbers.map(num =>
+                    Promise.all([
+                        fetchWithCache(`/api/wilayah/stats/${num}${periodParams}`)
+                            .catch(e => {
+                                console.warn(`⚠️  Failed to load stats for wilayah ${num}:`, e.message);
+                                return null;
+                            }),
+                        fetchWithCache(`/api/wilayah/geojson/${num}${periodParams}`)
+                            .catch(e => {
+                                console.warn(`⚠️  Failed to load geojson for wilayah ${num}:`, e.message);
+                                return null;
+                            })
+                    ])
+                    .then(([stats, geojson]) => {
+                        if (stats || geojson) {
+                            console.log(`✅ [lazyLoad] Enrichment for wilayah ${num}:`, { stats: !!stats, geojson: geojson?.features?.length || 0 });
+                            return { wilayah: num, stats, geojson };
+                        }
+                        return null;
+                    })
                 );
                 
-                const statsResults = await Promise.all(statsPromises);
-                console.log(`✅ [lazyLoad] Loaded stats for ${statsResults.filter(r => r).length} wilayah`);
+                const enrichmentResults = await Promise.all(enrichmentPromises);
+                const validResults = enrichmentResults.filter(r => r !== null);
+                console.log(`✅ [lazyLoad] Enrichment complete for ${validResults.length} wilayah`);
                 
-                // Note: Stats are loaded but not blocking - user sees map immediately
+                // ✅ CRITICAL: Guard check before updating UI
+                if (loadId !== currentLoadId) {
+                    console.log(`⛔ [lazyLoad] Load #${loadId} became stale before updating cards (current: #${currentLoadId})`);
+                    return;
+                }
+                
+                // ✅ BUILD enrichment map: wilayah -> { stats, luas, tk, status_counts }
+                const enrichmentMap = {};
+                validResults.forEach(({ wilayah, stats, geojson }) => {
+                    let totalLuasNetto = 0;
+                    let totalTk = 0;
+                    const statusCounts = {
+                        bersih: 0,
+                        ringan: 0,
+                        sedang: 0,
+                        berat: 0,
+                        belum_dimonitoring: 0
+                    };
+                    
+                    // ✅ PRIORITY 1: Use stats if available (fastest)
+                    if (stats && stats.bersih_count !== undefined) {
+                        totalLuasNetto = stats.total_neto || stats.total_luas_netto || 0;
+                        totalTk = stats.total_tk || 0;
+                        statusCounts.bersih = stats.bersih_count || 0;
+                        statusCounts.ringan = stats.ringan_count || 0;
+                        statusCounts.sedang = stats.sedang_count || 0;
+                        statusCounts.berat = stats.berat_count || 0;
+                        statusCounts.belum_dimonitoring = stats.belum_dimonitoring_count || 0;
+                        
+                        console.log(`📊 [lazyLoad] Wilayah ${wilayah} using STATS data`);
+                    }
+                    // ✅ FALLBACK: Calculate from geojson if stats not available
+                    else if (geojson && geojson.features) {
+                        console.log(`📊 [lazyLoad] Wilayah ${wilayah} calculating from ${geojson.features.length} features`);
+                        
+                        geojson.features.forEach(feature => {
+                            const props = feature.properties;
+                            
+                            // Sum Luas Netto (from CSV neto field)
+                            const neto = props.neto || props.Netto || props.netto || props.Luas_Netto || 0;
+                            totalLuasNetto += parseFloat(neto) || 0;
+                            
+                            // Sum TK (from CSV TOTAL_TK field)
+                            const tkTotal = props.TOTAL_TK || props['TOTAL TK'] || props.total_tk || 0;
+                            const tkNumber = parseFloat(String(tkTotal).replace(/,/g, '.')) || 0;
+                            totalTk += tkNumber;
+                            
+                            // Count status
+                            const status = (props.kategori || props.Kelas_weed || props.gulma_KATEGORI || props.Status || '').toLowerCase();
+                            if (!status || (!status.includes('bersih') && !status.includes('ringan') && !status.includes('sedang') && !status.includes('berat'))) {
+                                statusCounts.belum_dimonitoring++;
+                            } else if (status.includes('bersih')) {
+                                statusCounts.bersih++;
+                            } else if (status.includes('ringan')) {
+                                statusCounts.ringan++;
+                            } else if (status.includes('sedang')) {
+                                statusCounts.sedang++;
+                            } else if (status.includes('berat')) {
+                                statusCounts.berat++;
+                            }
+                        });
+                    }
+                    
+                    enrichmentMap[wilayah] = {
+                        total_luas_netto: totalLuasNetto,
+                        total_tk: totalTk,
+                        status_counts: statusCounts
+                    };
+                });
+                
+                console.log(`📊 [lazyLoad #${loadId}] Enrichment map ready:`, enrichmentMap);
+                
+                // ✅ UPDATE CARDS with enriched data!
+                wilayahData = wilayahData.map(card => {
+                    const enrichment = enrichmentMap[card.wilayah];
+                    if (enrichment) {
+                        return {
+                            ...card,
+                            total_luas_netto: enrichment.total_luas_netto,
+                            total_tk: enrichment.total_tk,
+                            status_counts: enrichment.status_counts
+                        };
+                    }
+                    return card;
+                });
+                
+                // RE-RENDER cards with updated stats + luas + tk
+                console.log(`🔄 [lazyLoad #${loadId}] RE-RENDERING cards with enriched data (luas, tk, stats)`);
+                renderWilayah(wilayahData);
+                
             } catch (error) {
-                console.error(`❌ [lazyLoad] Error loading stats:`, error);
+                console.error(`❌ [lazyLoad] Error loading enrichment data:`, error);
             }
         }, 100); // Small delay to let browser render map first
     }
@@ -2394,6 +3050,24 @@ function initMap() {
             console.log('📍 [wilayah.blade] Will load wilayah:', wilayahNumbers);
             
             console.log(`📅 [wilayah.blade] Loading map dengan periode: ${tahun}/${bulan}/W${minggu}`);
+            
+            // ✅ OPTIMIZATION: RENDER CARDS IMMEDIATELY with basic data
+            // Don't wait for geojson, stats, or enrichment - show cards now!
+            const basicWilayahCards = summary.data.map(w => ({
+                ...w,
+                total_luas_netto: w.total_area || 0,
+                total_tk: 0,
+                status_counts: {
+                    bersih: 0,
+                    ringan: 0,
+                    sedang: 0,
+                    berat: 0,
+                    belum_dimonitoring: 0
+                }
+            }));
+            
+            console.log(`⚡ [OPTIMIZATION] Rendering ${basicWilayahCards.length} cards IMMEDIATELY (no stats yet)`);
+            renderWilayah(basicWilayahCards);
             
             // Load each wilayah - ONLY GEOJSON for fast rendering
             const promises = wilayahNumbers.map(num => {
@@ -2510,7 +3184,8 @@ function initMap() {
                     return acc.extend(bounds);
                 }, L.latLngBounds(allBounds[0]));
                 
-                map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: 13 });
+                const isMobile = window.innerWidth < 768;
+                map.fitBounds(combinedBounds, { padding: [80, 80], maxZoom: isMobile ? 21 : 13 });
             } else if (currentStatusFilter) {
                 // Filter active but no results found
                 console.warn(`⚠️ Filter '${currentStatusFilter}' returned no results`);
@@ -3175,8 +3850,14 @@ function initMap() {
         const tbody = document.getElementById('locationTableBody');
         tbody.innerHTML = '';
         
+        // Reset search input dan result count
+        const searchInput = document.getElementById('searchLocationTable');
+        if (searchInput) searchInput.value = '';
+        const resultCount = document.getElementById('searchResultCount');
+        if (resultCount) resultCount.textContent = '';
+        
         if (!features || features.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 20px; color: #999;">Tidak ada data lokasi</td></tr>';
             return;
         }
         
@@ -3940,26 +4621,4 @@ function initMap() {
             loadAvailablePeriods(); // Load periods and then auto-load map
         }
     });
-
-    // Export CSV function (from csv-handler.js)
-    async function exportToCsv(filters = {}) {
-        try {
-            // Build query string from current location table data
-            const params = new URLSearchParams();
-            
-            // Get current wilayah if any
-            const wilayahSelect = document.getElementById('wilayahSelect');
-            if (wilayahSelect && wilayahSelect.value) {
-                params.append('wilayah_id', wilayahSelect.value);
-            }
-            
-            // Download file
-            const url = `/api/csv/export?${params.toString()}`;
-            window.location.href = url;
-            
-        } catch (error) {
-            console.error('Error exporting CSV:', error);
-            alert('Gagal mengexport data: ' + error.message);
-        }
-    }
 </script>

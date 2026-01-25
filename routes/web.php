@@ -37,6 +37,22 @@ Route::get('/data/excel', [ExcelDataController::class, 'getExcelData'])
 
 /*
 |--------------------------------------------------------------------------
+| API - ADMIN DASHBOARD AUTOREFRESH
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/admin')
+    ->name('api.admin.')
+    ->middleware(['auth', 'admin'])
+    ->group(function () {
+        Route::get('/publikasi-refresh', [AdminController::class, 'getPublikasiRefresh'])
+            ->name('publikasi-refresh');
+
+        Route::get('/riwayat-upload-refresh', [AdminController::class, 'getRiwayatUploadRefresh'])
+            ->name('riwayat-upload-refresh');
+    });
+
+/*
+|--------------------------------------------------------------------------
 | API - STATISTIK 
 |--------------------------------------------------------------------------
 */

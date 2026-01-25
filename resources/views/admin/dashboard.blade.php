@@ -765,7 +765,7 @@
     }
 
     .grid-btn {
-        padding: 12px 16px;
+        padding: 10px 8px;
         border: 2px solid #e3eae8;
         border-radius: 8px;
         background: white;
@@ -776,7 +776,12 @@
         cursor: pointer;
         transition: all 0.2s ease;
         text-align: center;
-        white-space: nowrap;
+        white-space: normal;
+        word-wrap: break-word;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .grid-btn:hover {
@@ -802,6 +807,35 @@
 
     .full-width {
         grid-column: 1 / -1;
+    }
+
+    /* Responsive Grid untuk Bulan dan Minggu */
+    #bulanGrid {
+        grid-template-columns: repeat(6, 1fr) !important;
+    }
+
+    #mingguGrid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    @media (max-width: 1024px) {
+        #bulanGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+        }
+
+        #mingguGrid {
+            grid-template-columns: repeat(4, 1fr) !important;
+        }
+    }
+
+    @media (max-width: 600px) {
+        #bulanGrid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        #mingguGrid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
     }
 
     @media (max-width: 768px) {
@@ -1081,7 +1115,7 @@
                         <i class="fas fa-calendar-alt" style="color: var(--accent-color);"></i> Pilih Bulan:
                     </label>
                     <input type="hidden" id="bulan" name="bulan" required>
-                    <div id="bulanGrid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                    <div id="bulanGrid" style="display: grid; gap: 10px;">
                         <button type="button" class="grid-btn" data-value="1" onclick="selectMonth('1', 'Januari', event)">Januari</button>
                         <button type="button" class="grid-btn" data-value="2" onclick="selectMonth('2', 'Februari', event)">Februari</button>
                         <button type="button" class="grid-btn" data-value="3" onclick="selectMonth('3', 'Maret', event)">Maret</button>
@@ -1102,7 +1136,7 @@
                         <i class="fas fa-calendar-week" style="color: var(--accent-color);"></i> Pilih Minggu:
                     </label>
                     <input type="hidden" id="minggu" name="minggu" required>
-                    <div id="mingguGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                    <div id="mingguGrid" style="display: grid; gap: 10px;">
                         <button type="button" class="grid-btn" data-value="1" onclick="selectWeek('1', event)">Minggu 1</button>
                         <button type="button" class="grid-btn" data-value="2" onclick="selectWeek('2', event)">Minggu 2</button>
                         <button type="button" class="grid-btn" data-value="3" onclick="selectWeek('3', event)">Minggu 3</button>
@@ -1166,9 +1200,21 @@
                 </ul>
                 <p style="margin-top: 20px; padding: 15px; background: #fff8e1; border-left: 4px solid var(--accent-color); border-radius: 8px; font-size: 13px; color: #666;">
                     <strong style="color: var(--accent-color);">📋 Format CSV yang valid:</strong><br>
-                    <span style="font-size: 12px; line-height: 1.6; display: block; margin-top: 8px;">
-                        PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,<br>TANGGAL,TK/HA,TOTAL_TK
-                    </span>
+                    <div style="font-size: 11px; line-height: 1.8; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">PG</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">FM</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">WIL</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">SEKSI</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">NETO</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">HASIL</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">UMUR_TNM</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">TNM_STS</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">ACTIVITAS</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">KATEGORI</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">TANGGAL</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">TK/HA</span>
+                        <span style="background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-family: 'Courier New', monospace;">TOTAL_TK</span>
+                    </div>
                 </p>
             </div>
         </div>
@@ -2518,130 +2564,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             });
     }
 
-    // Form upload
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const tahun = document.getElementById('tahun').value;
-        const bulan = document.getElementById('bulan').value;
-        const minggu = document.getElementById('minggu').value;
-        const file = document.getElementById('csvFile').files[0];
-        const messageDiv = document.getElementById('uploadMessage');
-
-        if (!tahun || !bulan || !minggu) {
-            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih tahun, bulan, dan minggu terlebih dahulu';
-            messageDiv.className = 'message show error';
-            setTimeout(() => {
-                messageDiv.className = 'message';
-            }, 4000);
-            return;
-        }
-
-        if (!file) {
-            messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Pilih file CSV terlebih dahulu';
-            messageDiv.className = 'message show error';
-            setTimeout(() => {
-                messageDiv.className = 'message';
-            }, 4000);
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('tahun', tahun);
-        formData.append('bulan', bulan);
-        formData.append('minggu', minggu);
-        formData.append('_token', document.querySelector('[name="_token"]').value);
-
-        document.getElementById('uploadBtn').disabled = true;
-        document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses file...';
-        messageDiv.innerHTML = '<div class="loading-spinner"></div> Memproses file...';
-        messageDiv.className = 'message show';
-
-        try {
-            const res = await fetch('{{ route("admin.upload-csv") }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('[name="_token"]').value
-                }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                const fileName = file.name;
-                messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
-                messageDiv.className = 'message show success';
-                
-                console.log('✓ Upload berhasil');
-                console.log('📊 Import Log ID:', data.import_log_id);
-                
-                // Clear form
-                document.getElementById('csvFile').value = '';
-                document.getElementById('fileStatus').style.display = 'none';
-                document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
-                document.getElementById('uploadBtn').disabled = true;
-                document.getElementById('uploadBtn').style.opacity = '0.5';
-                document.getElementById('uploadBtn').style.cursor = 'not-allowed';
-                
-                // PENTING: Update statistics LANGSUNG dari data upload (temporary)
-                console.log('✓ Update statistics dari upload baru...');
-                document.getElementById('statTotalData').textContent = data.berhasil;
-                
-                // PENTING: Load peta dengan data dari import_log_id baru
-                console.log('✓ Load peta dengan data dari upload baru...');
-                if (map && data.import_log_id) {
-                    // Clear existing layers
-                    Object.keys(geoJsonLayers).forEach(key => {
-                        if (geoJsonLayers[key]) {
-                            map.removeLayer(geoJsonLayers[key]);
-                        }
-                    });
-                    geoJsonLayers = {};
-                    
-                    // Show loading indicator
-                    const loadingDiv = document.getElementById('mapLoadingIndicator');
-                    if (loadingDiv) {
-                        loadingDiv.style.display = 'block';
-                    }
-                    
-                    // Load data dari import_log_id baru (TEMP DATA)
-                    console.log('✓ Loading temp data dari import_log_id:', data.import_log_id);
-                    await loadImportDataOnMap(data.import_log_id, data.wilayah_id, tahun, bulan, minggu);
-                    
-                    // Hide loading indicator
-                    if (loadingDiv) {
-                        loadingDiv.style.display = 'none';
-                    }
-                } else {
-                    console.error('❌ Map tidak ditemukan atau import_log_id tidak ada!');
-                }
-                
-                // Refresh table history
-                console.log('✓ Refresh import history table...');
-                fetchImportHistory();
-                
-                // Scroll to map untuk lihat hasil
-                setTimeout(() => {
-                    document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 500);
-                
-            } else {
-                const errorData = await res.json();
-                messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorData.message || 'Terjadi kesalahan'}`;
-                messageDiv.className = 'message show error';
-            }
-        } catch (error) {
-            messageDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
-            messageDiv.className = 'message show error';
-        } finally {
-            document.getElementById('uploadBtn').disabled = false;
-            document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload File';
-            document.getElementById('uploadBtn').style.opacity = '1';
-            document.getElementById('uploadBtn').style.cursor = 'pointer';
-        }
-    });
+    // 🗑️ REMOVED: Duplicate upload form handler - see line 1901 for the active one
 
     // Grid Selection Functions (Direct Click)
     function selectMonth(value, label, event) {
@@ -3680,6 +3603,114 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 }
             });
         }
+
+        // ===== AUTO-REFRESH PUBLIKASI & RIWAYAT UPLOAD =====
+        // Refresh setiap 10 detik hanya bagian tabel publikasi dan riwayat upload
+        const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
+
+        function refreshPubiclasiTable() {
+            fetch('/api/admin/publikasi-refresh', {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const tbody = document.querySelector('#publikasiTable tbody');
+                        if (tbody) {
+                            tbody.innerHTML = '';
+                            const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                            
+                            data.data.forEach(row => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td style="font-weight: 600;">
+                                        ${row.tahun}<br>
+                                        <small style="color: #666;">${row.periode}</small>
+                                    </td>
+                                    <td>
+                                        ${row.is_published ? 
+                                            `<div style="background: #e8f5e9; padding: 10px; border-radius: 6px; border-left: 4px solid #128241;">
+                                                <strong style="color: #128241;">${row.nama_file}</strong>
+                                                <br>
+                                                <small style="color: #666;">ID #${row.file_id}</small>
+                                            </div>` :
+                                            `<div style="background: #fff8e1; padding: 10px; border-radius: 6px; border-left: 4px solid #FBA919;">
+                                                <strong style="color: #FBA919;">⚠️ Belum ada publikasi</strong>
+                                                <br>
+                                                <small style="color: #666;">Pilih salah satu file di bawah</small>
+                                            </div>`
+                                        }
+                                    </td>
+                                    <td style="text-align: center;">
+                                        ${row.records !== '-' ? row.records : '-'}
+                                    </td>
+                                    <td style="font-size: 12px;">
+                                        ${row.upload_time}
+                                    </td>
+                                    <td style="font-size: 12px;">
+                                        ${row.publikasi_time}
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        }
+                    }
+                })
+                .catch(error => console.log('Auto-refresh publikasi error:', error));
+        }
+
+        function refreshRiwayatUploadTable() {
+            // Get current filters from form
+            const filterForm = document.getElementById('filterForm');
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams();
+            
+            if (formData.get('tahun')) params.append('tahun', formData.get('tahun'));
+            if (formData.get('bulan')) params.append('bulan', formData.get('bulan'));
+            if (formData.get('minggu')) params.append('minggu', formData.get('minggu'));
+            if (formData.get('search')) params.append('search', formData.get('search'));
+
+            fetch('/api/admin/riwayat-upload-refresh?' + params.toString(), {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        filteredData = data.data.map(row => ({
+                            id: row.id.replace('#', ''),
+                            nama_file: row.nama_file,
+                            tahun: row.periode.split('/')[0]?.trim() || 0,
+                            bulan: row.periode.includes('Jan') ? 1 : row.periode.includes('Feb') ? 2 : row.periode.includes('Mar') ? 3 : row.periode.includes('Apr') ? 4 : row.periode.includes('Mei') ? 5 : row.periode.includes('Jun') ? 6 : row.periode.includes('Jul') ? 7 : row.periode.includes('Ags') ? 8 : row.periode.includes('Sep') ? 9 : row.periode.includes('Okt') ? 10 : row.periode.includes('Nov') ? 11 : row.periode.includes('Des') ? 12 : 0,
+                            minggu: row.periode.match(/Minggu (\d+)/) ? parseInt(row.periode.match(/Minggu (\d+)/)[1]) : 0,
+                            jumlah_records: row.data,
+                            status: row.status_class,
+                            created_at: row.waktu_upload,
+                            id_detailed: row.import_id
+                        }));
+                        currentPage = 1;
+                        renderTable();
+                    }
+                })
+                .catch(error => console.log('Auto-refresh riwayat upload error:', error));
+        }
+
+        // Start auto-refresh
+        setInterval(function() {
+            refreshPubiclasiTable();
+            refreshRiwayatUploadTable();
+        }, AUTO_REFRESH_INTERVAL);
+
+        // Also refresh immediately on page load (after a small delay to ensure DOM is ready)
+        setTimeout(function() {
+            refreshPubiclasiTable();
+            refreshRiwayatUploadTable();
+        }, 500);
     });
 </script>
 

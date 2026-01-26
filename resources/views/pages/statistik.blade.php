@@ -62,31 +62,83 @@
             margin-bottom: 25px;
             overflow-x: auto;
         overflow-y: visible !important;
-        .stat-table th {
+    }
+
+        .stat-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .stat-table thead {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 12px;
+        }
+
+        .stat-table th {
+            padding: 14px 16px;
             text-align: left;
             font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             white-space: nowrap;
         }
 
         .stat-table td {
-            padding: 12px;
+            padding: 13px 16px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .stat-table tbody tr {
-            transition: all 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .stat-table tbody tr:hover {
             background-color: var(--light-color);
         }
 
+        .stat-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
         .stat-value {
             font-weight: 600;
             color: var(--primary-color);
+        }
+
+        /* Responsive - Tablet */
+        @media (max-width: 1024px) {
+            .stat-table {
+                font-size: 12px;
+            }
+
+            .stat-table th,
+            .stat-table td {
+                padding: 11px 12px;
+                font-size: 12px;
+            }
+
+            .stat-table th {
+                font-size: 11px;
+            }
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 768px) {
+            .stat-table {
+                font-size: 11px;
+            }
+
+            .stat-table th,
+            .stat-table td {
+                padding: 10px 10px;
+                font-size: 11px;
+            }
+
+            .stat-table th {
+                font-size: 10px;
+            }
         }
 
         .bar-chart {
@@ -1198,16 +1250,17 @@
 
     <!-- Tabel Statistik Detail -->
     <div class="stat-section">
-        <h3><i class="fas fa-list"></i> Tabel Statistik Detail Per Wilayah</h3>
+    <h3><i class="fas fa-list"></i> Tabel Statistik Detail Per Wilayah</h3>
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 6px;">
         <table class="stat-table">
             <thead>
                 <tr>
-                    <th>No.</th>
-                    <th>Wilayah</th>
-                    <th>Luas Rencana Wilayah (Ha)</th>
-                    <th>Total Neto</th>
-                    <th>Total Tenaga Kerja (Orang)</th>
-                    <th>Tahun</th>
+                    <th style="text-align: center; width: 50px;">No.</th>
+                    <th style="min-width: 120px;">Wilayah</th>
+                    <th style="text-align: center; min-width: 140px;">Luas Rencana (Ha)</th>
+                    <th style="text-align: center; min-width: 140px;">Total Neto (Ha)</th>
+                    <th style="text-align: center; min-width: 140px;">Tenaga Kerja (Orang)</th>
+                    <th style="text-align: center; width: 80px;">Tahun</th>
                 </tr>
             </thead>
             <tbody id="detailStatsTable">
@@ -1823,10 +1876,10 @@ function renderDetailStats(data) {
     if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center; padding: 40px;">
-                    <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3;"></i><br>
-                    <strong>Tidak ada data</strong><br>
-                    <small>Pilih periode lain atau upload CSV di Admin</small>
+                <td colspan="6" style="text-align:center; padding: 50px 20px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
+                    <strong style="display: block; font-size: 14px; margin-bottom: 5px;">Tidak ada data</strong>
+                    <small style="display: block; font-size: 12px; color: #999;">Pilih periode lain atau upload CSV di Admin</small>
                 </td>
             </tr>
         `;
@@ -1836,34 +1889,19 @@ function renderDetailStats(data) {
     data.forEach((item, i) => {
         const row = tbody.insertRow();
         
-        // IMPORTANT: 
-        // - total_hasil = Luas Rencana (from CSV "hasil" column)
-        // - total_neto = Total Neto (from CSV "neto" column)
-        // - total_tenaga_kerja = Total TK (from CSV "total_tk" column)
-        
-        const luasRencana = parseFloat(item.total_hasil || 0).toFixed(2); // Luas Rencana
-        const totalNeto = parseFloat(item.total_neto || 0).toFixed(2); // Total Neto
-        const totalTk = Math.round(parseFloat(item.total_tenaga_kerja || 0)); // Total TK (dibulatkan)
-        
-        // DEBUG: Log first 3 items
-        if (i < 3 || item.wilayah_id == 16) {
-            console.log(`🔍 WILAYAH ${item.wilayah_id} - BEFORE FORMAT`, {
-                total_tenaga_kerja_raw: item.total_tenaga_kerja,
-                parseFloat_result: parseFloat(item.total_tenaga_kerja || 0),
-                afterRound: totalTk
-            });
-        }
+        const luasRencana = parseFloat(item.total_hasil || 0).toFixed(2);
+        const totalNeto = parseFloat(item.total_neto || 0).toFixed(2);
+        const totalTk = Math.round(parseFloat(item.total_tenaga_kerja || 0));
         
         row.innerHTML = `
-            <td><strong>${i + 1}</strong></td>
-            <td><strong>Wilayah ${item.wilayah_id}</strong></td>
-            <td class="stat-value">${luasRencana} Ha</td>
-            <td class="stat-value">${totalNeto} Ha</td>
-            <td class="stat-value"><strong>${totalTk.toLocaleString('id-ID')}</strong> Orang</td>
-            <td><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
+            <td style="text-align: center; font-weight: 600; color: #999;"><strong>${i + 1}</strong></td>
+            <td style="font-weight: 600; color: var(--primary-color);">Wilayah ${item.wilayah_id}</td>
+            <td class="stat-value" style="text-align: center;">${luasRencana}</td>
+            <td class="stat-value" style="text-align: center;">${totalNeto}</td>
+            <td class="stat-value" style="text-align: center;"><strong>${totalTk.toLocaleString('id-ID')}</strong></td>
+            <td style="text-align: center; font-weight: 600;"><strong>${currentPeriod.tahun || new Date().getFullYear()}</strong></td>
         `;
         
-        // Debug info
         if (item.raw_count) {
             row.cells[0].title = `Raw: ${item.raw_count} → Dedup: ${item.total_features}`;
         }

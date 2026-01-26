@@ -923,7 +923,7 @@
     @if ($drones->count() > 0)
         <div class="filter-section">
             <select id="locationFilter" onchange="filterByLocation()">
-                <option value="">📍 Semua Lokasi</option>
+                <option value=""><i class="fas fa-map-pin"></i> Semua Lokasi</option>
                 @foreach ($drones->groupBy('lokasi') as $lokasi => $items)
                     <option value="{{ $lokasi }}">{{ $lokasi }}</option>
                 @endforeach
@@ -951,19 +951,19 @@
 
                     <div class="card-content">
                         <div class="drone-info">
-                            <div class="info-label">📅 Tanggal Perencanaan</div>
+                            <div class="info-label"><i class="fas fa-calendar"></i> Tanggal Upload</div>
                             <div class="info-value">{{ $drone->tanggal_perencanaan->translatedFormat('d F Y') }}</div>
                         </div>
 
                         <div class="drone-info">
-                            <div class="info-label">⏰ Tanggal Pembuatan</div>
+                            <div class="info-label"><i class="fas fa-clock"></i> Tanggal Upload</div>
                             <div class="info-value">{{ $drone->created_at->translatedFormat('d F Y') }}</div>
                         </div>
                     </div>
 
                     <div class="card-footer">
                         <a href="{{ route('drone.download', $drone->id) }}" class="btn btn-download">
-                            📥 Downloas PDF
+                            <i class="fas fa-download"></i> Downloas PDF
                         </a>
                         <button class="btn btn-view" data-pdf-url="{{ route('drone.view', $drone->id) }}" data-pdf-title="{{ $drone->judul }}" onclick="openPdfModal(this)">Detail</button>
                     </div>
@@ -972,7 +972,7 @@
         </div>
     @else
         <div class="empty-state">
-            <div class="empty-state-icon">📭</div>
+            <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
             <h2 class="empty-state-title">Belum ada dokumen drone</h2>
             <p class="empty-state-text">
                 Dokumen perencanaan penggunaan drone akan ditampilkan di sini. Silakan kembali lagi nanti untuk melihat dokumen terbaru.

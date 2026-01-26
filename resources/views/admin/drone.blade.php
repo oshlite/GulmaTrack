@@ -413,7 +413,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="judul">Judul <span style="color: red;">*</span></label>
-                    <input type="text" id="judul" name="judul" placeholder="Contoh: Perencanaan Pengendalian Gulma Wilayah A" value="{{ old('judul') }}" required>
+                    <input type="text" id="judul" name="judul" placeholder="Contoh: Perencanaan Gulma Wilayah A" value="{{ old('judul') }}" required>
                     @error('judul')
                         <small style="color: red;">{{ $message }}</small>
                     @enderror
@@ -421,7 +421,7 @@
 
                 <div class="form-group">
                     <label for="lokasi">Lokasi <span style="color: red;">*</span></label>
-                    <input type="text" id="lokasi" name="lokasi" placeholder="Contoh: Wilayah Jakarta Timur" value="{{ old('lokasi') }}" required>
+                    <input type="text" id="lokasi" name="lokasi" placeholder="Contoh: 506C1" value="{{ old('lokasi') }}" required>
                     @error('lokasi')
                         <small style="color: red;">{{ $message }}</small>
                     @enderror
@@ -430,7 +430,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="tanggal_perencanaan">Tanggal Perencanaan <span style="color: red;">*</span></label>
+                    <label for="tanggal_perencanaan">Tanggal Penerbangan <span style="color: red;">*</span></label>
                     <input type="date" id="tanggal_perencanaan" name="tanggal_perencanaan" value="{{ old('tanggal_perencanaan') }}" required>
                     @error('tanggal_perencanaan')
                         <small style="color: red;">{{ $message }}</small>
@@ -451,7 +451,7 @@
                     <label for="pdf_file">File PDF <span style="color: red;">*</span></label>
                     <div class="file-input-wrapper">
                         <label class="file-input-label">
-                            <span id="file-label">📁 Pilih File PDF (Max 10MB)</span>
+                            <span id="file-label"><i class="fas fa-folder"></i> Pilih File PDF (Max 10MB)</span>
                             <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required onchange="updateFileName(this)">
                         </label>
                         <div class="file-name" id="file-name-display"></div>
@@ -463,7 +463,7 @@
             </div>
 
             <button type="submit" id="submitBtn" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
-                ✅ Upload Drone
+                <i class="fas fa-check"></i> Upload Drone
             </button>
             <div id="uploadProgress" style="margin-top: 15px; display: none;">
                 <div style="background: #e9ecef; border-radius: 6px; overflow: hidden; height: 8px;">
@@ -533,7 +533,7 @@
                                 <td>{{ $drone->tanggal_perencanaan->format('d/m/Y') }}</td>
                                 <td>
                                     <a href="{{ route('drone.download', $drone->id) }}" class="btn-download" target="_blank">
-                                        📥 Download
+                                        Download
                                     </a>
                                 </td>
                                 <td>{{ $drone->created_at->format('d/m/Y H:i') }}</td>
@@ -542,7 +542,7 @@
                                         <form action="{{ route('admin.drone.destroy', $drone->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus drone ini?');" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">🗑️ Hapus</button>
+                                            <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
                                         </form>
                                     </div>
                                 </td>
@@ -558,7 +558,7 @@
             </div>
         @else
             <div class="empty-state">
-                <div class="empty-state-icon">📭</div>
+                <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
                 <h3>Tidak ada data drone</h3>
                 <p>Mulai upload drone PDF dengan form di atas</p>
             </div>
@@ -574,11 +574,11 @@
         const fileLabel = document.getElementById('file-label');
 
         if (fileName) {
-            fileNameDisplay.textContent = '✓ File terpilih: ' + fileName;
-            fileLabel.textContent = '✓ File siap diupload';
+            fileNameDisplay.innerHTML = '<i class="fas fa-check"></i> File terpilih: ' + fileName;
+            fileLabel.innerHTML = '<i class="fas fa-check"></i> File siap diupload';
         } else {
             fileNameDisplay.textContent = '';
-            fileLabel.textContent = '📁 Pilih File PDF (Max 10MB)';
+            fileLabel.innerHTML = '<i class="fas fa-folder"></i> Pilih File PDF (Max 10MB)';
         }
     }
 </script>

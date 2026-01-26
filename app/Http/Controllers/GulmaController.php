@@ -67,47 +67,61 @@ class GulmaController extends Controller
 
     /**
      * API: Summary statistik per wilayah (FIXED - NO deduplication for total_tk)
+     * UPDATED: Support filtering by specific import_log_id or period
      */
     public function getStatistikSummary(Request $request)
     {
         try {
             \Log::info("📊 === getStatistikSummary called ===");
             
-            // Get latest published import_log_id
-            $latestImportId = $this->getLatestPublishedImportId();
+            // Determine which import_log_id to use
+            $importLogId = null;
             
-            if (!$latestImportId) {
+            // First, check if specific import_log_id is provided
+            if ($request->has('import_log_id') && $request->import_log_id) {
+                $importLogId = $request->import_log_id;
+                \Log::info("Using specified import_log_id: {$importLogId}");
+            }
+            // Otherwise, try to find import_log_id by period filters
+            else if ($request->has('tahun') || $request->has('bulan') || $request->has('minggu')) {
+                $periodQuery = ImportLog::query();
+                
+                if ($request->has('tahun') && $request->tahun) {
+                    $periodQuery->where('tahun', $request->tahun);
+                }
+                if ($request->has('bulan') && $request->bulan) {
+                    $periodQuery->where('bulan', $request->bulan);
+                }
+                if ($request->has('minggu') && $request->minggu) {
+                    $periodQuery->where('minggu', $request->minggu);
+                }
+                
+                // Get the latest import_log for this period
+                $importLog = $periodQuery->orderBy('created_at', 'desc')->first();
+                
+                if ($importLog) {
+                    $importLogId = $importLog->id;
+                    \Log::info("Found import_log_id {$importLogId} for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                } else {
+                    \Log::info("No import_log found for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                }
+            }
+            // If no filters, use latest published
+            else {
+                $importLogId = $this->getLatestPublishedImportId();
+                \Log::info("Using latest published import_id: {$importLogId}");
+            }
+            
+            if (!$importLogId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipublikasikan',
+                    'message' => 'Tidak ada data untuk periode yang dipilih',
                     'data' => []
                 ]);
             }
             
-            \Log::info("Using latest published import_id: {$latestImportId}");
-            
-            // Get ALL data from latest published import with FILTERS
-            $query = DataGulma::where('import_log_id', $latestImportId);
-            
-            // Apply periode filters if provided
-            if ($request->has('tahun') && $request->tahun) {
-                \Log::info("Filter tahun: " . $request->tahun);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('tahun', $request->tahun);
-                });
-            }
-            if ($request->has('bulan') && $request->bulan) {
-                \Log::info("Filter bulan: " . $request->bulan);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('bulan', $request->bulan);
-                });
-            }
-            if ($request->has('minggu') && $request->minggu) {
-                \Log::info("Filter minggu: " . $request->minggu);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('minggu', $request->minggu);
-                });
-            }
+            // Get ALL data from the determined import_log
+            $query = DataGulma::where('import_log_id', $importLogId);
             
             $allData = $query->get();
             \Log::info("Total raw records after filtering: " . $allData->count());
@@ -155,9 +169,11 @@ class GulmaController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $summaryData,
-                'import_log_id' => $latestImportId,
+                'import_log_id' => $importLogId,
                 'filters' => [
-                    'using_latest_published' => true
+                    'tahun' => $request->tahun ?? null,
+                    'bulan' => $request->bulan ?? null,
+                    'minggu' => $request->minggu ?? null
                 ]
             ]);
             
@@ -173,47 +189,61 @@ class GulmaController extends Controller
 
     /**
      * API: Ranking wilayah (FIXED - NO deduplication for total_tk)
+     * UPDATED: Support filtering by specific import_log_id or period
      */
     public function getStatistikRanking(Request $request)
     {
         try {
             \Log::info("🏆 === getStatistikRanking called ===");
             
-            // Get latest published import_log_id
-            $latestImportId = $this->getLatestPublishedImportId();
+            // Determine which import_log_id to use
+            $importLogId = null;
             
-            if (!$latestImportId) {
+            // First, check if specific import_log_id is provided
+            if ($request->has('import_log_id') && $request->import_log_id) {
+                $importLogId = $request->import_log_id;
+                \Log::info("Using specified import_log_id: {$importLogId}");
+            }
+            // Otherwise, try to find import_log_id by period filters
+            else if ($request->has('tahun') || $request->has('bulan') || $request->has('minggu')) {
+                $periodQuery = ImportLog::query();
+                
+                if ($request->has('tahun') && $request->tahun) {
+                    $periodQuery->where('tahun', $request->tahun);
+                }
+                if ($request->has('bulan') && $request->bulan) {
+                    $periodQuery->where('bulan', $request->bulan);
+                }
+                if ($request->has('minggu') && $request->minggu) {
+                    $periodQuery->where('minggu', $request->minggu);
+                }
+                
+                // Get the latest import_log for this period
+                $importLog = $periodQuery->orderBy('created_at', 'desc')->first();
+                
+                if ($importLog) {
+                    $importLogId = $importLog->id;
+                    \Log::info("Found import_log_id {$importLogId} for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                } else {
+                    \Log::info("No import_log found for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                }
+            }
+            // If no filters, use latest published
+            else {
+                $importLogId = $this->getLatestPublishedImportId();
+                \Log::info("Using latest published import_id: {$importLogId}");
+            }
+            
+            if (!$importLogId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipublikasikan',
+                    'message' => 'Tidak ada data untuk periode yang dipilih',
                     'data' => []
                 ]);
             }
             
-            \Log::info("Using latest published import_id: {$latestImportId}");
-            
-            // Get ALL data from latest published import with FILTERS
-            $query = DataGulma::where('import_log_id', $latestImportId);
-            
-            // Apply periode filters if provided
-            if ($request->has('tahun') && $request->tahun) {
-                \Log::info("Filter tahun: " . $request->tahun);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('tahun', $request->tahun);
-                });
-            }
-            if ($request->has('bulan') && $request->bulan) {
-                \Log::info("Filter bulan: " . $request->bulan);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('bulan', $request->bulan);
-                });
-            }
-            if ($request->has('minggu') && $request->minggu) {
-                \Log::info("Filter minggu: " . $request->minggu);
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('minggu', $request->minggu);
-                });
-            }
+            // Get ALL data from the determined import_log
+            $query = DataGulma::where('import_log_id', $importLogId);
             
             $allData = $query->get();
             
@@ -253,7 +283,12 @@ class GulmaController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $rankingData,
-                'import_log_id' => $latestImportId
+                'import_log_id' => $importLogId,
+                'filters' => [
+                    'tahun' => $request->tahun ?? null,
+                    'bulan' => $request->bulan ?? null,
+                    'minggu' => $request->minggu ?? null
+                ]
             ]);
             
         } catch (\Throwable $e) {
@@ -268,42 +303,61 @@ class GulmaController extends Controller
 
     /**
      * API: Produktivitas (FIXED - use deduped data for map display)
+     * UPDATED: Support filtering by specific import_log_id or period
      */
     public function getStatistikProductivity(Request $request)
     {
         try {
             \Log::info("📈 === getStatistikProductivity called ===");
             
-            // Get latest published import_log_id
-            $latestImportId = $this->getLatestPublishedImportId();
+            // Determine which import_log_id to use
+            $importLogId = null;
             
-            if (!$latestImportId) {
+            // First, check if specific import_log_id is provided
+            if ($request->has('import_log_id') && $request->import_log_id) {
+                $importLogId = $request->import_log_id;
+                \Log::info("Using specified import_log_id: {$importLogId}");
+            }
+            // Otherwise, try to find import_log_id by period filters
+            else if ($request->has('tahun') || $request->has('bulan') || $request->has('minggu')) {
+                $periodQuery = ImportLog::query();
+                
+                if ($request->has('tahun') && $request->tahun) {
+                    $periodQuery->where('tahun', $request->tahun);
+                }
+                if ($request->has('bulan') && $request->bulan) {
+                    $periodQuery->where('bulan', $request->bulan);
+                }
+                if ($request->has('minggu') && $request->minggu) {
+                    $periodQuery->where('minggu', $request->minggu);
+                }
+                
+                // Get the latest import_log for this period
+                $importLog = $periodQuery->orderBy('created_at', 'desc')->first();
+                
+                if ($importLog) {
+                    $importLogId = $importLog->id;
+                    \Log::info("Found import_log_id {$importLogId} for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                } else {
+                    \Log::info("No import_log found for period: tahun={$request->tahun}, bulan={$request->bulan}, minggu={$request->minggu}");
+                }
+            }
+            // If no filters, use latest published
+            else {
+                $importLogId = $this->getLatestPublishedImportId();
+                \Log::info("Using latest published import_id: {$importLogId}");
+            }
+            
+            if (!$importLogId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipublikasikan',
+                    'message' => 'Tidak ada data untuk periode yang dipilih',
                     'data' => []
                 ]);
             }
             
-            // Get ALL data from latest published import with FILTERS
-            $query = DataGulma::where('import_log_id', $latestImportId);
-            
-            // Apply periode filters if provided
-            if ($request->has('tahun') && $request->tahun) {
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('tahun', $request->tahun);
-                });
-            }
-            if ($request->has('bulan') && $request->bulan) {
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('bulan', $request->bulan);
-                });
-            }
-            if ($request->has('minggu') && $request->minggu) {
-                $query->whereHas('importLog', function($q) use ($request) {
-                    $q->where('minggu', $request->minggu);
-                });
-            }
+            // Get ALL data from the determined import_log
+            $query = DataGulma::where('import_log_id', $importLogId);
             
             $allData = $query->get();
             
@@ -339,7 +393,12 @@ class GulmaController extends Controller
                         'avg' => round($rendah->avg('hasil') ?? 0, 2)
                     ],
                 ],
-                'import_log_id' => $latestImportId
+                'import_log_id' => $importLogId,
+                'filters' => [
+                    'tahun' => $request->tahun ?? null,
+                    'bulan' => $request->bulan ?? null,
+                    'minggu' => $request->minggu ?? null
+                ]
             ]);
             
         } catch (\Throwable $e) {

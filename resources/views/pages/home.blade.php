@@ -587,10 +587,6 @@
             max-width: none;
         }
 
-        .btn-hero i {
-            display: none;
-        }
-
         .section-title {
             font-size: 22px;
         }
@@ -708,7 +704,7 @@
 <div class="scroll-content">
 
     <!-- Features Section -->
-    <section class="features-section"><br><br>
+    <section class="features-section"><br>
         <h2 class="section-title">Fitur Unggulan</h2>
         <p class="section-subtitle">Solusi lengkap untuk monitoring dan analisis persebaran gulma</p>
         <div class="features-grid">
@@ -757,7 +753,7 @@
     <!-- CTA Section -->
     <section class="cta-section">
         <h2>Mulai Monitoring Gulma Sekarang</h2>
-        <p>Dapatkan insight lengkap tentang persebaran gulma di area pertanian Anda</p>
+        <p>Dapatkan insight lengkap tentang persebaran gulma di area perkebunan Anda</p>
         <div class="cta-buttons">
             <a href="{{ route('wilayah') }}" class="btn-hero secondary">
                 <i class="fas fa-map-location-dot"></i> Jelajahi Wilayah

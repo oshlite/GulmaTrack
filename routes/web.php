@@ -128,6 +128,9 @@ Route::get('/drone/download/{id}', [DroneController::class, 'download'])->name('
 // View drone PDF inline (accessible to everyone)
 Route::get('/drone/view/{id}', [DroneController::class, 'view'])->name('drone.view');
 
+// Thumbnail drone (cached, super ringan)
+Route::get('/drone/thumbnail/{id}', [DroneController::class, 'thumbnail'])->name('drone.thumbnail');
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN AREA
@@ -169,6 +172,7 @@ Route::prefix('admin')
             Route::get('/', [DroneController::class, 'adminIndex'])->name('index');
             Route::post('/store', [DroneController::class, 'store'])->name('store');
             Route::delete('/{id}', [DroneController::class, 'destroy'])->name('destroy');
+            Route::get('/api/list', [DroneController::class, 'getDronesPaginated'])->name('api.list');
         });
 
         /*

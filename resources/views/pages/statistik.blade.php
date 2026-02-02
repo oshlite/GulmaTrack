@@ -22,7 +22,7 @@
             flex-wrap: wrap;
             align-items: center;
             position: relative;
-            z-index: 30;
+            z-index: 1;
         }
 
         .stats-controls input,
@@ -33,7 +33,7 @@
             font-size: 13px;
             font-family: 'Poppins';
             position: relative;
-            z-index: 40;
+            z-index: 1;
             background: white;
         }
 
@@ -321,17 +321,8 @@
             .stats-controls button {
                 font-size: 12px;
                 padding: 9px 12px;
-                .stats-controls input,
-                .stats-controls select {
-                    padding: 10px 12px;
-                    border: 1px solid var(--border-color);
-                    border-radius: 4px;
-                    font-size: 13px;
-                    font-family: 'Poppins';
-                    position: relative;
-                    z-index: 40;
-                    background: white;
-                }
+            }
+
             .stat-table th,
             .stat-table td {
                 padding: 10px;
@@ -536,222 +527,109 @@
     </style>
 
     <style>
-        .comparison-card {
-            background: linear-gradient(135deg, var(--light-color), #fff);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.3s ease;
+        .wilayah-controls {
+            background: linear-gradient(135deg, #ffffff 0%, #f7faf8 100%);
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(18, 130, 65, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(18, 130, 65, 0.1);
+            border-left: 4px solid #128241;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            overflow: visible !important;
+            z-index: 1;
         }
 
-        .comparison-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: var(--shadow);
+        .wilayah-controls::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
         }
 
-        .comparison-title {
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 15px;
-            font-size: 15px;
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
         }
 
-        .comparison-stat {
+        .controls-wrapper {
+            max-width: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow: visible !important;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls-row {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: nowrap;
+            margin-bottom: 16px;
+            overflow: visible !important;
+            position: relative;
         }
 
-        .comparison-stat:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            z-index: 100;
+            overflow: visible !important;
         }
 
-        .comparison-label {
-            color: #666;
-            font-size: 13px;
+        .control-item.compact {
+            flex: 1;
+            min-width: 0;
         }
 
-        .comparison-value {
-            font-weight: 600;
-            color: var(--primary-color);
+        .controls-buttons-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            z-index: 1;
         }
 
-        .trend-indicator {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
+        .control-label {
             font-size: 11px;
             font-weight: 600;
-            margin-left: 8px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-family: 'Poppins', sans-serif;
+            transition: color 0.3s ease;
+            white-space: nowrap;
         }
 
-        .trend-up {
-            background-color: #d4edda;
-            color: #155724;
+        .control-item:hover .control-label {
+            color: #128241;
         }
 
-        .trend-down {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .export-btn {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
+        .control-label i {
             font-size: 13px;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .year-comparison {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .year-item {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 5px solid var(--primary-color);
+            color: #FBA919;
+            width: 16px;
             text-align: center;
+            transition: transform 0.3s ease;
         }
 
-        .year-item .year {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 5px;
+        .control-item:hover .control-label i {
+            transform: scale(1.15);
         }
 
-        .year-item .value {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .year-item .label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 8px;
-        }
-
-        .wilayah-controls {
-        background: linear-gradient(135deg, #ffffff 0%, #f7faf8 100%);
-        padding: 32px;
-        border-radius: 16px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 20px rgba(18, 130, 65, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-        border: 1px solid rgba(18, 130, 65, 0.1);
-        border-left: 4px solid #128241;
-        font-family: 'Poppins', sans-serif;
-        position: relative;
-        overflow: visible !important;
-        pointer-events: auto;
-    }
-
-    .wilayah-controls::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background-size: 200% 100%;
-        animation: shimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes shimmer {
-        0%, 100% { background-position: 0% 0%; }
-        50% { background-position: 100% 0%; }
-    }
-
-    .controls-wrapper {
-        max-width: 100%;
-        font-family: 'Poppins', sans-serif;
-        overflow: visible !important;
-        position: relative;
-        z-index: 1;
-    }
-
-    .controls-row {
-        display: flex;
-        align-items: flex-end;
-        gap: 12px;
-        flex-wrap: nowrap;
-        margin-bottom: 16px;
-        overflow: visible !important;
-        position: relative;
-    }
-
-    .control-item {
-        display: flex;
-        flex-direction: column;
-        font-family: 'Poppins', sans-serif;
-        position: relative;
-        flex: 1;
-        min-width: 0;
-        z-index: 100;
-        overflow: visible !important;
-    }
-
-    .control-item.compact {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .controls-buttons-row {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        z-index: 1;
-    }
-
-    .control-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        font-family: 'Poppins', sans-serif;
-        transition: color 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .control-item:hover .control-label {
-        color: #128241;
-    }
-
-    .control-label i {
-        font-size: 13px;
-        color: #FBA919;
-        width: 16px;
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-
-    .control-item:hover .control-label i {
-        transform: scale(1.15);
-    }
-
-    /* Button Grid Trigger */
-    .button-grid-trigger {
+        .button-grid-trigger {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -761,7 +639,7 @@
             background-color: white;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: 'Poppins';
+            font-family: 'Poppins', sans-serif;
             font-size: 13px;
             font-weight: 500;
             color: #2c3e50;
@@ -780,8 +658,6 @@
 
         .button-grid-trigger.active {
             border-color: #128241;
-            border-bottom-left-radius: 4px;
-            border-bottom-right-radius: 4px;
             background-color: #fafdfb;
             z-index: 99998 !important;
             position: relative;
@@ -791,372 +667,339 @@
             z-index: 99999 !important;
         }
 
-    .grid-selected-text {
-        flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .grid-arrow {
-        font-size: 11px;
-        color: #128241;
-        transition: transform 0.3s ease;
-        margin-left: 8px;
-        flex-shrink: 0;
-    }
-
-    .button-grid-trigger.active .grid-arrow {
-        transform: rotate(180deg);
-    }
-
-    /* Button Grid */
-    .button-grid {
-        position: fixed !important;
-        background: white;
-        border: 2px solid #128241;
-        border-radius: 10px;
-        padding: 10px 8px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        z-index: 999999 !important;
-        pointer-events: auto !important;
-        box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
-        animation: slideDown 0.3s ease;
-        max-height: 400px;
-        overflow-y: auto;
-        width: auto;
-        max-width: 320px;
-    }
-
-    /* Khusus untuk Bulan - 6 kolom */
-    #bulanGrid.button-grid {
-        grid-template-columns: repeat(6, 1fr);
-        max-width: 600px;
-    }
-    
-    /* Khusus untuk Minggu - 4 kolom */
-    #mingguGrid.button-grid {
-        grid-template-columns: repeat(4, 1fr);
-        max-width: 300px;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .grid-btn {
-        padding: 10px 8px;
-        border: 2px solid #e3eae8;
-        border-radius: 6px;
-        background: white;
-        color: #2c3e50;
-        font-family: 'Poppins', sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-        white-space: normal;
-        line-height: 1.2;
-        position: relative;
-        pointer-events: auto !important;
-    }
-
-    .grid-btn:hover {
-        border-color: #128241;
-        background: #f0f8f5;
-        color: #128241;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.15);
-    }
-
-    .grid-btn.selected {
-        background: linear-gradient(135deg, #128241 0%, #0d5c2e 100%);
-        color: white;
-        border-color: #128241;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
-    }
-
-    .grid-btn.selected:hover {
-        background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
-        transform: translateY(-2px);
-    }
-
-    /* Disabled state untuk buttons yang tidak ada data */
-    .grid-btn[disabled] {
-        opacity: 0.4;
-        cursor: not-allowed;
-        background: #f5f5f5;
-        color: #999;
-        border-color: #ddd;
-    }
-
-    .grid-btn[disabled]:hover {
-        border-color: #ddd;
-        background: #f5f5f5;
-        color: #999;
-        transform: none;
-        box-shadow: none;
-    }
-
-    /* Action Button */
-    .btn-secondary {
-        flex: 1;
-        padding: 13px 24px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        letter-spacing: 0.6px;
-        font-family: 'Poppins', sans-serif;
-        position: relative;
-        overflow: hidden;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        background: white;
-        border: 2px solid #d8e1dd;
-        color: #FBA919;
-        box-shadow: none;
-    }
-
-    .btn-secondary:hover {
-        background: #FBA919;
-        border-color: #FBA919;
-        color: white;
-        box-shadow: none;
-        outline: none;
-    }
-
-    @media (max-width: 1024px) {
-        .controls-row {
-            flex-wrap: wrap;
-        }
-
-        .control-item.compact {
-            flex: 1 1 calc(50% - 6px);
-            min-width: 0;
-        }
-
-        .wilayah-controls {
-            padding: 24px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .wilayah-controls {
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            gap: 8px;
-        }
-
-        .controls-wrapper {
-            overflow: visible;
-        }
-
-        .controls-row {
-            gap: 8px;
-            margin-bottom: 10px;
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .control-item {
-            min-width: 100%;
-            flex: 1 1 100%;
-            width: 100%;
-        }
-
-        .control-item.compact {
-            min-width: 100%;
-            flex: 1 1 100%;
-            width: 100%;
-        }
-
-        .control-label {
-            font-size: 10px;
-            margin-bottom: 6px;
-        }
-
-        .button-grid-trigger {
-            padding: 10px 12px;
-            font-size: 12px;
-            width: 100%;
-        }
-
         .grid-selected-text {
+            flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .controls-buttons-row {
-            gap: 8px;
-            flex-direction: column;
-            align-items: stretch;
-            margin-top: 12px;
+        .grid-arrow {
+            font-size: 11px;
+            color: #128241;
+            transition: transform 0.3s ease;
+            margin-left: 8px;
+            flex-shrink: 0;
         }
 
-        .btn-secondary {
-            flex: 1 1 100% !important;
-            min-width: 100% !important;
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 12px;
-            gap: 6px;
+        .button-grid-trigger.active .grid-arrow {
+            transform: rotate(180deg);
         }
 
         .button-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-            padding: 10px;
+            position: fixed !important;
+            background: white;
+            border: 2px solid #128241;
+            border-radius: 10px;
+            padding: 10px 8px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            max-height: 300px;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+            box-shadow: 0 10px 30px rgba(18, 130, 65, 0.2);
+            animation: slideDown 0.3s ease;
+            max-height: 400px;
+            overflow-y: auto;
+            width: auto;
+            max-width: 320px;
         }
 
         #tahunGrid.button-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 280px;
         }
 
         #bulanGrid.button-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
+            grid-template-columns: repeat(6, 1fr);
+            max-width: 600px;
         }
 
         #mingguGrid.button-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
+            grid-template-columns: repeat(4, 1fr);
+            max-width: 300px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .grid-btn {
             padding: 10px 8px;
+            border: 2px solid #e3eae8;
+            border-radius: 6px;
+            background: white;
+            color: #2c3e50;
+            font-family: 'Poppins', sans-serif;
             font-size: 12px;
-            min-width: 60px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .wilayah-controls {
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .controls-row {
-            gap: 6px;
-            margin-bottom: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: normal;
+            line-height: 1.2;
+            position: relative;
+            pointer-events: auto !important;
         }
 
-        .control-item {
-            min-width: 100%;
-            flex: 1 1 100%;
+        .grid-btn:hover {
+            border-color: #128241;
+            background: #f0f8f5;
+            color: #128241;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(18, 130, 65, 0.15);
         }
 
-        .control-label {
-            font-size: 9px;
-            margin-bottom: 4px;
-            gap: 4px;
+        .grid-btn.selected {
+            background: linear-gradient(135deg, #128241 0%, #0d5c2e 100%);
+            color: white;
+            border-color: #128241;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(18, 130, 65, 0.3);
         }
 
-        .control-label i {
-            font-size: 12px;
-            width: 14px;
+        .grid-btn.selected:hover {
+            background: linear-gradient(135deg, #0d5c2e 0%, #0a4a26 100%);
+            transform: translateY(-2px);
         }
 
-        .button-grid-trigger {
-            padding: 8px 10px;
-            font-size: 11px;
-            width: 100%;
-            min-height: 36px;
+        .grid-btn[disabled] {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f5f5f5;
+            color: #999;
+            border-color: #ddd;
         }
 
-        .grid-arrow {
-            font-size: 10px;
-            margin-left: 6px;
-        }
-
-        .controls-buttons-row {
-            gap: 6px;
-            margin-top: 10px;
+        .grid-btn[disabled]:hover {
+            border-color: #ddd;
+            background: #f5f5f5;
+            color: #999;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-secondary {
-            flex: 1 1 100%;
-            width: 100%;
-            padding: 8px 10px;
-            font-size: 11px;
-            gap: 4px;
+            flex: 1;
+            padding: 13px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.6px;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            background: white;
+            border: 2px solid #d8e1dd;
+            color: #FBA919;
+            box-shadow: none;
         }
 
-        .btn-secondary i {
-            font-size: 12px;
+        .btn-secondary:hover {
+            background: #FBA919;
+            border-color: #FBA919;
+            color: white;
+            box-shadow: 0 4px 12px rgba(251, 169, 25, 0.2);
         }
 
-        .button-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            padding: 8px;
-            gap: 6px;
-            max-height: 250px;
-            font-size: 10px;
+        @media (max-width: 1024px) {
+            .controls-row {
+                flex-wrap: wrap;
+            }
+
+            .control-item.compact {
+                flex: 1 1 calc(50% - 6px);
+                min-width: 0;
+            }
+
+            .wilayah-controls {
+                padding: 24px;
+            }
         }
 
-        #tahunGrid.button-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
+        @media (max-width: 768px) {
+            .wilayah-controls {
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+
+            .controls-wrapper {
+                overflow: visible;
+            }
+
+            .controls-row {
+                gap: 8px;
+                margin-bottom: 10px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-item {
+                min-width: 100%;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .control-item.compact {
+                min-width: 100%;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .control-label {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+
+            .button-grid-trigger {
+                padding: 10px 12px;
+                font-size: 12px;
+                width: 100%;
+            }
+
+            .grid-selected-text {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .controls-buttons-row {
+                gap: 8px;
+                flex-direction: column;
+                align-items: stretch;
+                margin-top: 12px;
+            }
+
+            .btn-secondary {
+                flex: 1 1 100% !important;
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 12px;
+                gap: 6px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                padding: 10px;
+                gap: 8px;
+                max-height: 300px;
+            }
+
+            #tahunGrid.button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            #mingguGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .grid-btn {
+                padding: 10px 8px;
+                font-size: 12px;
+                min-width: 60px;
+            }
         }
 
-        #bulanGrid.button-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-        }
+        @media (max-width: 480px) {
+            .wilayah-controls {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
 
-        #mingguGrid.button-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-        }
+            .controls-row {
+                gap: 6px;
+                margin-bottom: 8px;
+            }
 
-        .grid-btn {
-            padding: 8px 6px;
-            font-size: 10px;
-            min-width: 50px;
-        }
+            .control-item {
+                min-width: 100%;
+                flex: 1 1 100%;
+            }
 
-        /* Mobile Dropdown Z-Index Fix */
-        .button-grid {
-            z-index: 99999 !important;
-            position: absolute !important;
-        }
+            .control-label {
+                font-size: 9px;
+                margin-bottom: 4px;
+                gap: 4px;
+            }
 
-        .button-grid-trigger.active {
-            z-index: 99998 !important;
-        }
+            .control-label i {
+                font-size: 12px;
+                width: 14px;
+            }
 
-        .button-grid-trigger {
-            z-index: 99998 !important;
-            position: relative !important;
-        }
+            .button-grid-trigger {
+                padding: 8px 10px;
+                font-size: 11px;
+                width: 100%;
+                min-height: 36px;
+            }
 
-        .control-item {
-            overflow: visible !important;
-            z-index: 99997 !important;
-        }
+            .grid-arrow {
+                font-size: 10px;
+                margin-left: 6px;
+            }
 
-        .controls-wrapper {
-            overflow: visible !important;
-            z-index: 99996 !important;
-        }
+            .controls-buttons-row {
+                gap: 6px;
+                margin-top: 10px;
+            }
 
-        .wilayah-controls {
-            overflow: visible !important;
-            z-index: 99995 !important;
+            .btn-secondary {
+                flex: 1 1 100%;
+                width: 100%;
+                padding: 8px 10px;
+                font-size: 11px;
+                gap: 4px;
+            }
+
+            .btn-secondary i {
+                font-size: 12px;
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                padding: 8px;
+                gap: 6px;
+                max-height: 250px;
+                font-size: 10px;
+            }
+
+            #tahunGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            #bulanGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            #mingguGrid.button-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .grid-btn {
+                padding: 8px 6px;
+                font-size: 10px;
+                min-width: 50px;
+            }
         }
-    }
     </style>
 
     <!-- Filter & Kontrol -->
@@ -1593,13 +1436,12 @@ function toggleButtonGrid(type) {
     let gridId = type + 'Grid';
     const grid = document.getElementById(gridId);
     const trigger = grid.previousElementSibling;
-    
-    // Toggle current grid
+
     if (grid.style.display === 'none' || grid.style.display === '') {
-        // Close all other grids
         document.querySelectorAll('.button-grid').forEach(g => {
             if (g.id !== gridId) {
                 g.style.display = 'none';
+                g.style.pointerEvents = 'none';
             }
         });
         document.querySelectorAll('.button-grid-trigger').forEach(t => {
@@ -1607,53 +1449,44 @@ function toggleButtonGrid(type) {
                 t.classList.remove('active');
             }
         });
-        
-        // Set FIXED positioning dan hitung koordinat viewport
+
         grid.style.position = 'fixed';
         grid.style.display = 'grid';
+        grid.style.pointerEvents = 'auto';
         trigger.classList.add('active');
-        
-        // Calculate position dari trigger element
+
         const triggerRect = trigger.getBoundingClientRect();
-        
-        // Position dropdown di bawah trigger
+
         let top = triggerRect.bottom + 8;
         let left = triggerRect.left;
-        
-        // Use requestAnimationFrame untuk memastikan grid sudah ter-render
+
         requestAnimationFrame(() => {
             const gridHeight = grid.offsetHeight;
             const gridWidth = grid.offsetWidth;
             
-            // Check jika dropdown keluar dari batas bawah screen
             if (top + gridHeight > window.innerHeight - 10) {
-                // Positioning di ATAS trigger
                 top = triggerRect.top - gridHeight - 8;
             }
-            
-            // Check jika dropdown keluar dari batas kanan screen
+
             if (left + gridWidth > window.innerWidth - 10) {
-                // Shift ke kiri
                 left = Math.max(10, window.innerWidth - gridWidth - 10);
             }
-            
-            // Check jika dropdown keluar dari batas kiri screen
+
             if (left < 10) {
                 left = 10;
             }
-            
-            // Pastikan top tidak negatif
-            top = Math.max(10, top);
-            
-            // APPLY positioning untuk VIEWPORT (fixed)
+
+            if (top < 10) {
+                top = 10;
+            }
+
             grid.style.top = top + 'px';
             grid.style.left = left + 'px';
             grid.style.zIndex = '999999';
         });
-        
     } else {
-        // Close this grid
         grid.style.display = 'none';
+        grid.style.pointerEvents = 'none';
         trigger.classList.remove('active');
     }
 }
@@ -1742,6 +1575,7 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('.control-item')) {
         document.querySelectorAll('.button-grid').forEach(grid => {
             grid.style.display = 'none';
+            grid.style.pointerEvents = 'none';
         });
         document.querySelectorAll('.button-grid-trigger').forEach(trigger => {
             trigger.classList.remove('active');

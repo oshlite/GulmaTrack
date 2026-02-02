@@ -3,8 +3,6 @@
 @section('title', 'Wilayah Admin')
 
 @section('content')
-<!-- Poppins Font -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -18,277 +16,12 @@
         --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
 
-    body {
-        font-family: 'Poppins';
-        padding-top: 0;
-    }
-
-    /* Navbar Styling - Same as main navbar */
-    nav.admin-navbar {
-        background: #128241;
-        backdrop-filter: blur(100px);
-        padding: 0;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        border-bottom: 2px solid var(--secondary-color);
-        width: 100%;
-    }
-
-    .navbar-container {
-        max-width: 100%;
-        margin: 0;
-        padding: 0 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 70px;
-    }
-
-    .navbar-brand {
-        font-size: 25px;
-        font-family: 'Poppins';
-        font-weight: 800;
-        color: #FBA919;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-    }
-
-    .navbar-brand:hover {
-        transform: scale(1.05);
-        color: #FBA919;
-    }
-
-    .navbar-brand img {
-        width: 85px;
-        height: 60px;
-        object-fit: contain;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand:hover img {
-        transform: rotate(1deg) scale(1);
-    }
-
-    .navbar-brand span {
-        color: #FBA919 !important;
-    }
-
-    .nav-menu {
-        display: flex;
-        list-style: none;
-        gap: 2px;
-        flex-wrap: nowrap;
-        margin: 0;
-    }
-
-    .nav-item {
-        position: relative;
-        white-space: nowrap;
-    }
-
-    .nav-link {
-        color: #ecf0f1;
-        text-decoration: none;
-        padding: 10px 20px;
-        display: block;
-        transition: all 0.3s ease;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-        position: relative;
-    }
-
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background-color: var(--secondary-color);
-        transition: all 0.3s ease;
-        transform: translateX(-50%);
-    }
-
-    .nav-link:hover::after,
-    .nav-link.active::after {
-        width: 80%;
-    }
-
-    .nav-link:hover {
-        color: #ffffff;
-    }
-
-    .nav-link.active {
-        color: var(--secondary-color);
-    }
-
-    .navbar-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .admin-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        color: #ecf0f1;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .admin-avatar {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
-        font-weight: 700;
-        font-family: 'Poppins';
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .logout-btn {
-        padding: 8px 16px;
-        background: #E74C3C;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        font-size: 13px;
-        font-family: 'Poppins';
-        letter-spacing: 0.3px;
-        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
-    }
-
-    .logout-btn:hover {
-        background: #c0392b;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-    }
-
-    .admin-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 100px 20px 30px;
-        font-family: 'Poppins';
-    }
-
-    :root {
-        --title-color: #A6CE39;
-    }
-
-    .page-header {
-        margin-bottom: 40px;
-        padding: 40px 20px 30px;
-        border-bottom: 3px solid var(--primary-color);
-        animation: slideInDown 0.5s ease;
-    }
-
-    .page-header h1 {
-        font-size: 42px;
-        color: var(--title-color);
-        margin-bottom: 10px;
-        font-family: 'Poppins';
-    }
-
-    .page-header h1 i {
-        color: var(--title-color);
-    }
-
-    .page-header p {
-        font-size: 16px;
-        color: #666;
-        font-family: 'Poppins';
-        margin: 0;
-    }
-
-    @keyframes slideInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        padding: 25px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.15);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .stat-card::before {
-        display: none;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 24px rgba(18, 130, 65, 0.25);
-    }
-
-    .stat-icon {
-        font-size: 32px;
-        color: white;
-        margin-bottom: 12px;
-        opacity: 0.9;
-    }
-
-    .stat-label {
-        font-size: 14px;
-        opacity: 0.95;
-        margin-bottom: 8px;
-        font-weight: 500;
-        font-family: 'Poppins';
-    }
-
-    .stat-value {
-        font-size: 36px;
-        font-weight: 700;
-        color: white;
-        font-family: 'Poppins';
-    }
-
     .content-grid {
+        display: grid;
         grid-template-columns: 1fr 1fr;
+        gap: 24px; /* jarak antar card */
         margin-bottom: 40px;
-        display: flex;
-    gap: 24px; /* jarak antar card */
-    width: 100%;
+        width: 100%;
     }
 
     .card {
@@ -537,6 +270,18 @@
         background: #ffebee;
         color: #E74C3C;
         border: 1px solid #E74C3C;
+    }
+
+    .status-partial {
+        background: #ede7f6;
+        color: #5e35b1;
+        border: 1px solid #9575cd;
+    }
+
+    .status-neutral {
+        background: #eceff1;
+        color: #607d8b;
+        border: 1px solid #cfd8dc;
     }
 
     .empty-state {
@@ -859,16 +604,16 @@
             grid-template-columns: 1fr;
         }
 
+        .content-grid .card {
+            order: -1;
+        }
+
         .stats-grid {
             grid-template-columns: 1fr;
         }
 
         .admin-container {
             padding: 20px 15px;
-        }
-
-        .page-header h1 {
-            font-size: 24px;
         }
 
         .map-legend {
@@ -899,9 +644,6 @@
     }
 
     @media (max-width: 480px) {
-        .page-header h1 {
-            font-size: 20px;
-        }
 
         .navbar-brand {
             font-size: 16px;
@@ -1021,6 +763,257 @@
             display: block;
         }
     }
+    /* Delete Confirmation Modal */
+    #deleteConfirmModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+    }
+
+    #deleteConfirmModal > div {
+        background: white;
+        padding: 35px;
+        border-radius: 16px;
+        max-width: 520px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalBounceIn 0.4s ease;
+    }
+
+    @keyframes modalBounceIn {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    #deleteConfirmModal h3 {
+        margin: 0 0 15px 0;
+        color: #d32f2f;
+        font-weight: 700;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #deleteConfirmModal .warning-icon {
+        font-size: 48px;
+        color: #ff9800;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    #deleteConfirmModal .modal-body {
+        color: #555;
+        line-height: 1.7;
+        margin-bottom: 25px;
+    }
+
+    #deleteConfirmModal .file-info {
+        background: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-weight: 600;
+        color: #e65100;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #deleteConfirmModal .file-info i {
+        font-size: 18px;
+    }
+
+    #deleteConfirmModal .file-info span {
+        font-size: 12px;
+        color: #8d6e63;
+        font-weight: 500;
+    }
+
+    #deleteConfirmModal .warning-list {
+        background: #ffebee;
+        border-left: 4px solid #d32f2f;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    #deleteConfirmModal .warning-list ul {
+        margin: 10px 0 0 0;
+        padding-left: 20px;
+    }
+
+    #deleteConfirmModal .warning-list li {
+        margin-bottom: 8px;
+        color: #c62828;
+    }
+
+    #deleteConfirmModal .modal-footnote {
+        font-size: 13px;
+        color: #546e7a;
+        margin-top: 18px;
+        background: #fffde7;
+        border-left: 4px solid #f9a825;
+        border-radius: 10px;
+        padding: 12px 16px;
+    }
+
+    #deleteConfirmModal .modal-footnote strong {
+        color: #d35400;
+    }
+
+    #deleteConfirmModal .modal-lead {
+        font-size: 15px;
+        color: #455a64;
+        background: #edf7ed;
+        border-left: 4px solid #D6DF20;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+    }
+
+    #deleteConfirmModal .modal-lead strong {
+        color: #c62828;
+    }
+
+    #deleteConfirmModal .file-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        background: #f7f9fc;
+        border-radius: 12px;
+        padding: 15px 18px;
+        border: 1px solid #e3e9f2;
+    }
+
+    #deleteConfirmModal .file-info > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #deleteConfirmModal .file-info strong {
+        font-size: 18px;
+        color: #263238;
+        text-transform: none;
+    }
+
+    #deleteConfirmModal .file-info > div > span {
+        font-size: 12px;
+        color: #78909c;
+        font-weight: 500;
+    }
+
+    #deleteConfirmModal .file-info i {
+        font-size: 28px;
+        color: #ef6c00;
+        margin-top: 4px;
+    }
+
+    #deleteConfirmModal .file-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        margin-top: 6px;
+    }
+
+    #deleteConfirmModal .file-meta .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #546e7a;
+        background: #e3f2fd;
+        border-radius: 20px;
+        padding: 4px 10px;
+    }
+
+    #deleteConfirmModal .file-meta .meta-item span {
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    #deleteConfirmModal .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    #deleteConfirmModal .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'Poppins';
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #deleteConfirmModal .btn i {
+        font-size: 16px;
+    }
+
+    #deleteConfirmModal .btn-cancel {
+        background: #f5f5f5;
+        color: #666;
+        border: 2px solid #ddd;
+    }
+
+    #deleteConfirmModal .btn-cancel:hover {
+        background: #e0e0e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #deleteConfirmModal .btn-delete {
+        background: linear-gradient(135deg, #ef5350, #e53935);
+        color: white;
+    }
+
+    #deleteConfirmModal .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(239, 83, 80, 0.4);
+    }
+
+    #deleteConfirmModal .btn-delete:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 520px) {
+        #deleteConfirmModal > div {
+            padding: 28px 20px;
+        }
+
+        #deleteConfirmModal .modal-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #deleteConfirmModal .btn {
+            justify-content: center;
+        }
+    }
 </style>
 
 <!-- Main Content -->
@@ -1060,14 +1053,6 @@
             </div>
             <div class="stat-label"><i class="fas fa-map-marker-alt"></i> Wilayah Aktif</div>
             <div class="stat-value" id="statWilayahAktif">{{ $wilayahAktif ?? 0 }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-th"></i>
-            </div>
-            <div class="stat-label"><i class="fas fa-th"></i> Total Features</div>
-            <div class="stat-value" id="statTotalTanaman">{{ $totalTanaman ?? 0 }}</div>
         </div>
 
         <div class="stat-card">
@@ -1542,9 +1527,36 @@
                     let recordsPerPage = 10;
                     let filteredData = [...allTableData];
 
+                    function escapeHtmlAttr(value) {
+                        if (value === null || value === undefined) {
+                            return '';
+                        }
+                        return String(value)
+                            .replace(/&/g, '&amp;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+                    }
+
+                    function getStatusInfo(statusValue) {
+                        const status = (statusValue || '').toLowerCase();
+                        const statusMap = {
+                            success: { label: 'Berhasil', className: 'status-chip success' },
+                            pending: { label: 'Pending', className: 'status-chip pending' },
+                            partial: { label: 'Sebagian', className: 'status-chip partial' },
+                            failed: { label: 'Gagal', className: 'status-chip failed' }
+                        };
+                        return statusMap[status] || { label: statusValue || 'Tidak Diketahui', className: 'status-chip neutral' };
+                    }
+
                     function changeRecordsPerPage() {
                         const value = document.getElementById('recordsPerPage').value;
-                        recordsPerPage = value === 'all' ? filteredData.length : parseInt(value);
+                        let newRecordsPerPage = value === 'all' ? filteredData.length : parseInt(value, 10);
+                        if (!newRecordsPerPage || isNaN(newRecordsPerPage) || newRecordsPerPage <= 0) {
+                            newRecordsPerPage = filteredData.length > 0 ? filteredData.length : 10;
+                        }
+                        recordsPerPage = newRecordsPerPage;
                         currentPage = 1;
                         renderTable();
                     }
@@ -1553,36 +1565,96 @@
                         const tbody = document.getElementById('tableBody');
                         tbody.innerHTML = '';
 
-                        const startIdx = (currentPage - 1) * recordsPerPage;
-                        const endIdx = startIdx + recordsPerPage;
+                        const effectivePerPage = recordsPerPage && recordsPerPage > 0 ? recordsPerPage : (filteredData.length > 0 ? filteredData.length : 1);
+                        const startIdx = (currentPage - 1) * effectivePerPage;
+                        const endIdx = startIdx + effectivePerPage;
                         const pageData = filteredData.slice(startIdx, endIdx);
 
                         pageData.forEach(log => {
-                            const periodText = log.tahun && log.bulan && log.minggu 
-                                ? `<span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins'; border: 1px solid #90caf9;"><i class="fas fa-calendar"></i> ${log.tahun} / ${monthNames[log.bulan]} - Minggu ${log.minggu}</span>`
+                            const hasPeriode = log.tahun && log.bulan && log.minggu;
+                            const periodPlain = hasPeriode
+                                ? `${log.tahun} / ${monthNames[log.bulan]} - Minggu ${log.minggu}`
+                                : '-';
+                            const periodText = hasPeriode
+                                ? `<span style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); border-radius: 12px; font-size: 11px; font-weight: 600; color: #1976d2; font-family: 'Poppins'; border: 1px solid #90caf9;"><i class="fas fa-calendar"></i> ${periodPlain}</span>`
                                 : '<span style="color: #999;">-</span>';
-                            
-                            const statusBadge = log.status === 'success' 
-                                ? '<span class="status-badge status-success"><i class="fas fa-check"></i> Berhasil</span>'
-                                : log.status === 'pending'
-                                ? '<span class="status-badge status-pending"><i class="fas fa-hourglass-half"></i> Pending</span>'
-                                : '<span class="status-badge status-failed"><i class="fas fa-times"></i> Gagal</span>';
+
+                            const normalizedStatus = (log.status || '').toLowerCase();
+                            let statusBadge;
+                            if (normalizedStatus === 'success') {
+                                statusBadge = '<span class="status-badge status-success"><i class="fas fa-check"></i> Berhasil</span>';
+                            } else if (normalizedStatus === 'pending') {
+                                statusBadge = '<span class="status-badge status-pending"><i class="fas fa-hourglass-half"></i> Pending</span>';
+                            } else if (normalizedStatus === 'partial') {
+                                statusBadge = '<span class="status-badge status-partial"><i class="fas fa-adjust"></i> Sebagian</span>';
+                            } else if (normalizedStatus === 'failed') {
+                                statusBadge = '<span class="status-badge status-failed"><i class="fas fa-times"></i> Gagal</span>';
+                            } else {
+                                statusBadge = `<span class="status-badge status-neutral"><i class="fas fa-info-circle"></i> ${log.status || 'Tidak Diketahui'}</span>`;
+                            }
+
+                            const recordCountRaw = log.jumlah_records ?? log.data ?? 0;
+                            const recordCount = isNaN(Number(recordCountRaw)) ? 0 : Number(recordCountRaw);
+                            const recordDisplay = recordCount > 0 ? recordCount.toLocaleString('id-ID') : '0';
+                            const successCountRaw = log.jumlah_berhasil ?? recordCountRaw;
+                            const successCount = isNaN(Number(successCountRaw)) ? 0 : Number(successCountRaw);
+
+                            const safeFileAttr = escapeHtmlAttr(log.nama_file || '-');
+                            const safePeriodAttr = escapeHtmlAttr(periodPlain);
+                            const safeStatusAttr = escapeHtmlAttr(log.status || '');
+                            const safeRecordsAttr = escapeHtmlAttr(recordCount);
+                            const safeSuccessAttr = escapeHtmlAttr(successCount);
+
+                            let createdAtText = '-';
+                            if (log.created_at) {
+                                let dateSource = log.created_at;
+                                if (typeof dateSource === 'string' && !dateSource.includes('T')) {
+                                    dateSource = dateSource.replace(' ', 'T');
+                                }
+                                const parsedDate = new Date(dateSource);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    createdAtText = parsedDate.toLocaleDateString('id-ID', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                } else if (typeof log.created_at === 'string') {
+                                    createdAtText = log.created_at;
+                                }
+                            }
 
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td><strong>#${log.id}</strong></td>
-                                <td>${log.nama_file}</td>
+                                <td>${log.nama_file || '-'}</td>
                                 <td>${periodText}</td>
-                                <td>${log.jumlah_records}</td>
+                                <td>${recordDisplay}</td>
                                 <td>${statusBadge}</td>
-                                <td>${new Date(log.created_at).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</td>
+                                <td>${createdAtText}</td>
                                 <td>
-                                    <button onclick="loadImportDataOnMap(${log.id}, '${log.wilayah_id}', ${log.tahun || null}, ${log.bulan || null}, ${log.minggu || null})" 
-                                            style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
-                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
-                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                        <i class="fa-solid fa-map-location-dot"></i> Lihat Peta
-                                    </button>
+                                    <div style="display: flex; gap: 8px; justify-content: flex-start; align-items: center;">
+                                        <button onclick="loadImportDataOnMap(${log.id}, '${log.wilayah_id || ''}', ${log.tahun || null}, ${log.bulan || null}, ${log.minggu || null})" 
+                                                style="padding: 8px 14px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
+                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(18, 130, 65, 0.3)'"
+                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                            <i class="fa-solid fa-map-location-dot"></i> Lihat Peta
+                                        </button>
+                                        <button onclick="confirmDeleteImport(this)" 
+                                                data-id="${log.id}"
+                                                data-file="${safeFileAttr}"
+                                                data-period="${safePeriodAttr}"
+                                                data-records="${safeRecordsAttr}"
+                                                data-success="${safeSuccessAttr}"
+                                                data-status="${safeStatusAttr}"
+                                                style="padding: 8px 14px; background: linear-gradient(135deg, #ef5350, #e53935); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins'; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"
+                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(239, 83, 80, 0.3)'"
+                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                                                title="Hapus import log dan semua data terkait">
+                                            <i class="fas fa-trash-alt"></i> Hapus
+                                        </button>
+                                    </div>
                                 </td>
                             `;
                             tbody.appendChild(row);
@@ -1594,8 +1666,9 @@
 
                     function updatePaginationInfo() {
                         const totalRecords = filteredData.length;
-                        const startIdx = (currentPage - 1) * recordsPerPage + 1;
-                        let endIdx = currentPage * recordsPerPage;
+                        const effectivePerPage = recordsPerPage && recordsPerPage > 0 ? recordsPerPage : (totalRecords > 0 ? totalRecords : 1);
+                        const startIdx = (currentPage - 1) * effectivePerPage + 1;
+                        let endIdx = currentPage * effectivePerPage;
                         if (endIdx > totalRecords) endIdx = totalRecords;
 
                         document.getElementById('recordsStart').textContent = totalRecords === 0 ? 0 : startIdx;
@@ -1609,7 +1682,12 @@
 
                         if (filteredData.length === 0) return;
 
-                        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+                        const effectivePerPage = recordsPerPage && recordsPerPage > 0 ? recordsPerPage : (filteredData.length > 0 ? filteredData.length : 1);
+                        const totalPages = Math.ceil(filteredData.length / effectivePerPage);
+
+                        if (currentPage > totalPages) {
+                            currentPage = totalPages || 1;
+                        }
 
                         // Previous button
                         if (currentPage > 1) {
@@ -2541,13 +2619,17 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 // Update allTableData dengan response
                 if (Array.isArray(data)) {
                     allTableData = data;
-                } else if (data.data && Array.isArray(data.data)) {
-                    allTableData = data.data;
                 } else {
-                    console.warn('Unexpected data format from API');
-                    return;
+                    if (data.data && Array.isArray(data.data)) {
+                        allTableData = data.data;
+                    } else {
+                        console.warn('Unexpected data format from API');
+                        return;
+                    }
                 }
                 
+                filteredData = Array.isArray(allTableData) ? [...allTableData] : [];
+
                 console.log('✓ Updated import history with', allTableData.length, 'records');
                 
                 // Re-render table
@@ -2747,7 +2829,6 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 const stats = result.data;
                 document.getElementById('statTotalData').textContent = stats.totalDataGulma;
                 document.getElementById('statWilayahAktif').textContent = stats.wilayahAktif;
-                document.getElementById('statTotalTanaman').textContent = stats.totalTanaman;
                 document.getElementById('statUploadTerbaru').textContent = stats.uploadTerbaru;
             }
         } catch (error) {
@@ -3681,18 +3762,30 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success && data.data) {
-                        filteredData = data.data.map(row => ({
-                            id: row.id.replace('#', ''),
-                            nama_file: row.nama_file,
-                            tahun: row.periode.split('/')[0]?.trim() || 0,
-                            bulan: row.periode.includes('Jan') ? 1 : row.periode.includes('Feb') ? 2 : row.periode.includes('Mar') ? 3 : row.periode.includes('Apr') ? 4 : row.periode.includes('Mei') ? 5 : row.periode.includes('Jun') ? 6 : row.periode.includes('Jul') ? 7 : row.periode.includes('Ags') ? 8 : row.periode.includes('Sep') ? 9 : row.periode.includes('Okt') ? 10 : row.periode.includes('Nov') ? 11 : row.periode.includes('Des') ? 12 : 0,
-                            minggu: row.periode.match(/Minggu (\d+)/) ? parseInt(row.periode.match(/Minggu (\d+)/)[1]) : 0,
-                            jumlah_records: row.data,
-                            status: row.status_class,
-                            created_at: row.waktu_upload,
-                            id_detailed: row.import_id
-                        }));
+                    if (data.success && Array.isArray(data.data)) {
+                        filteredData = data.data.map(row => {
+                            const parsedId = row.import_id ?? (row.id ? parseInt(String(row.id).replace('#', ''), 10) : null);
+                            const finalId = typeof parsedId === 'number' && !isNaN(parsedId) ? parsedId : 0;
+                            const parsedTahun = row.tahun ?? null;
+                            const parsedBulan = row.bulan ?? null;
+                            const parsedMinggu = row.minggu ?? null;
+
+                            return {
+                                id: finalId,
+                                nama_file: row.nama_file,
+                                tahun: parsedTahun,
+                                bulan: parsedBulan,
+                                minggu: parsedMinggu,
+                                jumlah_records: row.jumlah_records ?? row.data ?? 0,
+                                jumlah_berhasil: row.jumlah_berhasil ?? row.data ?? 0,
+                                jumlah_gagal: row.jumlah_gagal ?? 0,
+                                status: row.status_raw ?? row.status_class,
+                                created_at: row.created_at_raw ?? row.waktu_upload,
+                                wilayah_id: row.wilayah_id ?? '',
+                                periode_label: row.periode
+                            };
+                        });
+                        allTableData = [...filteredData];
                         currentPage = 1;
                         renderTable();
                     }
@@ -3712,6 +3805,87 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             refreshRiwayatUploadTable();
         }, 500);
     });
+
+    // ===== DELETE IMPORT LOG - SIMPLE & FAST =====
+    
+    /**
+     * Delete import directly - super simple
+     */
+    async function confirmDeleteImport(buttonElement) {
+        if (!buttonElement?.dataset) {
+            alert('Error: Data tidak lengkap');
+            return;
+        }
+
+        const importId = buttonElement.dataset.id;
+        const fileName = buttonElement.dataset.file || 'File';
+        const recordCount = parseInt(buttonElement.dataset.records, 10) || 0;
+
+        // Simple confirm
+        const msg = `Hapus "${fileName}"?\n${recordCount} data akan dihapus permanen.`;
+        if (!confirm(msg)) return;
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) throw new Error('CSRF token not found');
+
+            console.log('🗑️ Deleting ID:', importId);
+
+            const response = await fetch(`/api/import-logs/${importId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ ' + result.message);
+                
+                // Update stats immediately
+                if (recordCount > 0) {
+                    const totalEl = document.getElementById('statTotalData');
+                    if (totalEl) {
+                        const curr = parseInt(String(totalEl.textContent).replace(/[^0-9]/g, '')) || 0;
+                        totalEl.textContent = Math.max(0, curr - recordCount).toLocaleString('id-ID');
+                    }
+                }
+                
+                // Refresh table
+                fetchImportHistory();
+            } else {
+                alert('❌ ' + (result.message || 'Gagal hapus'));
+            }
+        } catch (error) {
+            alert('❌ Error: ' + error.message);
+            console.error('Delete error:', error);
+        }
+    }
+
+    /**
+     * Show message notification
+     */
+    function showMessage(type, message) {
+        const messageDiv = document.getElementById('uploadMessage');
+        if (messageDiv) {
+            messageDiv.innerHTML = message;
+            messageDiv.className = `message show ${type}`;
+            
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 5000);
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('deleteConfirmModal');
+        if (event.target === modal) {
+            // Modal not used anymore
+        }
+    }
 </script>
 
 @endsection

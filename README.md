@@ -71,9 +71,40 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 **GulmaTrack** adalah aplikasi geospasial untuk tracking dan monitoring gulma (tanaman pengganggu) di berbagai wilayah produksi.
 
+### 📋 Dependency & Requirement
+**Minimal requirement untuk setup:**
+- PHP 8.1+
+- PostgreSQL 12+
+- Composer
+- Node.js 18+
+
+**⚠️ Catatan penting: Tidak perlu install Ghostscript atau ImageMagick!**
+- Thumbnail PDF menggunakan lightweight placeholder (built-in di PHP, tanpa external dependency)
+- Download PDF langsung support tanpa perlu convert
+
 ###  Dokumentasi Lengkap
-- **README2.md** - Dokumentasi komprehensif (instalasi, fitur, API, troubleshooting)
-- **testing/README.md** - Panduan testing & debugging files
+
+**Untuk Pemula:**
+- **[QUICKSTART.md](QUICKSTART.md)** - Copy-paste commands (5 menit!)
+- **[INSTALL.md](INSTALL.md)** - Quick installation guide
+
+**Untuk Developer:**
+- **[SETUP_SIMPLE.md](SETUP_SIMPLE.md)** - Detailed setup & troubleshooting
+- **[dokumentasi1.md](dokumentasi1.md)** - Full documentation (fitur, API, database)
+- **[CHANGES.md](CHANGES.md)** - Technical changelog
+- **[PERFORMANCE.md](PERFORMANCE.md)** - Performance test & benchmarks
+
+**Untuk Guru/Mentor:**
+- **[TEACH.md](TEACH.md)** - Panduan mengajarkan GulmaTrack ke pemula
+
+**Solusi Detail:**
+- **[SOLUTION_FINAL.md](SOLUTION_FINAL.md)** - ⭐ BACA INI! Real PDF thumbnails + no install!
+- **[README_SOLUSI.md](README_SOLUSI.md)** - Penjelasan removal Ghostscript dependency
+- **[THUMBNAIL_GUIDE.md](THUMBNAIL_GUIDE.md)** - PDF Thumbnail Preview guide
+- **[OPTIMIZATION.md](OPTIMIZATION.md)** - Complete optimization guide
+- **[PERFORMANCE.md](PERFORMANCE.md)** - Performance test & benchmarks
+- **[FINAL_SUMMARY.md](FINAL_SUMMARY.md)** - Quick summary
+- **[testing/README.md](testing/README.md)** - Testing & debugging guide
 
 ###  Struktur Folder Penting
 \\\

@@ -33,7 +33,6 @@ class AdminController extends Controller
             // Tampilkan statistik dari upload baru yang belum dipublish
             $totalDataGulma = DataGulma::where('import_log_id', $tempImportLogId)->count();
             $wilayahAktif = DataGulma::where('import_log_id', $tempImportLogId)->distinct('wilayah_id')->count('wilayah_id');
-            $totalTanaman = DataGulma::where('import_log_id', $tempImportLogId)->distinct('id_feature')->count('id_feature');
         } else {
             // DEFAULT: Tampilkan statistik dari published data saja
             $published = MapPublication::getLatestPublished();
@@ -42,7 +41,6 @@ class AdminController extends Controller
                 // Ada publikasi, tampilkan dari situ
                 $totalDataGulma = DataGulma::where('import_log_id', $published->import_log_id)->count();
                 $wilayahAktif = DataGulma::where('import_log_id', $published->import_log_id)->distinct('wilayah_id')->count('wilayah_id');
-                $totalTanaman = DataGulma::where('import_log_id', $published->import_log_id)->distinct('id_feature')->count('id_feature');
             } else {
                 // Tidak ada publikasi, ambil latest successful import saja
                 $latest = ImportLog::where('status', 'success')->latest('created_at')->first();
@@ -50,12 +48,10 @@ class AdminController extends Controller
                 if ($latest) {
                     $totalDataGulma = DataGulma::where('import_log_id', $latest->id)->count();
                     $wilayahAktif = DataGulma::where('import_log_id', $latest->id)->distinct('wilayah_id')->count('wilayah_id');
-                    $totalTanaman = DataGulma::where('import_log_id', $latest->id)->distinct('id_feature')->count('id_feature');
                 } else {
                     // Benar-benar tidak ada data
                     $totalDataGulma = 0;
                     $wilayahAktif = 0;
-                    $totalTanaman = 0;
                 }
             }
         }
@@ -99,7 +95,6 @@ class AdminController extends Controller
         return view('admin.dashboard', [
             'totalDataGulma' => $totalDataGulma,
             'wilayahAktif' => $wilayahAktif,
-            'totalTanaman' => $totalTanaman,
             'importTerbaru' => $importTerbaru,
             'totalDrone' => $totalDrone,
             'droneAktif' => $droneAktif,
@@ -480,7 +475,7 @@ class AdminController extends Controller
             // Dashboard dan Wilayah akan langsung baca dari published data
             
             $wilayahText = count($allWilayah) > 1 ? 'Wilayah ' . $wilayahList : 'Wilayah ' . $wilayahList;
-            $message = "✅ File CSV berhasil diproses dan dipublikasikan! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
+            $message = "File CSV berhasil diproses dan dipublikasikan! $wilayahText - Berhasil: $berhasil, Gagal: $gagal";
             
             Log::info('✅ CSV upload & auto-publish complete', [
                 'import_id' => $importLog->id,
@@ -700,7 +695,6 @@ class AdminController extends Controller
         try {
             $totalDataGulma = DataGulma::count();
             $wilayahAktif = DataGulma::distinct('wilayah_id')->count('wilayah_id');
-            $totalTanaman = DataGulma::distinct('id_feature')->count('id_feature');
             $uploadTerbaru = ImportLog::count();
 
             return response()->json([
@@ -708,7 +702,6 @@ class AdminController extends Controller
                 'data' => [
                     'totalDataGulma' => $totalDataGulma,
                     'wilayahAktif' => $wilayahAktif,
-                    'totalTanaman' => $totalTanaman,
                     'uploadTerbaru' => $uploadTerbaru
                 ]
             ]);
@@ -753,8 +746,12 @@ class AdminController extends Controller
                         'bulan' => $log->bulan,
                         'minggu' => $log->minggu,
                         'status' => $log->status,
+                        'status_label' => ucfirst($log->status ?? 'unknown'),
                         'wilayah_id' => $log->wilayah_id,
-                        'created_at' => $log->created_at->format('Y-m-d H:i:s')
+                        'jumlah_records' => (int) ($log->jumlah_records ?? 0),
+                        'jumlah_berhasil' => (int) ($log->jumlah_berhasil ?? 0),
+                        'jumlah_gagal' => (int) ($log->jumlah_gagal ?? 0),
+                        'created_at' => $log->created_at?->format('Y-m-d H:i:s')
                     ];
                 })
             ]);
@@ -1565,15 +1562,32 @@ class AdminController extends Controller
                     ? 'Berhasil'
                     : ($log->status === 'pending' ? 'Pending' : 'Gagal');
 
+                $statusClass = match ($log->status) {
+                    'success' => 'success',
+                    'pending' => 'pending',
+                    'partial' => 'partial',
+                    'failed' => 'failed',
+                    default => 'neutral'
+                };
+
                 $rows[] = [
                     'id' => '#' . $log->id,
+                    'import_id' => $log->id,
                     'nama_file' => $log->nama_file,
                     'periode' => $periodText,
-                    'data' => $log->jumlah_records,
+                    'tahun' => $log->tahun,
+                    'bulan' => $log->bulan,
+                    'minggu' => $log->minggu,
+                    'data' => (int) ($log->jumlah_records ?? 0),
+                    'jumlah_records' => (int) ($log->jumlah_records ?? 0),
+                    'jumlah_berhasil' => (int) ($log->jumlah_berhasil ?? 0),
+                    'jumlah_gagal' => (int) ($log->jumlah_gagal ?? 0),
                     'status' => $statusBadge,
-                    'status_class' => $log->status === 'success' ? 'success' : ($log->status === 'pending' ? 'pending' : 'failed'),
-                    'waktu_upload' => $log->created_at->format('d M Y H:i'),
-                    'import_id' => $log->id
+                    'status_class' => $statusClass,
+                    'status_raw' => $log->status,
+                    'waktu_upload' => $log->created_at?->format('d M Y H:i'),
+                    'created_at_raw' => $log->created_at?->format('Y-m-d H:i:s'),
+                    'wilayah_id' => $log->wilayah_id
                 ];
             }
 
@@ -1583,6 +1597,42 @@ class AdminController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error in getRiwayatUploadRefresh: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * API: Delete import log and all related data
+     * Endpoint: DELETE /api/import-logs/{id}
+     */
+    public function deleteImportLog($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $importLog = ImportLog::findOrFail($id);
+            $fileName = $importLog->nama_file;
+            
+            // Count before deletion
+            $dataCount = DataGulma::where('import_log_id', $id)->count();
+            
+            // Delete all related records in single operations
+            DataGulma::where('import_log_id', $id)->delete();
+            MapPublication::where('import_log_id', $id)->delete();
+            $importLog->delete();
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil hapus #{$id} ({$fileName})"
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage()

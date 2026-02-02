@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') | GulmaTrack</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico?v=' . time()) }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/logo3.png?v=' . time()) }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/logo3.png?v=' . time()) }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('image/logo3.png?v=' . time()) }}">
@@ -208,6 +209,13 @@
             font-size: 42px;
             color: var(--title-color);
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-header h1 i {
+            color: var(--title-color);
         }
 
         .page-header p {
@@ -581,13 +589,16 @@
             }
 
             .footer-links {
-                gap: 10px;
-                flex-direction: column;
+                gap: 12px;
+                flex-direction: row;
                 align-items: center;
+                justify-content: center;
+                flex-wrap: wrap;
             }
 
             .footer-links a {
                 font-size: 12px;
+                flex: 0 1 auto;
             }
 
             .contact-item {

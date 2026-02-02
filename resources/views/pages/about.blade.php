@@ -423,11 +423,11 @@
         <h4><i class="fas fa-clock"></i> Jam Kantor</h4>
         <div class="office-hours-item">
             <span>Senin - Jumat</span>
-            <span>08:00 - 17:00</span>
+            <span>07:45 - 16:00</span>
         </div>
         <div class="office-hours-item">
             <span>Sabtu</span>
-            <span>09:00 - 13:00</span>
+            <span>07:45 - 12:00</span>
         </div>
         <div class="office-hours-item">
             <span>Minggu & Hari Libur</span>

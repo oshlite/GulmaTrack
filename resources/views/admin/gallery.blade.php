@@ -5,54 +5,6 @@
 @section('content')
 
 <style>
-    :root {
-        --primary-color: #128241;
-        --secondary-color: #D6DF20;
-        --accent-color: #FBA919;
-        --light-bg: #f8f9fa;
-        --text-color: #333;
-        --border-color: #e0e0e0;
-    }
-
-    body {
-        font-family: 'Poppins';
-        padding-top: 0;
-    }
-
-    .admin-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 100px 20px 30px;
-        font-family: 'Poppins';
-    }
-
-    .page-header {
-        margin-bottom: 40px;
-        padding: 40px 20px 30px;
-        border-bottom: 3px solid var(--primary-color);
-    }
-
-    .page-header h1 {
-        font-size: 42px;
-        color: #A6CE39;
-        margin-bottom: 10px;
-        font-family: 'Poppins';
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .page-header h1 i {
-        color: var(--accent-color);
-    }
-
-    .page-header p {
-        font-size: 16px;
-        color: #666;
-        font-family: 'Poppins';
-        margin: 0;
-    }
-
     /* Stats Row */
     .stats-row {
         display: grid;
@@ -620,10 +572,7 @@
     }
 
     @media (max-width: 768px) {
-        .page-header h1 {
-            font-size: 24px;
-        }
-
+ 
         .stats-row {
             grid-template-columns: 1fr;
         }

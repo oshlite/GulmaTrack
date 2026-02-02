@@ -7,6 +7,7 @@ use App\Http\Controllers\ExcelDataController;
 use App\Http\Controllers\ImportLogController;
 use App\Http\Controllers\CsvController;
 use App\Http\Controllers\DebugController;
+use App\Http\Controllers\DroneController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,11 @@ Route::get('/data-gulma/by-import/{importId}', [\App\Http\Controllers\AdminContr
 // Import logs - get list with filters
 Route::get('/import-logs', [\App\Http\Controllers\AdminController::class, 'getImportLogs'])
     ->name('api.import-logs')
+    ->withoutMiddleware(['api', 'auth', 'admin']);
+
+// Import logs - delete
+Route::delete('/import-logs/{id}', [\App\Http\Controllers\AdminController::class, 'deleteImportLog'])
+    ->name('api.import-logs.delete')
     ->withoutMiddleware(['api', 'auth', 'admin']);
 
 // Debug endpoint - check data in database

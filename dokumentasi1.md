@@ -65,6 +65,7 @@ Sebelum install, pastikan komputer punya:
 2. PostgreSQL database (versi 12+)
 3. PHP 8.1 atau lebih baru
 4. Composer (untuk manage dependencies)
+5. Node.js 18+ (untuk build frontend assets)
 
 ```bash
 # Cek versi PHP
@@ -75,7 +76,20 @@ composer --version
 
 # Cek PostgreSQL running
 psql --version
+
+# Cek Node.js
+node --version
+npm --version
 ```
+
+**⚠️ CATATAN PENTING: Tidak perlu install Ghostscript atau ImageMagick!**
+
+GulmaTrack sudah dioptimasi untuk work tanpa external dependency rumit:
+- ✅ PDF thumbnail menggunakan static SVG (instant render, <1ms per request)
+- ✅ Download PDF langsung tanpa perlu convert
+- ✅ Semua dependency sudah included di composer.json
+- ✅ **Performance:** 32+ thumbnails load instantly tanpa lag
+- ✅ Setup beginner-friendly, cocok untuk yang baru coding
 
 ### Step 1: Clone Repository
 

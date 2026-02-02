@@ -16,233 +16,12 @@
         --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
 
-    body {
-        font-family: 'Poppins';
-        padding-top: 0;
-    }
-
-    .main-content {
-        margin-top: 90px;
-        padding: 30px;
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .page-header {
-        margin-bottom: 30px;
-    }
-
-    .page-title {
-        font-size: 32px;
-        font-weight: 700;
-        color: var(--text-color);
-        margin-bottom: 10px;
-    }
-
-    .page-subtitle {
-        font-size: 14px;
-        color: #666;
-    }
-
-    /* Alert Styling */
-    .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border-left: 4px solid;
-    }
-
-    .alert-success {
-        background-color: #d4edda;
-        border-left-color: #28a745;
-        color: #155724;
-    }
-
-    .alert-danger {
-        background-color: #f8d7da;
-        border-left-color: #dc3545;
-        color: #721c24;
-    }
-
-    /* Form Section */
-    .form-section {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: var(--shadow);
-    }
-
-    .form-section-title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--secondary-color);
-        padding-bottom: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--text-color);
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-family: 'Poppins';
-        font-size: 14px;
-        transition: border-color 0.3s;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(18, 130, 65, 0.1);
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .btn {
-        padding: 12px 30px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        font-family: 'Poppins';
-        cursor: pointer;
-        transition: all 0.3s;
-        font-size: 14px;
-    }
-
-    .btn-primary {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #0f6334;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-
-    .file-input-wrapper {
-        position: relative;
-        overflow: hidden;
-        display: inline-block;
-    }
-
-    .file-input-label {
-        display: block;
-        padding: 12px 15px;
-        background-color: #f0f0f0;
-        border: 2px dashed var(--primary-color);
-        border-radius: 6px;
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.3s;
-    }
-
-    .file-input-label:hover {
-        background-color: rgba(18, 130, 65, 0.05);
-        border-color: #0f6334;
-    }
-
-    .file-input-label input {
-        display: none;
-    }
-
-    .file-name {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
-    }
-
-    /* Table Styling */
-    .table-section {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: var(--shadow);
-    }
-
-    .table-title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--secondary-color);
-        padding-bottom: 10px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    table thead {
-        background-color: var(--light-bg);
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    table th {
-        padding: 15px;
-        text-align: left;
-        font-weight: 600;
-        color: var(--text-color);
-        font-size: 14px;
-    }
-
-    table td {
-        padding: 15px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 14px;
-    }
-
-    table tbody tr:hover {
-        background-color: var(--light-bg);
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-sm {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-
     .btn-download {
         background-color: #0066cc;
         color: white;
         text-decoration: none;
         padding: 8px 15px;
-        border-radius: 4px;
+        border-radius: 30px;
         display: inline-block;
         transition: background-color 0.3s;
     }
@@ -264,61 +43,121 @@
         margin-bottom: 15px;
     }
 
-    /* Stats Grid */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: var(--shadow);
-        transition: all 0.3s ease;
-        border-top: 4px solid var(--primary-color);
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stat-icon {
-        font-size: 32px;
-        color: var(--primary-color);
-        margin-bottom: 10px;
-    }
-
-    .stat-label {
-        font-size: 13px;
-        color: #666;
-        font-weight: 500;
-        margin-bottom: 10px;
+    .action-buttons {
         display: flex;
-        align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
 
-    .stat-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--primary-color);
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 30px;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-left-color: #28a745;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-left-color: #dc3545;
+        color: #721c24;
+    }
+
+    /* Pagination Styling - Compact */
+    .pagination {
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .pagination li {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .pagination a,
+    .pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+        min-width: 30px;
+        height: 30px;
+    }
+
+    .pagination a:hover {
+        background-color: #f0f0f0;
+        border-color: #999;
+    }
+
+    .pagination .active span {
+        background-color: #128241 !important;
+        color: white !important;
+        border-color: #128241 !important;
+    }
+
+    .pagination .disabled span {
+        color: #999;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        flex-wrap: wrap;
+    }
+
+    .pagination-info {
+        font-size: 12px;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    /* Remove excess spacing */
+    .table-section {
+        margin-bottom: 20px !important;
+    }
+
+    #droneTableContainer {
+        margin-bottom: 0 !important;
     }
 
     @media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
-        }
-
-        .main-content {
-            padding: 15px;
-        }
-
-        .page-title {
-            font-size: 24px;
         }
 
         .stats-grid {
@@ -341,12 +180,21 @@
         .btn-sm {
             width: 100%;
             text-align: center;
+            border-radius: 30px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 5px 6px !important;
+            font-size: 11px !important;
+            min-width: 26px;
+            height: 26px;
         }
     }
 </style>
 
   <!-- Manajemen Drone Section -->
-    <div class="main-content">
+    <div class="admin-container">
         <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-helicopter"></i> Manajemen Drone</h1>
@@ -510,62 +358,10 @@
             <i class="fas fa-table"></i> Daftar Drone
         </h2>
 
-        @if ($drones->count() > 0)
-            <div style="overflow-x: auto; margin-bottom: 20px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align: center; width: 50px;">No</th>
-                            <th>Judul</th>
-                            <th style="width: 150px;">Lokasi</th>
-                            <th style="width: 150px;">Tgl Perencanaan</th>
-                            <th style="width: 120px;">File</th>
-                            <th style="width: 150px;">Dibuat</th>
-                            <th style="text-align: center; width: 100px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($drones as $index => $drone)
-                            <tr>
-                                <td style="text-align: center;">{{ ($drones->currentPage() - 1) * $drones->perPage() + $index + 1 }}</td>
-                                <td><strong>{{ $drone->judul }}</strong></td>
-                                <td>{{ $drone->lokasi }}</td>
-                                <td>{{ $drone->tanggal_perencanaan->format('d/m/Y') }}</td>
-                                <td>
-                                    <a href="{{ route('drone.download', $drone->id) }}" class="btn-download" target="_blank">
-                                        Download
-                                    </a>
-                                </td>
-                                <td>{{ $drone->created_at->format('d/m/Y H:i') }}</td>
-                                <td style="text-align: center;">
-                                    <div class="action-buttons">
-                                        <form action="{{ route('admin.drone.destroy', $drone->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus drone ini?');" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div style="margin-top: 20px; display: flex; justify-content: center;">
-                {{ $drones->links() }}
-            </div>
-        @else
-            <div class="empty-state">
-                <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
-                <h3>Tidak ada data drone</h3>
-                <p>Mulai upload drone PDF dengan form di atas</p>
-            </div>
-        @endif
+        <div id="droneTableContainer">
+            <!-- Content loaded via AJAX -->
+        </div>
     </div>
-    </div>
-</div>
 
 <script>
     function updateFileName(input) {
@@ -581,6 +377,187 @@
             fileLabel.innerHTML = '<i class="fas fa-folder"></i> Pilih File PDF (Max 10MB)';
         }
     }
-</script>
 
-@endsection
+    // AJAX Pagination untuk Drone List
+    let currentDronePage = 1;
+
+    async function loadDroneList(page = 1) {
+        try {
+            currentDronePage = page;
+            const response = await fetch(`/admin/drone/api/list?page=${page}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            const container = document.getElementById('droneTableContainer');
+            
+            if (!data.drones || data.drones.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
+                        <h3>Tidak ada data drone</h3>
+                        <p>Mulai upload drone PDF dengan form di atas</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div style="overflow-x: auto; margin-bottom: 20px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 50px;">No</th>
+                                <th>Judul</th>
+                                <th style="width: 150px;">Lokasi</th>
+                                <th style="width: 150px;">Tgl Perencanaan</th>
+                                <th style="width: 120px;">File</th>
+                                <th style="width: 150px;">Dibuat</th>
+                                <th style="text-align: center; width: 100px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.drones.forEach((drone, index) => {
+                const no = (data.current_page - 1) * data.per_page + index + 1;
+                const tanggal = new Date(drone.tanggal_perencanaan);
+                const created = new Date(drone.created_at);
+                
+                html += `
+                    <tr>
+                        <td style="text-align: center;">${no}</td>
+                        <td><strong>${drone.judul}</strong></td>
+                        <td>${drone.lokasi}</td>
+                        <td>${tanggal.toLocaleDateString('id-ID')}</td>
+                        <td>
+                            <a href="/drone/download/${drone.id}" class="btn-download" target="_blank">
+                                Download
+                            </a>
+                        </td>
+                        <td>${created.toLocaleDateString('id-ID', {hour: '2-digit', minute: '2-digit'})}</td>
+                        <td style="text-align: center;">
+                            <div class="action-buttons">
+                                <button class="btn btn-danger btn-sm" onclick="deleteDrone(${drone.id})">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-wrapper">
+                    <div class="pagination-info">
+                        Menampilkan ${data.from} hingga ${data.to} dari ${data.total} hasil
+                    </div>
+                    <div id="dronePagination"></div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            
+            // Render pagination buttons
+            renderDronePagination(data);
+            
+        } catch (error) {
+            console.error('Error loading drones:', error);
+            document.getElementById('droneTableContainer').innerHTML = '<p style="color: red;">⚠️ Error: ' + error.message + '</p>';
+        }
+    }
+
+    function renderDronePagination(data) {
+        const paginationDiv = document.getElementById('dronePagination');
+        paginationDiv.innerHTML = '';
+
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        // Previous button
+        if (data.current_page > 1) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = '«';
+            a.onclick = (e) => { e.preventDefault(); loadDroneList(data.current_page - 1); };
+            li.appendChild(a);
+            ul.appendChild(li);
+        } else {
+            const li = document.createElement('li');
+            li.className = 'disabled';
+            const span = document.createElement('span');
+            span.textContent = '«';
+            li.appendChild(span);
+            ul.appendChild(li);
+        }
+
+        // Page numbers
+        for (let i = 1; i <= data.last_page; i++) {
+            if (i === data.current_page) {
+                const li = document.createElement('li');
+                li.className = 'active';
+                const span = document.createElement('span');
+                span.textContent = i;
+                li.appendChild(span);
+                ul.appendChild(li);
+            } else if (i <= 3 || i >= data.last_page - 2 || Math.abs(i - data.current_page) <= 1) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = i;
+                a.onclick = (e) => { e.preventDefault(); loadDroneList(i); };
+                li.appendChild(a);
+                ul.appendChild(li);
+            }
+        }
+
+        // Next button
+        if (data.current_page < data.last_page) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = '»';
+            a.onclick = (e) => { e.preventDefault(); loadDroneList(data.current_page + 1); };
+            li.appendChild(a);
+            ul.appendChild(li);
+        } else {
+            const li = document.createElement('li');
+            li.className = 'disabled';
+            const span = document.createElement('span');
+            span.textContent = '»';
+            li.appendChild(span);
+            ul.appendChild(li);
+        }
+
+        paginationDiv.appendChild(ul);
+    }
+
+    function deleteDrone(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus drone ini?')) return;
+        
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        
+        fetch(`/admin/drone/${id}`, { 
+            method: 'DELETE', 
+            headers: { 
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            } 
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadDroneList(currentDronePage);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+
+    // Load initial data
+    loadDroneList();
+</script>

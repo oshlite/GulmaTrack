@@ -5,11 +5,11 @@
 <footer>
     <div class="footer-content">
         <div class="footer-links">
-            <a href="{{ route('about') }}">Tentang Kami</a>
             <a href="{{ route('wilayah') }}">Peta Wilayah</a>
             <a href="{{ route('statistik') }}">Statistik</a>
             <a href="{{ route('drone') }}">Drone</a>
             <a href="{{ route('login') }}">Admin</a>
+            <a href="{{ route('about') }}">Tentang Kami</a>
         </div>
         <div class="footer-contact">
             <div class="contact-item">

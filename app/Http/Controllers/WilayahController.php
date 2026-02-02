@@ -793,11 +793,18 @@ class WilayahController extends Controller
     public function getPeriods(): JsonResponse
     {
         try {
-            // ✅ FIXED: Get maximum tahun from database, not current year
-            $maxYearInDb = \App\Models\MapPublication::where('status', 'published')
-                ->max('tahun');
-            
-            if (!$maxYearInDb) {
+            $maxYears = 3;  // Show last 3 publication years
+
+            // Ambil 3 tahun terbaru yang sudah dipublikasi (tidak harus berurutan)
+            $latestYears = \App\Models\MapPublication::where('status', 'published')
+                ->select('tahun')
+                ->distinct()
+                ->orderBy('tahun', 'desc')
+                ->limit($maxYears)
+                ->pluck('tahun')
+                ->toArray();
+
+            if (empty($latestYears)) {
                 // No published data
                 return response()->json([
                     'success' => true,
@@ -808,7 +815,8 @@ class WilayahController extends Controller
                     'year_range' => [
                         'current_year' => now()->year,
                         'min_year' => null,
-                        'max_years' => 3
+                        'max_years' => $maxYears,
+                        'included_years' => []
                     ]
                 ])
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
@@ -816,14 +824,14 @@ class WilayahController extends Controller
                 ->header('Expires', '0');
             }
             
-            $maxYears = 3;  // Show last 3 years
-            $minYear = $maxYearInDb - ($maxYears - 1);  // e.g., if 2031: 2031 - 2 = 2029
-            
-            \Log::info("🔍 getPeriods() - Max year in DB: {$maxYearInDb}, Min year for display: {$minYear}");
-            
-            // ✅ FIXED: Filter publications untuk hanya 3 tahun terakhir (dari max year)
+            $maxYearInDb = $latestYears[0];
+            $minYear = min($latestYears);
+
+            \Log::info("🔍 getPeriods() - Years included: " . implode(', ', $latestYears));
+
+            // Filter publikasi hanya untuk tahun yang diseleksi
             $publications = \App\Models\MapPublication::where('status', 'published')
-                ->where('tahun', '>=', $minYear)  // Only last 3 years
+                ->whereIn('tahun', $latestYears)
                 ->with('importLog')
                 ->orderBy('tahun', 'desc')
                 ->orderBy('bulan', 'desc')
@@ -877,7 +885,7 @@ class WilayahController extends Controller
             }
             
             // Sort arrays
-            sort($tahun_list);
+            $tahun_list = array_values(array_unique($tahun_list));
             rsort($tahun_list); // Descending (newest first)
             
             \Log::info("📊 getPeriods() - Filter Structure: " . json_encode($filterStructure));
@@ -898,8 +906,9 @@ class WilayahController extends Controller
                 'latest_period' => $latestPeriod,
                 'year_range' => [
                     'max_year_in_db' => $maxYearInDb,
-                    'min_year' => $minYear,
-                    'max_years' => $maxYears
+                        'min_year' => $minYear,
+                        'max_years' => $maxYears,
+                        'included_years' => $latestYears
                 ]
             ])
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')

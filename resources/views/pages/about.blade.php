@@ -392,27 +392,27 @@
         <h2><i class="fas fa-users"></i> Tim Pengembang</h2>
         <div class="team-grid">
             <div class="team-member">
-                <div class="team-avatar"><i class="fas fa-user-tie"></i></div>
+                <div class="team-avatar"><i class="fas fa-user-secret"></i></div>
                 <div class="team-info">
                     <div class="team-name">Alfi Rahma Amalia</div>
-                    <div class="team-position">Project Lead & Backend Developer</div>
-                    <div class="team-desc">Berpengalaman 8 tahun di pengembangan sistem informasi perkebunan</div>
+                    <div class="team-position">QGIS & UI/UX Designer</div>
+                    <div class="team-desc">Merancang antarmuka pengguna tamu dan admin serta visualisasi peta berbasis QGIS agar informasi spasial tersaji secara jelas, menarik, dan mudah dipahami.</div>
                 </div>
             </div>
             <div class="team-member">
                 <div class="team-avatar"><i class="fas fa-user-secret"></i></div>
                 <div class="team-info">
                     <div class="team-name">Oryza Surya Hapsari</div>
-                    <div class="team-position">Frontend Developer & UX Designer</div>
-                    <div class="team-desc">Spesialis dalam UI/UX dengan fokus pada user experience terbaik</div>
+                    <div class="team-position">Frontend Developer & Map Integration</div>
+                    <div class="team-desc">Mengembangkan antarmuka web interaktif serta mengintegrasikan peta digital berbasis GeoJSON ke dalam sistem agar data spasial ditampilkan dinamis informatif.</div>
                 </div>
             </div>
             <div class="team-member">
-                <div class="team-avatar"><i class="fas fa-flask"></i></div>
+                <div class="team-avatar"><i class="fas fa-user-secret"></i></div>
                 <div class="team-info">
                     <div class="team-name">Carissa Oktavia Sanjaya</div>
-                    <div class="team-position">GIS & Data Specialist</div>
-                    <div class="team-desc">Ahli dalam sistem informasi geografis dan analisis data perkebunan</div>
+                    <div class="team-position">Data & Backend Developer</div>
+                    <div class="team-desc">Mengelola basis data dan logika sistem untuk pengolahan dan penyediaan data spasial dalam mendukung kebutuhan visualisasi dan analisis persebaran gulma.</div>
                 </div>
             </div>
         </div>

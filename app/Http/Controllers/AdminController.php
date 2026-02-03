@@ -228,7 +228,7 @@ class AdminController extends Controller
             if ($wilayahIndex === null) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Kolom WIL tidak ditemukan dalam CSV'
+                    'message' => 'Terdapat data kotor pada csv. Pastikan kolom csv: PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,TANGGAL,TK/HA,TOTAL_TK ; Data csv wajib bersih dari kolom lain/angka diluar kolom'
                 ], 400);
             }
             
@@ -369,10 +369,10 @@ class AdminController extends Controller
                     DataGulma::updateOrCreate(
                         [
                             'wilayah_id' => $rowWilayahId,
-                            'id_feature' => $seksi
+                            'id_feature' => $seksi,
+                            'import_log_id' => $importLog->id  // ✅ FIX: Include import_log_id in unique key
                         ],
                         [
-                            'import_log_id' => $importLog->id,
                             'pg' => $pg,
                             'fm' => $fm,
                             'seksi' => $seksi,

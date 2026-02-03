@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Force HTTPS untuk local environment saat pakai ngrok
         if (app()->environment('local')) {
-            URL::forceScheme('https');
+            URL::forceScheme('http');
         }
     }
 }

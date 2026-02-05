@@ -3801,7 +3801,7 @@ function initMap() {
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-users"></i>
-                            <span>Total Tenaga Kerja Existing</span>
+                            <span>Total Kebutuhan Tenaga Kerja</span>
                         </span>
                         <span class="info-value">
                             ${(wilayah.total_tk ? Math.round(parseFloat(wilayah.total_tk)) : 0)} TK

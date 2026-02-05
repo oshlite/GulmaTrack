@@ -60,6 +60,48 @@
         display: inline-block;
     }
 
+    /* PDF Upload Area Styling */
+    .pdf-upload-area {
+        border: 3px dashed #128241;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        background-color: #f8fdf9;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pdf-upload-area:hover {
+        border-color: #D6DF20;
+        background-color: #f0faff;
+        box-shadow: 0 4px 12px rgba(18, 130, 65, 0.1);
+    }
+
+    .pdf-upload-area.drag-over {
+        border-color: #D6DF20;
+        background-color: #fffacd;
+        box-shadow: 0 4px 16px rgba(214, 223, 32, 0.2);
+    }
+
+    .upload-icon {
+        font-size: 48px;
+        color: #FBA919;
+        margin-bottom: 15px;
+    }
+
+    .upload-text {
+        font-size: 16px;
+        font-weight: 600;
+        color: #128241;
+        margin-bottom: 8px;
+    }
+
+    .upload-hint {
+        font-size: 13px;
+        color: #212121;
+        margin-top: 8px;
+    }
+
     .alert {
         padding: 15px 20px;
         border-radius: 8px;
@@ -259,6 +301,23 @@
             @csrf
 
             <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="pdf_file">File PDF <span style="color: red;">*</span></label>
+                    <div class="pdf-upload-area" id="pdfUploadArea">
+                        <div class="upload-icon"><i class="fas fa-file-pdf"></i></div>
+                        <div class="upload-text">Klik atau Drag & Drop PDF di Sini</div>
+                        <div class="upload-hint">Format: PDF | Maksimal 10MB</div>
+                        <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required hidden onchange="updateFileName(this); extractPdfData(this);">
+                    </div>
+                    <div class="file-name" id="file-name-display" style="margin-top: 15px; text-align: center;"></div>
+                    <div id="pdf-extract-status" style="font-size: 12px; color: #666; margin-top: 8px; text-align: center;"></div>
+                    @error('pdf_file')
+                        <small style="color: red; display: block; margin-top: 8px;">{{ $message }}</small>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label for="judul">Judul <span style="color: red;">*</span></label>
                     <input type="text" id="judul" name="judul" placeholder="Contoh: Perencanaan Gulma Wilayah A" value="{{ old('judul') }}" required>
@@ -294,24 +353,8 @@
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="pdf_file">File PDF <span style="color: red;">*</span></label>
-                    <div class="file-input-wrapper">
-                        <label class="file-input-label">
-                            <span id="file-label"><i class="fas fa-folder"></i> Pilih File PDF (Max 10MB)</span>
-                            <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required onchange="updateFileName(this)">
-                        </label>
-                        <div class="file-name" id="file-name-display"></div>
-                    </div>
-                    @error('pdf_file')
-                        <small style="color: red;">{{ $message }}</small>
-                    @enderror
-                </div>
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
-                <i class="fas fa-check"></i> Upload Drone
+            <button type="submit" id="submitBtn" class="btn btn-primary" style="margin-top: 20px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                Upload File Drone
             </button>
             <div id="uploadProgress" style="margin-top: 15px; display: none;">
                 <div style="background: #e9ecef; border-radius: 6px; overflow: hidden; height: 8px;">
@@ -349,6 +392,44 @@
                 clearInterval(interval);
             }, { once: true });
         });
+
+        // Drag & Drop functionality for PDF
+        const uploadArea = document.getElementById('pdfUploadArea');
+        const fileInput = document.getElementById('pdf_file');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const pdfFile = files[0];
+                // Check if it's a PDF
+                if (pdfFile.type === 'application/pdf' || pdfFile.name.endsWith('.pdf')) {
+                    // Create a DataTransfer to set the file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(pdfFile);
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                } else {
+                    alert('❌ Hanya file PDF yang diizinkan!');
+                }
+            }
+        });
         </script>
     </div>
 
@@ -363,19 +444,151 @@
         </div>
     </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+    // Set PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     function updateFileName(input) {
         const fileName = input.files[0]?.name || '';
         const fileNameDisplay = document.getElementById('file-name-display');
-        const fileLabel = document.getElementById('file-label');
+        const uploadArea = document.getElementById('pdfUploadArea');
 
         if (fileName) {
-            fileNameDisplay.innerHTML = '<i class="fas fa-check"></i> File terpilih: ' + fileName;
-            fileLabel.innerHTML = '<i class="fas fa-check"></i> File siap diupload';
+            fileNameDisplay.innerHTML = '<strong style="color: #128241;">File terpilih:</strong> ' + fileName;
+            uploadArea.style.borderColor = '#28a745';
+            uploadArea.style.backgroundColor = '#f0fff0';
         } else {
             fileNameDisplay.textContent = '';
-            fileLabel.innerHTML = '<i class="fas fa-folder"></i> Pilih File PDF (Max 10MB)';
+            uploadArea.style.borderColor = '#128241';
+            uploadArea.style.backgroundColor = '#f8fdf9';
         }
+    }
+
+    // Extract PDF data and auto-fill form
+    async function extractPdfData(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const statusDiv = document.getElementById('pdf-extract-status');
+        statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membaca PDF...';
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            
+            let fullText = '';
+            
+            // Extract text from first 3 pages (most info is usually there)
+            const pagesToRead = Math.min(3, pdf.numPages);
+            for (let i = 1; i <= pagesToRead; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(' ') + ' ';
+            }
+
+            // Parse extracted text
+            const extractedData = parsePdfData(fullText);
+            
+            // Auto-fill form fields
+            if (extractedData.lokasi) {
+                document.getElementById('lokasi').value = extractedData.lokasi;
+            }
+            if (extractedData.tanggal) {
+                document.getElementById('tanggal_perencanaan').value = extractedData.tanggal;
+            }
+            if (extractedData.persenGulma) {
+                // Use toFixed to ensure dot (.) not comma (,) as decimal separator
+                document.getElementById('persen_gulma').value = extractedData.persenGulma.toFixed(2);
+            }
+            if (extractedData.judul) {
+                document.getElementById('judul').value = extractedData.judul;
+            }
+
+            // Show status
+            const filledFields = [
+                extractedData.judul ? '✓ Judul' : '',
+                extractedData.lokasi ? '✓ Lokasi' : '',
+                extractedData.tanggal ? '✓ Tgl Penerbangan' : '',
+                extractedData.persenGulma ? '✓ Persen Gulma' : ''
+            ].filter(x => x).join(', ');
+
+            if (filledFields) {
+                statusDiv.innerHTML = `<i class="fas fa-check" style="color: #28a745;"></i> Data terekstrak: ${filledFields}`;
+            } else {
+                statusDiv.innerHTML = '<i class="fas fa-info-circle" style="color: #ffc107;"></i> PDF dibaca tetapi data tidak ditemukan';
+            }
+
+        } catch (error) {
+            statusDiv.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Error membaca PDF`;
+            console.error('PDF extraction error:', error);
+        }
+    }
+
+    function parsePdfData(text) {
+        const data = {
+            judul: '',
+            lokasi: '',
+            tanggal: '',
+            persenGulma: '',
+            wilayah: ''
+        };
+
+        console.log('=== PDF EXTRACTION DEBUG ===');
+        console.log('Full text:', text.substring(0, 2000));
+
+        // Extract Wilayah and Lokasi - pattern: ": 19 : 546A2 :" (wilayah and lokasi separated by colons)
+        let wilayahLokasiMatch = text.match(/:\s*(\d{1,2})\s*:\s*([A-Z0-9]{4,6})\s*:/);
+        if (wilayahLokasiMatch) {
+            data.wilayah = wilayahLokasiMatch[1].trim();
+            data.lokasi = wilayahLokasiMatch[2].trim();
+            console.log('✓ Wilayah matched:', data.wilayah);
+            console.log('✓ Lokasi matched:', data.lokasi);
+        } else {
+            console.log('✗ Wilayah/Lokasi not found');
+        }
+
+        // Extract Tanggal - pattern: "06 - 12 - 2025" (with spaces around dashes)
+        let tanggalMatch = text.match(/Tgl\s+Penerbangan[^:]*:\s*(\d{2})\s*-\s*(\d{2})\s*-\s*(\d{4})/i);
+        if (!tanggalMatch) {
+            // Alternative: look for date with spaces around dashes
+            tanggalMatch = text.match(/:\s*(\d{2})\s*-\s*(\d{2})\s*-\s*(\d{4})/);
+        }
+        if (tanggalMatch) {
+            const day = String(tanggalMatch[1]).padStart(2, '0');
+            const month = String(tanggalMatch[2]).padStart(2, '0');
+            const year = tanggalMatch[3];
+            data.tanggal = `${year}-${month}-${day}`;
+            console.log('✓ Tanggal matched:', data.tanggal);
+        } else {
+            console.log('✗ Tanggal not found');
+        }
+
+        // Extract Persen Gulma - pattern: ": X.XX %"
+        let persenMatch = text.match(/Persen\s+Gulma[^%]*:\s*([\d.,]+)\s*%/i);
+        if (!persenMatch) {
+            // Alternative: look for ":" followed by number with dot/comma and "%"
+            persenMatch = text.match(/:\s*([\d.,]+)\s*%/);
+        }
+        if (persenMatch) {
+            const numStr = persenMatch[1].replace(',', '.');
+            data.persenGulma = parseFloat(numStr);
+            console.log('✓ Persen matched:', data.persenGulma);
+        } else {
+            console.log('✗ Persen not found');
+        }
+
+        // Extract Judul - use Wilayah number
+        if (data.wilayah) {
+            data.judul = `Perencanaan Gulma Wilayah ${data.wilayah}`;
+            console.log('✓ Judul constructed:', data.judul);
+        } else {
+            console.log('✗ Judul not found (Wilayah not available)');
+        }
+
+        console.log('=== FINAL RESULT ===');
+        console.log('Data:', data);
+        return data;
     }
 
     // AJAX Pagination untuk Drone List
@@ -561,3 +774,5 @@
     // Load initial data
     loadDroneList();
 </script>
+
+@endsection

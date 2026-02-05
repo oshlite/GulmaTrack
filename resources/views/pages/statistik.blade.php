@@ -1085,7 +1085,7 @@
 
     <!-- Ranking Wilayah -->
     <div class="stat-section">
-        <h3><i class="fas fa-trophy"></i> Ranking Wilayah Berdasarkan Gulma</h3>
+        <h3><i class="fas fa-trophy"></i> Ranking Luas Rencana Kontrol Weeding Pengendalian Gulma</h3>
         <div class="bar-chart">
             <!-- Will be populated by JavaScript -->
         </div>
@@ -1720,7 +1720,14 @@ function renderDetailStats(data) {
         return;
     }
 
-    data.forEach((item, i) => {
+    // Sort data by total_hasil (Luas Rencana) from highest to lowest
+    const sortedData = [...data].sort((a, b) => {
+        const luasA = parseFloat(a.total_hasil || 0);
+        const luasB = parseFloat(b.total_hasil || 0);
+        return luasB - luasA;
+    });
+
+    sortedData.forEach((item, i) => {
         const row = tbody.insertRow();
         
         const luasRencana = parseFloat(item.total_hasil || 0).toFixed(2);

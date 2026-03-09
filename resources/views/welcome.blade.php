@@ -92,7 +92,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">💰</div>
                     <h3>Manajemen Keuangan</h3>
-                    <p>Kelola biaya produksi, harga penjualan, dan profit dengan laporan keuangan yang detail dan akurat.</p>
+                    <p>Kelola biaya produksi, harga penjualan, dan profit dengan pantauan produktivitas kebun.</p>
                 </div>
 
                 <div class="feature-card">

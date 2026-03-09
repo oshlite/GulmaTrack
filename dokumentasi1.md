@@ -1,4 +1,5 @@
-
+# cloudflared tunnel typing terminal
+cloudflared tunnel --url http://localhost:8000
 
 
 # 📚 DOKUMENTASI LENGKAP GULMATRACK v2.0 (UPDATED)

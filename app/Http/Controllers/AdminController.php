@@ -228,7 +228,7 @@ class AdminController extends Controller
             if ($wilayahIndex === null) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Terdapat data kotor pada csv. Pastikan kolom csv: PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,TANGGAL,TK/HA,TOTAL_TK ; Data csv wajib bersih dari kolom lain/angka diluar kolom'
+                    'message' => 'Terdapat data kotor pada CSV. Pastikan kolom CSV: PG,FM,WIL,SEKSI,NETO,HASIL,UMUR_TNM,TNM_STS,ACTIVITAS,KATEGORI,TANGGAL, <br> TK/HA,TOTAL_TK ; Data csv wajib bersih dari kolom lain/angka diluar kolom'
                 ], 400);
             }
             

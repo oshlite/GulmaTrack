@@ -487,7 +487,7 @@
                         <img src="{{ asset('image/logo3.png') }}" alt="GulmaTrack Logo" class="logo-icon">
                     </div>
                     <h1>GulmaTrack Admin</h1>
-                    <p>Sistem Visualisasi Persebaran Gulma</p>
+                    <p>Visualisasi Persebaran Gulma</p>
                 </div>
 
                 <!-- Content -->
@@ -568,7 +568,7 @@
                         </button>
                     </form>
 
-                    <!-- Info Section -->
+                    <!-- Info Section
                     <div class="info-section">
                         <div class="info-box">
                             <div class="info-box-title">
@@ -585,7 +585,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Footer Links -->
                     <div class="login-footer">

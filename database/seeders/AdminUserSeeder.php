@@ -24,26 +24,24 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        // Optional: Buat admin kedua (uncomment jika ingin)
-        // User::firstOrCreate(
-        //     ['email' => 'admin2@gmail.com'],
-        //     [
-        //         'name' => 'Admin Kedua',
-        //         'password' => Hash::make('password123'),
-        //         'role' => 'admin',
-        //         'is_active' => true,
-        //     ]
-        // );
+        User::firstOrCreate(
+            ['email' => 'erlambang@gmail.com'],
+            [
+                'name' => 'Admin Erlambang',
+                'password' => Hash::make('erlambang123'),
+                'role' => 'admin',
+                'is_active' => true,
+            ]
+        );
 
-        // Optional: Buat guest user (uncomment jika ingin)
-        // User::firstOrCreate(
-        //     ['email' => 'guest@gmail.com'],
-        //     [
-        //         'name' => 'Guest User',
-        //         'password' => Hash::make('password123'),
-        //         'role' => 'guest',
-        //         'is_active' => true,
-        //     ]
-        // );
+        User::firstOrCreate(
+            ['email' => 'furqon@gmail.com'],
+            [
+                'name' => 'Admin Furqon',
+                'password' => Hash::make('furqon123'),
+                'role' => 'admin',
+                'is_active' => true,
+            ]
+        );
     }
 }

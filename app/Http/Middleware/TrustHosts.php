@@ -15,6 +15,7 @@ class TrustHosts extends Middleware
     {
         return [
             $this->allSubdomainsOfApplicationUrl(),
+            '.*\.trycloudflare\.com$',  // Allow cloudflared tunnel
         ];
     }
 }

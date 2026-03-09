@@ -687,7 +687,7 @@
 <!-- Hero Section - Fullscreen -->
 <section class="hero-section">
     <div class="hero-content">
-        <h1>Sistem Visualisasi Peta Persebaran Gulma</h1>
+        <h1>Visualisasi Peta Persebaran Gulma</h1>
         <p>Monitoring dan analisis persebaran gulma pada perkebunan nanas dengan teknologi data peta interaktif, statistik, dan arsip drone</p>
         <div class="hero-buttons">
             <a href="{{ route('wilayah') }}" class="btn-hero third">

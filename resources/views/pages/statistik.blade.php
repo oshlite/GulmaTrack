@@ -1626,7 +1626,7 @@ async function loadAllStatistics() {
     showLoading();
 
     try {
-        console.log('🚀 Loading statistics with latest published data...');
+        console.log('🚀 Loading statistics with latest published data...');8
         
         const tahun = document.getElementById('tahunSelect')?.value;
         const bulan = document.getElementById('bulanSelect')?.value;

@@ -674,7 +674,7 @@
                 <div class="form-row">
                     <div class="checkbox-group">
                         <input type="checkbox" id="set_as_primary" name="set_as_primary">
-                        <label for="set_as_primary">Jadikan Foto Utama (akan ditampilkan di pop-up peta wilayah)</label>
+                        <label for="set_as_primary">Lanjutkan unggah foto ini?</label>
                     </div>
                 </div>
                 <div class="form-row">
@@ -711,7 +711,7 @@
             <div class="gallery-card" data-kategori="{{ $photo->kategori }}" data-photo-id="{{ $photo->id }}">
                 <div style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
                     @if($photo->is_primary)
-                        <span class="primary-badge">⭐ FOTO UTAMA</span>
+                        <span class="primary-badge">⭐ FOTO</span>
                     @endif
                     <img src="{{ $photo->foto_url }}" alt="Foto Gulma" class="gallery-image" onerror="this.style.display='none';">
                 </div>
@@ -736,9 +736,9 @@
                     @endif
                     <div class="action-buttons">
                         @if(!$photo->is_primary)
-                            <button class="btn btn-warning btn-set-primary" data-photo-id="{{ $photo->id }}">
+                            <!-- <button class="btn btn-warning btn-set-primary" data-photo-id="{{ $photo->id }}">
                                 <i class="fas fa-star"></i> Set Utama
-                            </button>
+                            </button> -->
                         @endif
                         <button class="btn btn-danger btn-delete" data-photo-id="{{ $photo->id }}">
                             <i class="fas fa-trash"></i> Hapus

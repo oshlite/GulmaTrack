@@ -1,6 +1,9 @@
 # cloudflared tunnel typing terminal
 cloudflared tunnel --url http://localhost:8000
 
+ping api.trycloudflare.com
+curl https://api.trycloudflare.com
+cloudflared tunnel --url http://localhost:8000 --protocol http2
 
 # 📚 DOKUMENTASI LENGKAP GULMATRACK v2.0 (UPDATED)
 
